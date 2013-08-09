@@ -8,16 +8,16 @@ use Drupal\monitoring\Sensor\NonExistingSensorException;
 use Drupal\monitoring\Sensor\SensorInfo;
 
 /**
- * Implements hook_enable()
+ * Implements hook_install()
  *
  * Creates Munin multigraphs and does default Munin specific sensors config.
  */
-function monitoring_munin_enable() {
+function monitoring_munin_install() {
 
   $sensor_info_by_categories = monitoring_sensor_info_by_categories();
 
-  foreach (module_implements('munin_default_multigraphs') as $module) {
-    foreach (module_invoke($module, 'munin_default_multigraphs') as $multigraph_title => $multigraph_info) {
+  foreach (\Drupal::moduleHandler()->getImplementations('munin_default_multigraphs') as $module) {
+    foreach (\Drupal::moduleHandler()->invoke($module, 'munin_default_multigraphs') as $multigraph_title => $multigraph_info) {
 
       $has_sensors = FALSE;
 
@@ -68,11 +68,14 @@ function monitoring_munin_enable() {
       // iterations.
       // Also create a multigraph only if there are any sensors enabled for it.
       $multigraphs = monitoring_munin_multigraphs();
+      debug($multigraphs);
       if ($has_sensors && !isset($multigraphs[$multigraph_title])) {
         monitoring_munin_multigraph_save($multigraph_title, $multigraph_info['vlabel']);
       }
     }
   }
+
+  debug(monitoring_munin_multigraphs());
 }
 
 /**

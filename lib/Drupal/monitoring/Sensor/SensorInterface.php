@@ -16,6 +16,26 @@ use Drupal\monitoring\Result\SensorResultInterface;
 interface SensorInterface {
 
   /**
+   * Service setter.
+   *
+   * @param string $id
+   *   Service name.
+   * @param mixed $service
+   *   The service to be used in the run method.
+   */
+  function addService($id, $service);
+
+  /**
+   * Gets service.
+   *
+   * @param string $id
+   *   Service name.
+   *
+   * @return mixed
+   */
+  function getService($id);
+
+  /**
    * Gets sensor name (not the label).
    *
    * @return string

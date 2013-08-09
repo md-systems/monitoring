@@ -8,6 +8,7 @@ namespace Drupal\monitoring\Sensor\Sensors;
 
 use Drupal\monitoring\Result\SensorResultInterface;
 use Drupal\monitoring\Sensor\SensorThresholds;
+use Drupal;
 
 /**
  * Monitors number of items for a given core queue.
@@ -23,8 +24,6 @@ class SensorQueue extends SensorThresholds {
    * {@inheritdoc}
    */
   public function runSensor(SensorResultInterface $result) {
-    /** @var \DrupalQueueInterface $queue */
-    $queue = \DrupalQueue::get($this->info->getSetting('queue'));
-    $result->setValue($queue->numberOfItems());
+    $result->setValue(\Drupal::queue($this->info->getSetting('queue'))->numberOfItems());
   }
 }

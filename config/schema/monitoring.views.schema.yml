@@ -1,0 +1,9 @@
+# Schema for the views plugins of the Monitoring module.
+
+views.field.monitoring_sensor_name:
+  type: views_field
+  label: 'Sensor name'
+  mapping:
+    display_as_link:
+      type: boolean
+      label: 'Display as link'

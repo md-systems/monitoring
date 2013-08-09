@@ -11,20 +11,22 @@
   Drupal.behaviors.monitoringOverviewToggle = {
     attach: function(context) {
       // Check if there are any criticals, warnings or unknowns.
-      if (Drupal.settings.monitoring_error_sensors > 0) {
+      if (drupalSettings.monitoring_escalated_sensors > 0) {
         // Inject toggle link into DOM.
         $('<a class="monitoring-sensor-toggle" href="#">' + Drupal.t('Show OK sensors') + '</a>')
             .appendTo('.monitoring-overview-summary', context)
-            .toggle(
-            function () {
-              $(this).text(Drupal.t('Hide OK sensors'));
-              $('#monitoring-sensors-overview tr.monitoring-ok, #monitoring-sensors-overview tr.sensor-category-ok', context).fadeIn();
-            },
-            function () {
-              $(this).text(Drupal.t('Show OK sensors'));
-              $('#monitoring-sensors-overview tr.monitoring-ok, #monitoring-sensors-overview tr.sensor-category-ok', context).fadeOut();
-            }
-        );
+            .click(
+              function () {
+                if ($(this).text() == Drupal.t('Show OK sensors')) {
+                  $(this).text(Drupal.t('Hide OK sensors'));
+                  $('#monitoring-sensors-overview tr.monitoring-ok, #monitoring-sensors-overview tr.sensor-category-ok', context).fadeIn();
+                }
+                else {
+                  $(this).text(Drupal.t('Show OK sensors'));
+                  $('#monitoring-sensors-overview tr.monitoring-ok, #monitoring-sensors-overview tr.sensor-category-ok', context).fadeOut();
+                }
+              }
+            );
         // Hide OK sensors by default.
         $('#monitoring-sensors-overview tr.monitoring-ok, #monitoring-sensors-overview tr.sensor-category-ok', context).hide();
       }

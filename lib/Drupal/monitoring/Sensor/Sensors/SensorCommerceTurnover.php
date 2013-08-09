@@ -10,15 +10,15 @@ use Drupal\monitoring\Result\SensorResultInterface;
 /**
  * Monitors commerce order turnover stats.
  *
- * Based on SensorDatabaseAggregator using commerce_order table.
+ * Based on SensorSimpleDatabaseAggregator using commerce_order table.
  */
-class SensorCommerceTurnover extends SensorDatabaseAggregator {
+class SensorCommerceTurnover extends SensorEntityDatabaseAggregator {
 
   /**
    * {@inheritdoc}
    */
-  protected function buildQuery() {
-    $query = parent::buildQuery();
+  protected function getEntityQueryAggregate($table, array $conditions, array $time_interval = array()) {
+    $query = parent::getEntityQueryAggregate($table, $conditions, $time_interval);
 
     // Get the field name for the amount field.
     $field_amount = $this->getFieldName($query, array('field' => 'commerce_order_total.amount'));

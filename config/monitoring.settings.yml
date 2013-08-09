@@ -1,0 +1,15 @@
+sensor_call_logging: on_request
+
+resources:
+  monitoring-sensor-info:
+    GET:
+      supported_formats:
+        - hal_json
+      supported_auth:
+        - basic_auth
+#  monitoring-sensor-result:
+#    GET:
+#      supported_formats:
+#        - hal_json
+#      supported_auth:
+#        - basic_auth

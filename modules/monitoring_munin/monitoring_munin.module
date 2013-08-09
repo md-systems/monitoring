@@ -11,13 +11,9 @@ use Drupal\monitoring\SensorRunner;
  */
 function monitoring_munin_menu() {
   $items['admin/config/system/monitoring/munin'] = array(
-    'title' => 'Munin',
+    'title' => 'Munin configuration',
     'description' => 'Configure Munin connector',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('monitoring_munin_graph_settings'),
-    'access arguments' => array('administer monitoring'),
-    'type' => MENU_LOCAL_TASK,
-    'file' => 'monitoring_munin.admin.inc',
+    'route_name' => 'monitoring_munin_graph_settings',
   );
   $items['admin/config/system/monitoring/munin/graph-settings'] = array(
     'title' => 'Graph settings',
@@ -28,10 +24,8 @@ function monitoring_munin_menu() {
   $items['admin/config/system/monitoring/munin/config'] = array(
     'title' => 'Config script',
     'description' => 'Munin setup configuration script.',
-    'page callback' => 'monitoring_munin_config_page',
-    'access arguments' => array('administer monitoring'),
+    'route_name' => 'monitoring_munin_config',
     'type' => MENU_LOCAL_TASK,
-    'file' => 'monitoring_munin.admin.inc',
   );
 
   return $items;
@@ -80,7 +74,11 @@ function monitoring_munin_munin_default_multigraphs() {
  *   Multigraphs definitions.
  */
 function monitoring_munin_multigraphs() {
-  return variable_get('monitoring_munin_multigraphs', array());
+  if ($multigraphs = \Drupal::config('monitoring.munin')->get('multigraphs')) {
+    return $multigraphs;
+  }
+
+  return array();
 }
 
 /**
@@ -95,7 +93,7 @@ function monitoring_munin_multigraph_delete($title) {
   if (isset($multigraphs[$title])) {
     unset($multigraphs[$title]);
   }
-  variable_set('monitoring_munin_multigraphs', $multigraphs);
+  \Drupal::config('monitoring.munin')->set('multigraphs', $multigraphs)->save();
 
   // Remove from settings.
   foreach (monitoring_sensor_info() as $info) {
@@ -126,7 +124,7 @@ function monitoring_munin_multigraph_delete($title) {
 function monitoring_munin_multigraph_save($title, $vlabel) {
   $multigraphs = monitoring_munin_multigraphs();
   $multigraphs[$title] = array('title' => $title, 'vlabel' => $vlabel);
-  variable_set('monitoring_munin_multigraphs', $multigraphs);
+  \Drupal::config('monitoring.munin')->set('multigraphs', $multigraphs)->save();
 }
 
 /**
@@ -254,6 +252,8 @@ function monitoring_munin_config() {
 /**
  * Composes sensor identifier based on the current host.
  *
+ * @param string $host
+ *   Current site host.
  * @param string $sensor_name
  *   Sensor name
  *

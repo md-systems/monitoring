@@ -8,6 +8,7 @@ namespace Drupal\monitoring\Sensor\Sensors;
 
 use Drupal\monitoring\Sensor\SensorThresholds;
 use Drupal\monitoring\Result\SensorResultInterface;
+use Drupal;
 
 /**
  * Monitors the last cron run time.
@@ -20,8 +21,8 @@ class SensorCronLastRunAge extends SensorThresholds {
    * {@inheritdoc}
    */
   public function runSensor(SensorResultInterface $result) {
-    $last_cron_run_before = REQUEST_TIME - variable_get('cron_last', 0);
+    $last_cron_run_before = REQUEST_TIME - \Drupal::state()->get('system.cron_last');
     $result->setValue($last_cron_run_before);
-    $result->addStatusMessage('@time ago', array('@time' => format_interval($last_cron_run_before)));
+    $result->addStatusMessage('@time ago', array('@time' => \Drupal::service('date')->formatInterval($last_cron_run_before)));
   }
 }

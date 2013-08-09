@@ -6,6 +6,7 @@
 
 namespace Drupal\monitoring\Result;
 
+use Drupal\Component\Utility\String;
 use Drupal\monitoring\Sensor\SensorCompilationException;
 use Drupal\monitoring\Sensor\SensorInfo;
 use Drupal\monitoring\Sensor\Thresholds;
@@ -195,7 +196,7 @@ class SensorResult implements SensorResultInterface {
     if (!empty($this->sensorMessage)) {
       // A message has been set by the sensor, use that as is and only do
       // placeholder replacements with the provided variables.
-      $message = format_string($this->sensorMessage['message'], $this->sensorMessage['variables']);
+      $message = String::format($this->sensorMessage['message'], $this->sensorMessage['variables']);
     }
     else {
 
@@ -204,10 +205,10 @@ class SensorResult implements SensorResultInterface {
       // Set the default message variables.
       $default_variables = array(
         '@sensor' => $this->getSensorName(),
-        '!formatted_value' => $this->getFormattedValue(),
+        '!formatted_value' => $this->getFormattedValue($this->getValue()),
         '@time' => $this->getTimestamp(),
         '!expected' => $msg_expected,
-        '!time_interval' => format_interval($this->getSensorInfo()->getTimeIntervalValue()),
+        '!time_interval' => \Drupal::service('date')->formatInterval($this->getSensorInfo()->getTimeIntervalValue()),
       );
 
       // Build an array of message parts.
@@ -219,7 +220,7 @@ class SensorResult implements SensorResultInterface {
         // If the sensor defines time interval we append the info to the
         // message.
         if ($this->getSensorInfo()->getTimeIntervalValue()) {
-          $messages[] = format_string('!formatted_value in !time_interval', $default_variables);
+          $messages[] = String::format('!formatted_value in !time_interval', $default_variables);
         }
         else {
           $messages[] = $default_variables['!formatted_value'];
@@ -232,7 +233,7 @@ class SensorResult implements SensorResultInterface {
 
       // Set the expected value message if the sensor did not match.
       if ($this->isCritical() && $this->getExpectedValue() !== NULL) {
-        $messages[] = format_string('expected !expected', $default_variables);
+        $messages[] = String::format('expected !expected', $default_variables);
       }
       // Set the threshold message if there is any.
       if ($threshold_message !== NULL) {
@@ -241,7 +242,7 @@ class SensorResult implements SensorResultInterface {
 
       // Append all status messages which were added by the sensor.
       foreach ($this->statusMessages as $msg) {
-        $messages[] = format_string($msg['message'], array_merge($default_variables, $msg['variables']));
+        $messages[] = String::format($msg['message'], array_merge($default_variables, $msg['variables']));
       }
 
       $message = implode(', ', $messages);
@@ -285,21 +286,24 @@ class SensorResult implements SensorResultInterface {
   /**
    * Formats the value to be human readable.
    *
+   * @param mixed $value
+   *   Sensor result value.
+   *
    * @return string
    *   Formatted value.
    *
    * @throws \Drupal\monitoring\Sensor\SensorCompilationException
    */
-  protected function getFormattedValue() {
+  public function getFormattedValue($value) {
     // If the value type is defined we have the formatter that will format the
     // value to be ready for display.
     if ($value_type = $this->getSensorInfo()->getValueType()) {
       $value_types = monitoring_value_types();
       if (!isset($value_types[$value_type])) {
-        throw new SensorCompilationException(format_string('Invalid value type @type', array('@type' => $value_type)));
+        throw new SensorCompilationException(String::format('Invalid value type @type', array('@type' => $value_type)));
       }
       elseif (isset($value_types[$value_type]['formatter_callback']) && !function_exists($value_types[$value_type]['formatter_callback'])) {
-        throw new SensorCompilationException(format_string('Formatter callback @callback for @type does not exist',
+        throw new SensorCompilationException(String::format('Formatter callback @callback for @type does not exist',
           array('@callback' => $value_types[$value_type]['formatter_callback'], '@type' => $value_type)));
       }
       else {
@@ -315,16 +319,19 @@ class SensorResult implements SensorResultInterface {
       // @todo This assumption will no longer work when non-english messages
       // supported.
       $label = drupal_strtolower($label);
-      return format_string('!value !label', array('!value' => $this->getValue(), '!label' => $label));
+      return String::format('!value !label', array('!value' => $value, '!label' => $label));
     }
 
-    return format_string('Value !value', array('!value' => $this->getValue()));
+    return String::format('Value !value', array('!value' => $value));
   }
 
   /**
    * {@inheritdoc}
    */
   public function getValue() {
+    if ($this->getSensorInfo()->isBool()) {
+      return (bool) $this->getResultData('sensor_value');
+    }
     return $this->getResultData('sensor_value');
   }
 
@@ -332,6 +339,9 @@ class SensorResult implements SensorResultInterface {
    * {@inheritdoc}
    */
   public function getExpectedValue() {
+    if ($this->getSensorInfo()->isBool()) {
+      return (bool) $this->getResultData('sensor_expected_value');
+    }
     return $this->getResultData('sensor_expected_value');
   }
 

@@ -6,6 +6,7 @@
 
 namespace Drupal\monitoring\Sensor\Sensors;
 
+use Drupal\Core\Database\Query\SelectInterface;
 use Drupal\monitoring\Result\SensorResultInterface;
 
 /**
@@ -13,13 +14,13 @@ use Drupal\monitoring\Result\SensorResultInterface;
  *
  * Displays URL with highest occurrence as message.
  */
-class SensorDblog404 extends SensorDatabaseAggregator {
+class SensorDblog404 extends SensorSimpleDatabaseAggregator {
 
   /**
    * {@inheritdoc}
    */
-  public function buildQuery() {
-    $query = parent::buildQuery();
+  public function getAggregateQuery() {
+    $query = parent::getAggregateQuery();
     $query->addField('watchdog', 'message');
     // The message is the requested 404 URL.
     $query->groupBy('message');
@@ -33,9 +34,8 @@ class SensorDblog404 extends SensorDatabaseAggregator {
    */
   public function runSensor(SensorResultInterface $result) {
     parent::runSensor($result);
-    $query_result = $this->fetchObject();
-    if (!empty($query_result) && !empty($query_result->message)) {
-      $result->addStatusMessage($query_result->message);
+    if (!empty($this->fetchedObject) && !empty($this->fetchedObject->message)) {
+      $result->addStatusMessage($this->fetchedObject->message);
     }
   }
 }

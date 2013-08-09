@@ -13,7 +13,7 @@ use Drupal\monitoring\Result\SensorResultInterface;
  *
  * Displays image derivate with highest occurrence as message.
  */
-class SensorImageMissingStyle extends SensorDatabaseAggregator {
+class SensorImageMissingStyle extends SensorSimpleDatabaseAggregator {
 
   /**
    * The path of the most failed image.
@@ -25,9 +25,9 @@ class SensorImageMissingStyle extends SensorDatabaseAggregator {
   /**
    * {@inheritdoc}
    */
-  public function buildQuery() {
+  public function getAggregateQuery() {
     // Extends the watchdog query.
-    $query = parent::buildQuery();
+    $query = parent::getAggregateQuery();
     $query->addField('watchdog', 'variables');
     $query->groupBy('variables');
     $query->orderBy('records_count', 'DESC');
@@ -39,9 +39,8 @@ class SensorImageMissingStyle extends SensorDatabaseAggregator {
    */
   public function runSensor(SensorResultInterface $result) {
     parent::runSensor($result);
-    $query_result = $this->fetchObject();
-    if (!empty($query_result)) {
-      $variables = unserialize($query_result->variables);
+    if (!empty($this->fetchedObject)) {
+      $variables = unserialize($this->fetchedObject->variables);
       if (isset($variables['%source_image_path'])) {
         $result->addStatusMessage($variables['%source_image_path']);
         $this->sourceImagePath = $variables['%source_image_path'];

@@ -6,9 +6,12 @@
 
 namespace Drupal\monitoring;
 
+use Drupal\Component\Utility\String;
+use Drupal\Component\Utility\Timer;
 use Drupal\monitoring\Result\SensorResultInterface;
 use Drupal\monitoring\Sensor\DisabledSensorException;
 use Drupal\monitoring\Sensor\SensorInfo;
+use Drupal;
 
 /**
  * Instantiate and run requested sensors.
@@ -75,7 +78,7 @@ class SensorRunner implements \IteratorAggregate {
       $this->sensors = $this->sensorManager->getEnabledSensorInfo();
     }
     // @todo LOW Cleanly variable based installation should go into a factory.
-    $this->loggingMode = variable_get('monitoring_sensor_call_logging', 'on_request');
+    $this->loggingMode = \Drupal::config('monitoring.settings')->get('sensor_call_logging');
     $this->loadCache();
   }
 
@@ -120,7 +123,7 @@ class SensorRunner implements \IteratorAggregate {
       }
     }
     if ($cids) {
-      foreach (cache_get_multiple($cids) as $cache) {
+      foreach (\Drupal::cache()->getMultiple($cids) as $cache) {
         if ($cache->expire > REQUEST_TIME) {
           $this->cache[$cache->data['name']] = $cache->data;
         }
@@ -137,7 +140,7 @@ class SensorRunner implements \IteratorAggregate {
   }
 
   /**
-   * Runs the defined sensors.
+   * Runs the defined sensableors.
    *
    * @return \Drupal\monitoring\Result\SensorResultInterface[]
    *   Array of sensor results.
@@ -177,7 +180,13 @@ class SensorRunner implements \IteratorAggregate {
     $sensor = $this->getSensorObject($sensor_info);
     // Check if sensor is enabled.
     if (!$sensor->isEnabled()) {
-      throw new DisabledSensorException(format_string('Sensor @sensor_name is not enabled and must not be run.', array('@sensor_name' => $sensor_info->getName())));
+      throw new DisabledSensorException(String::format('Sensor @sensor_name is not enabled and must not be run.', array('@sensor_name' => $sensor_info->getName())));
+    }
+    // If the sensor requires external services add them.
+    if ($sensor_info->isRequiringServices()) {
+      foreach ($sensor_info->getServices() as $service_id) {
+        $sensor->addService($service_id, \Drupal::service($service_id));
+      }
     }
 
     $result = $this->getResultObject($sensor_info);
@@ -185,7 +194,7 @@ class SensorRunner implements \IteratorAggregate {
     // In case result is not yet cached run sensor.
     if (!$result->isCached()) {
 
-      timer_start($sensor_info->getName());
+      Timer::start($sensor_info->getName());
       try {
         $sensor->runSensor($result);
       } catch (\Exception $e) {
@@ -199,7 +208,7 @@ class SensorRunner implements \IteratorAggregate {
         //   backtrace as part of the sensor verbose output.
       }
 
-      $timer = timer_stop($sensor_info->getName());
+      $timer = Timer::stop($sensor_info->getName());
       $result->setExecutionTime($timer['time']);
 
       // Capture verbose output if requested and if we are able to do so.
@@ -294,7 +303,12 @@ class SensorRunner implements \IteratorAggregate {
           'execution_time' => $result->getExecutionTime(),
           'timestamp' => $result->getTimestamp(),
         );
-        cache_set($this->getSensorCid($result->getSensorName()), $data, 'cache', REQUEST_TIME + $definition->getCachingTime());
+        \Drupal::cache()->set(
+          $this->getSensorCid($result->getSensorName()),
+          $data,
+          REQUEST_TIME + $definition->getCachingTime(),
+          array('monitoring_sensor_result')
+        );
       }
     }
   }
@@ -357,12 +371,14 @@ class SensorRunner implements \IteratorAggregate {
   public static function resetCache(array $sensor_names = array()) {
     if (empty($sensor_names)) {
       // No sensor names provided, clear all caches.
-      cache_clear_all('monitoring_sensor_result:', 'cache', TRUE);
+      \Drupal::cache()->deleteTags(array('monitoring_sensor_result'));
     }
     else {
+      $cids = array();
       foreach ($sensor_names as $sensor_name) {
-        cache_clear_all(self::getSensorCid($sensor_name), 'cache');
+        $cids[] = static::getSensorCid($sensor_name);
       }
+      \Drupal::cache()->deleteMultiple($cids);
     }
   }
 

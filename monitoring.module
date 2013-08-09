@@ -4,11 +4,17 @@
  * Monitoring bootstrap file.
  */
 
+use Drupal\Component\Utility\String;
+use Drupal\Core\Template\Attribute;
 use Drupal\monitoring\Sensor\NonExistingSensorException;
+use Drupal\monitoring\Entity\SensorResultEntity;
 use Drupal\monitoring\Sensor\SensorInfo;
 use Drupal\monitoring\Result\SensorResultInterface;
 use Drupal\monitoring\Sensor\SensorManager;
 use Drupal\monitoring\SensorRunner;
+use Symfony\Component\DependencyInjection\Exception\InvalidArgumentException;
+use Drupal\views\Plugin\views\area\View;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 
 /**
  * Returns an instance of the sensor manager.
@@ -17,11 +23,7 @@ use Drupal\monitoring\SensorRunner;
  *   The sensor manager.
  */
 function monitoring_sensor_manager() {
-  $sensor_manager = &drupal_static(__FUNCTION__);
-  if (!$sensor_manager) {
-    $sensor_manager = new SensorManager();
-  }
-  return $sensor_manager;
+  return \Drupal::service('monitoring.sensor_manager');
 }
 
 /**
@@ -37,26 +39,6 @@ function monitoring_sensor_manager() {
  */
 function monitoring_sensor_info() {
   return monitoring_sensor_manager()->getSensorInfo();
-}
-
-/**
- * Menu load function to load a sensor info object.
- *
- * @param string $sensor_name
- *   Sensor name.
- *
- * @return \Drupal\monitoring\Sensor\SensorInfo
- *   A SensorInfo instance.
- */
-function monitoring_sensor_info_load($sensor_name) {
-  try {
-    return monitoring_sensor_manager()->getSensorInfoByName($sensor_name);
-  }
-  catch (NonExistingSensorException $e) {
-    // Return FALSE if a sensor does not exist, this will lead to a page not
-    // found response.
-    return FALSE;
-  }
 }
 
 /**
@@ -162,113 +144,179 @@ function monitoring_entity_info() {
 }
 
 /**
- * Implements hook_views_api().
+ * Implements hook_views_data().
  */
-function monitoring_views_api() {
-  return array(
-    'api' => 3,
+function monitoring_views_data() {
+  $data['monitoring_sensor_result']['table']['group'] = t('Monitoring');
+
+  // Advertise this table as a possible base table.
+  $data['monitoring_sensor_result']['table']['base'] = array(
+    'field' => 'record_id',
+    'title' => t('Sensor result log'),
   );
+
+  $data['monitoring_sensor_result']['table']['entity type'] = 'monitoring_sensor_result';
+
+  $data['monitoring_sensor_result']['record_id'] = array(
+    'title' => t('Record ID'),
+    'help' => t('The unique ID of the sensor result log.'),
+    'field' => array(
+      'id' => 'numeric',
+    ),
+    'filter' => array(
+      'id' => 'numeric',
+    ),
+    'sort' => array(
+      'id' => 'standard',
+    ),
+  );
+
+  $data['monitoring_sensor_result']['sensor_name'] = array(
+    'title' => t('Sensor name'),
+    'help' => t('The machine name of the sensor.'),
+    'field' => array(
+      'id' => 'monitoring_sensor_name',
+    ),
+    'sort' => array(
+      'id' => 'standard',
+    ),
+    'filter' => array(
+      'id' => 'string',
+    ),
+    'argument' => array(
+      'id' => 'string',
+    ),
+  );
+  $data['monitoring_sensor_result']['timestamp'] = array(
+    'title' => t('Timestamp'),
+    'help' => t('The time when the sensor triggered.'),
+    'field' => array(
+      'id' => 'date',
+    ),
+    'sort' => array(
+      'id' => 'date'
+    ),
+    'filter' => array(
+      'id' => 'date',
+    ),
+  );
+  $data['monitoring_sensor_result']['sensor_status'] = array(
+    'title' => t('Status'),
+    'help' => t('The status at the moment when the sensor triggered.'),
+    'field' => array(
+      'id' => 'standard',
+    ),
+    'sort' => array(
+      'id' => 'standard',
+    ),
+    'filter' => array(
+      'id' => 'string',
+    ),
+    'argument' => array(
+      'id' => 'string',
+    ),
+  );
+  $data['monitoring_sensor_result']['sensor_message'] = array(
+    'title' => t('Status message'),
+    'help' => t('The sensor status message.'),
+    'field' => array(
+      'id' => 'standard',
+    ),
+    'sort' => array(
+      'id' => 'standard',
+    ),
+    'filter' => array(
+      'id' => 'string',
+    ),
+    'argument' => array(
+      'id' => 'string',
+    ),
+  );
+  $data['monitoring_sensor_result']['sensor_value'] = array(
+    'title' => t('Sensor value'),
+    'help' => t('The value at the moment when the sensor triggered.'),
+    'field' => array(
+      'id' => 'standard',
+    ),
+    'sort' => array(
+      'id' => 'standard',
+    ),
+    'filter' => array(
+      'id' => 'string',
+    ),
+    'argument' => array(
+      'id' => 'string',
+    ),
+  );
+  $data['monitoring_sensor_result']['execution_time'] = array(
+    'title' => t('Execution time'),
+    'help' => t('Sensor execution time in ms.'),
+    'field' => array(
+      'id' => 'standard',
+    ),
+    'sort' => array(
+      'id' => 'standard',
+    ),
+    'filter' => array(
+      'id' => 'string',
+    ),
+    'argument' => array(
+      'id' => 'string',
+    ),
+  );
+
+  return $data;
 }
 
 /**
  * Implements hook_preprocess_HOOK().
  *
  * Display a view as a table style.
+ *
+ * @todo - this needs review.
+ *    Is it the right way how to inject custom css classes?
  */
 function monitoring_preprocess_views_view_table(&$vars) {
+  /** @var \Drupal\views\ViewExecutable $view */
+  $view = $vars['view'];
   // We want to alter only the monitoring sensor results view.
-  if ($vars['view']->name != 'monitoring_sensor_results') {
+  // @todo - really?? we do not have the view machine name available here?
+  if (!in_array('monitoring_sensor_results', $view->getBaseTables())) {
     return;
   }
 
-  $vars['classes_array'][] = 'monitoring-severity-colors';
-
   foreach ($vars['rows'] as $num => $row) {
     if (isset($vars['result'][$num]->monitoring_sensor_result_sensor_status)) {
-      $vars['row_classes'][$num][] = 'monitoring-' . strtolower($vars['result'][$num]->monitoring_sensor_result_sensor_status);
+      $vars['rows'][$num]['attributes'] = new Attribute(array(
+        'class' => 'monitoring-' . strtolower($vars['result'][$num]->monitoring_sensor_result_sensor_status),
+      ));
     }
   }
 
-  drupal_add_css(drupal_get_path('module', 'monitoring') . '/monitoring.css');
+  _drupal_add_css(drupal_get_path('module', 'monitoring') . '/monitoring.css');
 }
 
 /**
- * Implements hook_menu().
+ * Implements hook_menu_link_defaults().
  */
-function monitoring_menu() {
-  $items['admin/config/system/monitoring'] = array(
-    'title' => 'Monitoring',
-    'description' => 'Manage sensors, configure enabled monitoring products.',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('monitoring_config_sensors_overview_form'),
-    'access arguments' => array('administer monitoring'),
-    'file' => 'monitoring.admin.inc',
-  );
-  $items['admin/config/system/monitoring/sensors'] = array(
-    'title' => 'Sensors',
-    'description' => 'Configure all available sensors',
-    'type' => MENU_DEFAULT_LOCAL_TASK,
-    'weight' => -10,
-  );
-  $items['admin/config/system/monitoring/settings'] = array(
-    'title' => 'Monitoring settings',
-    'description' => 'Configure monitoring behaviour',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('monitoring_settings_form'),
-    'access arguments' => array('administer monitoring'),
-    'file' => 'monitoring.admin.inc',
-    'weight' => -9,
-    'type' => MENU_LOCAL_TASK,
-  );
-  $items['admin/config/system/monitoring/sensors/%monitoring_sensor_info'] = array(
-    'title callback' => 'monitoring_sensor_action_title',
-    'title arguments' => array('settings', 5),
-    'description' => 'Monitoring sensor configuration',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('monitoring_sensor_settings_form', 5),
-    'access arguments' => array('administer monitoring'),
-    'file' => 'monitoring.admin.inc',
-    'type' => MENU_VISIBLE_IN_BREADCRUMB,
-    'weight' => -10,
+function monitoring_menu_link_defaults() {
+  $items['monitoring.sensors_overview_settings'] = array(
+    'link_title' => 'Monitoring',
+    'description' => 'Monitoring sensors configuration.',
+    'route_name' => 'monitoring.sensors_overview_settings',
+    'parent' => 'system.admin.config.system',
   );
 
-  $items['admin/reports/monitoring'] = array(
-    'title' => 'Monitoring',
-    'description' => 'View sensor results and logs.',
-    'page callback' => 'monitoring_reports_sensors_overview',
-    'access arguments' => array('monitoring reports'),
-    'file' => 'monitoring.admin.inc',
-  );
-  $items['admin/reports/monitoring/sensors'] = array(
-    'title' => 'Sensors',
+  $items['monitoring.sensor_list'] = array(
+    'link_title' => 'Monitoring',
     'description' => 'Overview of all enabled monitoring sensors.',
-    'type' => MENU_DEFAULT_LOCAL_TASK,
-    'weight' => -10,
-  );
-  $items['admin/reports/monitoring/sensors/%monitoring_sensor_info'] = array(
-    'title callback' => 'monitoring_sensor_action_title',
-    'title arguments' => array('details', 4),
-    'description' => 'Details',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('monitoring_sensor_details', 4),
-    'access arguments' => array('monitoring reports'),
-    'file' => 'monitoring.admin.inc',
-  );
-  $items['admin/reports/monitoring/sensors/%monitoring_sensor_info/details'] = array(
-    'title' => 'Details',
-    'type' => MENU_DEFAULT_LOCAL_TASK,
-    'weight' => -16,
-  );
-
-  $items['monitoring/sensors/force'] = array(
-    'title' => 'Force run all sensors',
-    'page callback' => 'monitoring_force_execution',
-    'access arguments' => array('monitoring force run'),
-    'file' => 'monitoring.admin.inc',
+    'route_name' => 'monitoring.sensor_list',
+    'parent' => 'system.admin.reports',
   );
 
   return $items;
 }
+
 
 /**
  * Sensor pages title callback.
@@ -284,10 +332,6 @@ function monitoring_menu() {
 function monitoring_sensor_action_title($action, SensorInfo $sensor_info) {
   $placeholders = array('@category' => $sensor_info->getCategory(), '@label' => $sensor_info->getLabel());
   switch ($action) {
-    case 'settings':
-      return t('@label settings (@category)', $placeholders);
-
-    case 'details':
     case 'log':
       return t('@label (@category)', $placeholders);
   }
@@ -316,88 +360,6 @@ function monitoring_permission() {
 }
 
 /**
- * Implements hook_services_resources().
- *
- * Offer services resources:
- * - sensor-info: Available sensors info
- * - sensor-result: Available sensor results
- */
-function monitoring_services_resources() {
-
-  $resources = array();
-
-  $resources['sensor-info']['operations'] = array(
-    'index' => array(
-      'file' => array('type' => 'inc', 'module' => 'monitoring', 'name' => 'monitoring.services'),
-      'help' => t('Available sensors info'),
-      'callback' => 'monitoring_services_sensors_info',
-      'access callback' => 'user_access',
-      'access arguments' => array('monitoring reports'),
-    ),
-    'retrieve' => array(
-      'file' => array('type' => 'inc', 'module' => 'monitoring', 'name' => 'monitoring.services'),
-      'help' => t('Specific sensor info'),
-      'callback' => 'monitoring_services_sensor_info',
-      'access callback' => 'user_access',
-      'access arguments' => array('monitoring reports'),
-      'args' => array(
-        array(
-          'name' => 'sensor_name',
-          'optional' => FALSE,
-          'source' => array('path' => 0),
-          'type' => 'string',
-          'description' => 'Sensor name.',
-        ),
-      ),
-    ),
-  );
-
-  $resources['sensor-result']['operations'] = array(
-    'index' => array(
-      'file' => array('type' => 'inc', 'module' => 'monitoring', 'name' => 'monitoring.services'),
-      'help' => t('Available sensor results'),
-      'callback' => 'monitoring_services_sensors_results',
-      'access callback' => 'user_access',
-      'access arguments' => array('monitoring reports'),
-      'args' => array(
-        array(
-          'name' => 'expand',
-          'type' => 'string',
-          'description' => t('Additional sensor result data to expand. I.e. expand=sensor_info'),
-          'source' => array('param' => 'expand'),
-          'optional' => TRUE,
-        ),
-      ),
-    ),
-    'retrieve' => array(
-      'file' => array('type' => 'inc', 'module' => 'monitoring', 'name' => 'monitoring.services'),
-      'help' => t('Specific sensor result'),
-      'callback' => 'monitoring_services_sensor_result',
-      'access callback' => 'user_access',
-      'access arguments' => array('monitoring reports'),
-      'args' => array(
-        array(
-          'name' => 'sensor_name',
-          'optional' => FALSE,
-          'source' => array('path' => 0),
-          'type' => 'string',
-          'description' => 'Sensor name.',
-        ),
-        array(
-          'name' => 'expand',
-          'type' => 'string',
-          'description' => t('Additional sensor result data to expand. I.e. expand=sensor_info'),
-          'source' => array('param' => 'expand'),
-          'optional' => TRUE,
-        ),
-      ),
-    ),
-  );
-
-  return $resources;
-}
-
-/**
  * Saves sensor settings.
  *
  * @param string $sensor_name
@@ -406,7 +368,7 @@ function monitoring_services_resources() {
  *   Settings to be saved.
  */
 function monitoring_sensor_settings_save($sensor_name, $values) {
-  variable_set(monitoring_sensor_settings_key($sensor_name), $values);
+  \Drupal::config('monitoring.settings')->set($sensor_name, $values)->save();
   // After settings save reset the cache.
   monitoring_sensor_manager()->resetCache();
   // Changed settings might affect the sensor result.
@@ -423,20 +385,7 @@ function monitoring_sensor_settings_save($sensor_name, $values) {
  *   Sensor saved settings.
  */
 function monitoring_sensor_settings_get($sensor_name) {
-  return variable_get(monitoring_sensor_settings_key($sensor_name), array());
-}
-
-/**
- * Build the sensor settings key.
- *
- * @param string $sensor_name
- *   Sensor name.
- *
- * @return string
- *   Sensor settings key.
- */
-function monitoring_sensor_settings_key($sensor_name) {
-  return 'monitoring_' . $sensor_name . '_settings';
+  return (array)\Drupal::config('monitoring.settings')->get($sensor_name);
 }
 
 /**
@@ -458,7 +407,7 @@ function monitoring_sensor_result_save(SensorResultInterface $result) {
     'execution_time' => $result->getExecutionTime(),
   );
   $result_entity = entity_create('monitoring_sensor_result', $values);
-  entity_save('monitoring_sensor_result', $result_entity);
+  $result_entity->save();
   return $result_entity;
 }
 
@@ -472,16 +421,14 @@ function monitoring_sensor_result_save(SensorResultInterface $result) {
  *   A SensorResultEntity representing the last sensor result.
  */
 function monitoring_sensor_result_last($sensor_name) {
-  $query = new EntityFieldQuery();
-  $query->entityCondition('entity_type', 'monitoring_sensor_result');
-  $query->propertyCondition('sensor_name', $sensor_name);
-  $query->propertyOrderBy('timestamp', 'DESC');
-  $query->range(0, 1);
-  $result = $query->execute();
+  $result = \Drupal::entityQuery('monitoring_sensor_result')
+    ->condition('sensor_name', $sensor_name)
+    ->sort('timestamp', 'DESC')
+    ->range(0, 1)
+    ->execute();
 
-  if (isset($result['monitoring_sensor_result'])) {
-    $row = array_shift($result['monitoring_sensor_result']);
-    return entity_load_single('monitoring_sensor_result', $row->record_id);
+  if (!empty($result)) {
+    return entity_load('monitoring_sensor_result', reset($result));
   }
 
   return NULL;
@@ -492,11 +439,11 @@ function monitoring_sensor_result_last($sensor_name) {
  *
  * Alters the views page title.
  */
-function monitoring_views_pre_render(View &$view) {
-  if ($view->name == 'monitoring_sensor_results' && !empty($view->args)) {
-    $view->build_info['title'] = monitoring_sensor_action_title('log', monitoring_sensor_info_load($view->args[0]));
-  }
-}
+//function monitoring_views_pre_render(View $view) {
+//  if ($view->name == 'monitoring_sensor_results' && !empty($view->args)) {
+//    $view->build_info['title'] = monitoring_sensor_action_title('log', monitoring_sensor_info_load($view->args[0]));
+//  }
+//}
 
 /**
  * Implements hook_theme().
@@ -567,7 +514,7 @@ function theme_monitoring_config_box($variables) {
  */
 function monitoring_config_code($module, $type, $variables = array()) {
   $code = file_get_contents(drupal_get_path('module', $module) . '/config_tpl/' . $type . '.txt');
-  return format_string($code, $variables);
+  return String::format($code, $variables);
 }
 
 /**
@@ -615,12 +562,6 @@ function monitoring_host() {
   return preg_replace('/^http(s)?:\/\//', '', $base_url);
 }
 
-/**
- * Gets host key.
- *
- * @return string
- *   Host key.
- */
 function monitoring_host_key() {
   return str_replace('.', '_', monitoring_host());
 }
@@ -639,28 +580,27 @@ function monitoring_clear_missing_sensor_submit($form, &$form_state) {
       'enabled' => $info->isEnabled(),
     );
   }
-  variable_set('monitoring_available_sensors', $available_sensors);
+  \Drupal::state()->set('monitoring.available_sensors', $available_sensors);
   drupal_set_message(t('All missing sensors have been cleared.'));
 }
 
 /**
- * Implements hook_modules_enabled().
+ * Implements hook_modules_installed().
  *
- * Enabling modules can change the available sensors, reset the cache to make
+ * Installing modules can change the available sensors, reset the cache to make
  * sure that the list is up to date.
  */
-function monitoring_modules_enabled($modules) {
+function monitoring_modules_installed($modules) {
   monitoring_sensor_manager()->resetCache();
 }
 
 /**
- * Implements hook_modules_disabled().
+ * Implements hook_modules_installed().
  *
- * Disabling modules can change the available sensors, reset the cache to make
+ * Uninstalled modules can change the available sensors, reset the cache to make
  * sure that the list is up to date.
  */
-function monitoring_modules_disabled($modules) {
-  //
+function monitoring_modules_uninstalled($modules) {
   monitoring_sensor_manager()->resetCache();
 }
 
@@ -698,10 +638,10 @@ function monitoring_value_types() {
  * @return string
  *   Formatted time interval.
  *
- * @see format_interval()
+ * @see \Drupal::service('date')->formatInterval()
  */
 function monitoring_value_label_callback_interval(SensorResultInterface $result) {
-  return format_interval($result->getValue());
+  return \Drupal::service('date')->formatInterval($result->getValue());
 }
 
 /**
@@ -730,7 +670,7 @@ function monitoring_value_label_callback_bool(SensorResultInterface $result) {
  * @see commerce_currency_format()
  */
 function monitoring_value_label_callback_commerce_currency(SensorResultInterface $result) {
-  if (module_exists('commerce')) {
+  if (\Drupal::moduleHandler()->moduleExists('commerce')) {
     $currency = $result->getSensorInfo()->getSetting('currency_code');
     if (empty($currency)) {
       $currency = commerce_default_currency();
@@ -741,4 +681,11 @@ function monitoring_value_label_callback_commerce_currency(SensorResultInterface
   }
 
   return $result->getValue();
+}
+
+/**
+ * Ajax callback for threshold sensors settings form.
+ */
+function monitoring_sensor_thresholds_ajax($form, &$form_state) {
+  return $form[$form_state['sensor']->getSensorName()]['thresholds'];
 }

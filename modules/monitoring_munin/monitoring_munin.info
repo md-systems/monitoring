@@ -1,8 +1,0 @@
-name = Monitoring Munin
-description = Monitoring Munin integration.
-package = Monitoring
-core = 7.x
-
-dependencies[] = monitoring
-
-files[] = monitoring_munin.test

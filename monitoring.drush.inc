@@ -4,6 +4,8 @@
  * Drush support for monitoring.
  */
 
+use Drupal\Component\Utility\Json;
+use Drupal\Component\Utility\String;
 use Drupal\monitoring\Result\SensorResultInterface;
 use Drupal\monitoring\Sensor\DisabledSensorException;
 use Drupal\monitoring\Sensor\NonExistingSensorException;
@@ -166,15 +168,15 @@ function monitoring_drush_info_single($sensor_name) {
     return drush_set_error('MONITORING_SENSOR_INVALID_NAME', dt('Sensor "@name" does not exist.', array('@name' => $sensor_name)));
   }
 
-  $rows[] = array(format_string("@label (@name)", array('@label' => $sensor_info->getLabel(), '@name' => $sensor_info->getName())), '====================');
+  $rows[] = array(String::format("@label (@name)", array('@label' => $sensor_info->getLabel(), '@name' => $sensor_info->getName())), '====================');
   $rows[] = array(dt('Category'), $sensor_info->getCategory());
   $rows[] = array(dt('Description'), $sensor_info->getDescription());
-  $rows[] = array(dt('Value info'), format_string('type: @type, label: @label, numeric: @numeric', array(
+  $rows[] = array(dt('Value info'), String::format('type: @type, label: @label, numeric: @numeric', array(
     '@type' => ($sensor_info->getValueType() ? $sensor_info->getValueType() : dt('N/A')),
     '@label' => ($sensor_info->getValueLabel() ? $sensor_info->getValueLabel() : dt('N/A')),
     '@numeric' => ($sensor_info->isNumeric() ? dt('Yes') : dt('No')),
   )));
-  $rows[] = array(dt('Caching time'), format_interval($sensor_info->getCachingTime()));
+  $rows[] = array(dt('Caching time'), \Drupal::service('date')->formatInterval($sensor_info->getCachingTime()));
   $rows[] = array(dt('Enabled'), $sensor_info->isEnabled() ? dt('Yes') : dt('No'));
   $rows[] = array(dt('Has thresholds'), $sensor_info->isDefiningThresholds() ? dt('Yes') : dt('No'));
   $rows[] = array(dt('Is configurable'), $sensor_info->isConfigurable() ? dt('Yes') : dt('No'));
@@ -262,7 +264,7 @@ function monitoring_drush_result_output_json(array $results, $expand = NULL) {
       $json_output[$result->getSensorName()]['sensor_info'] = $result->getSensorInfo()->toArray();
     }
   }
-  drush_print(drupal_json_encode($json_output));
+  drush_print(Json::encode($json_output));
 }
 
 /**
@@ -294,7 +296,7 @@ function monitoring_drush_result_output_table_single(SensorResultInterface $resu
   $rows[] = array(dt('Status'), $result->getStatusLabel());
   $rows[] = array(dt('Message'), $result->getMessage());
   $rows[] = array(dt('Execution time'), $result->getExecutionTime() . 'ms');
-  $rows[] = array(dt('Result age'), format_interval(time() - $result->getTimestamp()));
+  $rows[] = array(dt('Result age'), \Drupal::service('date')->formatInterval(time() - $result->getTimestamp()));
 
   // Add the verbose output if requested.
   if ($result->getVerboseOutput()) {
@@ -320,10 +322,10 @@ function monitoring_drush_result_output_table_multiple(array $results, $show_exe
 
   foreach ($results as $result) {
     $rows[$result->getSensorName()] = array(
-      format_string("@label\n(@name)", array('@label' => truncate_utf8($result->getSensorInfo()->getLabel(), 40, TRUE, TRUE), '@name' => $result->getSensorName())),
+      String::format("@label\n(@name)", array('@label' => truncate_utf8($result->getSensorInfo()->getLabel(), 40, TRUE, TRUE), '@name' => $result->getSensorName())),
       $result->getStatusLabel(),
       truncate_utf8($result->getMessage(), 40, TRUE, TRUE),
-      format_interval(time() - $result->getTimestamp()),
+      \Drupal::service('date')->formatInterval(time() - $result->getTimestamp()),
     );
 
     if ($show_exec_time) {
@@ -390,12 +392,14 @@ function monitoring_drush_disable($sensor_name) {
 function monitoring_drush_purge_settings($sensor_name = NULL) {
   if (empty($sensor_name)) {
     if (drush_confirm(dt('Do you want to purge all sensor settings?'))) {
-      $query = db_query('DELETE FROM {variable} WHERE name LIKE :name', array(':name' => 'monitoring_%'));
-      drush_print(dt('Affected rows: @rows', array('@rows' => $query->rowCount())));
+      foreach (monitoring_sensor_manager()->getSensorInfo() as $sensor_name => $sensor_info) {
+        \Drupal::config('monitoring.settings')->set($sensor_name, array())->save();
+      }
+      drush_print(dt('Purged settings for all sensors'));
     }
     return;
   }
 
-  $query = db_query('DELETE FROM {variable} WHERE name = :name', array(':name' => monitoring_sensor_settings_key($sensor_name)));
-  drush_print(dt('Affected rows: @rows', array('@rows' => $query->rowCount())));
+  \Drupal::config('monitoring.settings')->set($sensor_name, array())->save();
+  drush_print(dt('Purged settings for sensor @sensor_name', array('@sensor_name' => $sensor_name)));
 }

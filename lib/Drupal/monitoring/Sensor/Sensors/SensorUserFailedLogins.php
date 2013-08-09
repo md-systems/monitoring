@@ -6,6 +6,7 @@
 
 namespace Drupal\monitoring\Sensor\Sensors;
 
+use Drupal\Core\Database\Query\SelectInterface;
 use Drupal\monitoring\Result\SensorResultInterface;
 
 /**
@@ -13,13 +14,13 @@ use Drupal\monitoring\Result\SensorResultInterface;
  *
  * Helps to identify bots or brute force attacks.
  */
-class SensorUserFailedLogins extends SensorDatabaseAggregator {
+class SensorUserFailedLogins extends SensorSimpleDatabaseAggregator {
 
   /**
    * {@inheritdoc}
    */
-  public function buildQuery() {
-    $query = parent::buildQuery();
+  public function getAggregateQuery() {
+    $query = parent::getAggregateQuery();
     $query->addField('watchdog', 'variables');
     $query->groupBy('watchdog.variables');
     return $query;
@@ -30,8 +31,7 @@ class SensorUserFailedLogins extends SensorDatabaseAggregator {
    */
   public function runSensor(SensorResultInterface $result) {
     $records_count = 0;
-
-    foreach ($this->getQueryResult()->fetchAll() as $row) {
+    foreach ($this->getAggregateQuery()->execute() as $row) {
       $records_count += $row->records_count;
       $variables = unserialize($row->variables);
       $result->addStatusMessage('@user: @count', array('@user' => $variables['%user'], '@count' => $row->records_count));

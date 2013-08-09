@@ -6,6 +6,7 @@
 
 namespace Drupal\monitoring\Sensor\Sensors;
 
+use Drupal\Component\Utility\String;
 use Drupal\monitoring\Result\SensorResultInterface;
 use Drupal\monitoring\Sensor\Sensor;
 
@@ -79,7 +80,7 @@ class SensorCoreRequirements extends Sensor {
     $function = $module . '_requirements';
 
     if (!function_exists($function)) {
-      throw new \RuntimeException(format_string('Requirement function @function not found', array('@function' => $function)));
+      throw new \RuntimeException(String::format('Requirement function @function not found', array('@function' => $function)));
     }
 
     return (array)$function('runtime');

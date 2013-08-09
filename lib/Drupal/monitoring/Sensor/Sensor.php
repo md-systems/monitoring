@@ -19,6 +19,7 @@ abstract class Sensor implements SensorInterface {
    * @var SensorInfo
    */
   protected $info;
+  protected $services = array();
 
   /**
    * Instantiates a sensor object.
@@ -28,6 +29,22 @@ abstract class Sensor implements SensorInterface {
    */
   function __construct(SensorInfo $info) {
     $this->info = $info;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function addService($id, $service) {
+    $this->services[$id] = $service;
+  }
+
+  /**
+   * {@inheritdoc}
+   *
+   * @todo: Replace with injection
+   */
+  public function getService($id) {
+    return \Drupal::service($id);
   }
 
   /**

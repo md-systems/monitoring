@@ -16,6 +16,12 @@ function monitoring_schema() {
         'type' => 'serial',
         'not null' => TRUE,
       ),
+      'uuid' => array(
+        'description' => 'UUID',
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => TRUE,
+      ),
       'sensor_name' => array(
         'description' => 'The sensor name invoked',
         'type' => 'varchar',
@@ -57,6 +63,7 @@ function monitoring_schema() {
     'primary key' => array('record_id'),
     'indexes' => array(
       'sensor_name' => array('sensor_name'),
+      'uuid' => array('uuid'),
     ),
   );
 

@@ -22,7 +22,7 @@ class SensorDisappearedSensors extends SensorConfigurable {
    * {@inheritdoc}
    */
   public function runSensor(SensorResultInterface $result) {
-    $available_sensors = variable_get('monitoring_available_sensors', array());
+    $available_sensors = \Drupal::state()->get('monitoring.available_sensors', array());
     $sensor_info = monitoring_sensor_info();
 
     $available_sensors = $this->updateAvailableSensorsList($available_sensors, $sensor_info);
@@ -97,7 +97,7 @@ class SensorDisappearedSensors extends SensorConfigurable {
 
     // If we have new sensors add it to available list.
     if (!empty($new_sensors)) {
-      variable_set('monitoring_available_sensors', $available_sensors + $new_sensors);
+      \Drupal::state()->set('monitoring.available_sensors', $available_sensors + $new_sensors);
       watchdog('monitoring', '@count new sensor/s added: @names',
         array('@count' => count($new_sensors), '@names' => implode(', ', array_keys($new_sensors))));
     }
@@ -140,7 +140,7 @@ class SensorDisappearedSensors extends SensorConfigurable {
       foreach ($sensors_to_remove as $sensor_to_remove) {
         unset($available_sensors[$sensor_to_remove]);
       }
-      variable_set('monitoring_available_sensors', $available_sensors);
+      \Drupal::state()->set('monitoring.available_sensors', $available_sensors);
       watchdog('monitoring', '@count new sensor/s removed: @names',
         array('@count' => count($sensors_to_remove), '@names' => implode(', ', $sensors_to_remove)));
     }

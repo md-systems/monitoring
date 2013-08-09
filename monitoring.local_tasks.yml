@@ -1,0 +1,4 @@
+monitoring.sensor_list:
+  route_name: monitoring.sensor_list
+  base_route: monitoring.sensor_list
+  title: Monitoring

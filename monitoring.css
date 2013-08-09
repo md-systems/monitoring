@@ -16,7 +16,8 @@ table#monitoring-sensors-overview tr th.status {
   width: 70px;
 }
 
-table.monitoring-severity-colors tr td.views-field-sensor-status {
+table.monitoring-severity-colors tr td.views-field-sensor-status,
+div.view-id-monitoring_sensor_results table tr td.views-field-sensor-status {
   padding-left: 18px;
 }
 
@@ -24,44 +25,53 @@ table#monitoring-sensors-overview tr td.execution-time {
   text-align: right;
 }
 
-table.monitoring-severity-colors tr {
+table#monitoring-sensors-overview th.actions {
+  width: 65px;
+}
+
+table.monitoring-severity-colors tr,
+div.view-id-monitoring_sensor_results table tr {
   border-left: 8px solid #bebfb9;
 }
 
-table.monitoring-severity-colors tr.monitoring-critical {
+table.monitoring-severity-colors tr.monitoring-critical,
+div.view-id-monitoring_sensor_results table tr.monitoring-critical {
   border-left: 8px solid #E62600;
 }
 
 table.monitoring-severity-colors tr.monitoring-critical td.status,
-table.monitoring-severity-colors tr.monitoring-critical td.views-field-sensor-status
-{
+div.view-id-monitoring_sensor_results table tr.monitoring-critical td.status,
+div.view-id-monitoring_sensor_results table tr.monitoring-critical td.views-field-sensor-status {
   background: url(images/message-16-error.png) no-repeat 0% 50%;
 }
 
 table.monitoring-severity-colors tr.monitoring-critical td.status.having-dropbutton,
-table.monitoring-severity-colors tr.monitoring-critical td.views-field-sensor-status.having-dropbutton
-{
+div.view-id-monitoring_sensor_results table tr.monitoring-critical td.status.having-dropbutton {
   background-position: 0% 12px;
 }
 
-table.monitoring-severity-colors tr.monitoring-warning {
+table.monitoring-severity-colors tr.monitoring-warning,
+div.view-id-monitoring_sensor_results table tr.monitoring-warning {
   border-left: 8px solid #E09600;
 }
 
-table.monitoring-severity-colors tr.monitoring-warning td.status {
+table.monitoring-severity-colors tr.monitoring-warning td.status
+div.view-id-monitoring_sensor_results table tr.monitoring-warning td.status {
   background: url(images/message-16-warning.png) no-repeat 0% 50%;
 }
 
-table.monitoring-severity-colors tr.monitoring-warning td.status.having-dropbutton
+div.view-id-monitoring_sensor_results table tr.monitoring-warning td.status.having-dropbutton
 {
   background-position: 0% 12px;
 }
 
-table.monitoring-severity-colors tr.monitoring-info {
+table.monitoring-severity-colors tr.monitoring-info,
+div.view-id-monitoring_sensor_results table tr.monitoring-info {
   border-left: 8px solid #0074BD;
 }
 
-table.monitoring-severity-colors tr.monitoring-ok {
+table.monitoring-severity-colors tr.monitoring-ok,
+div.view-id-monitoring_sensor_results table tr.monitoring-ok {
   border-left: 8px solid #77B259;
 }
 

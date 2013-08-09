@@ -154,6 +154,16 @@ class SensorInfo {
   }
 
   /**
+   * Determines if the sensor value type is boolean.
+   *
+   * @return bool
+   *   TRUE if the sensor value type is boolean.
+   */
+  public function isBool() {
+    return  $this->getValueType() == 'bool';
+  }
+
+  /**
    * Gets sensor caching time.
    *
    * @return int
@@ -196,6 +206,7 @@ class SensorInfo {
   }
 
   /**
+<<<<<<< HEAD
    * Returns all settings.
    *
    * @return array
@@ -214,6 +225,28 @@ class SensorInfo {
    */
   public function getTimeIntervalValue() {
     return $this->getSetting('time_interval_value', NULL);
+  }
+
+  /** Gets sensor services definition.
+   *
+   * @return array
+   *   List of service name => service class pairs.
+   */
+  public function getServices() {
+    if ($this->isRequiringServices()) {
+      return $this->sensorInfo['services'];
+    }
+
+    return array();
+  }
+
+  /**
+   * Checks if sensor requires services.
+   *
+   * @return bool
+   */
+  public function isRequiringServices() {
+    return !empty($this->sensorInfo['services']);
   }
 
   /**

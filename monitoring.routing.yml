@@ -1,0 +1,44 @@
+monitoring.sensors_overview_settings:
+  path: '/admin/config/system/monitoring/sensors'
+  defaults:
+    _form: '\Drupal\monitoring\Form\SensorsOverviewForm'
+  requirements:
+    _permission: 'administer monitoring'
+
+monitoring.sensor_settings:
+  path: '/admin/config/system/monitoring/sensors/{sensor_name}'
+  defaults:
+    _form: '\Drupal\monitoring\Form\SensorSettingsForm'
+    _title_callback: '\Drupal\monitoring\Form\SensorSettingsForm::formTitle'
+  requirements:
+    _permission: 'administer monitoring'
+
+monitoring.sensor_list:
+  path: '/admin/reports/monitoring'
+  defaults:
+    _content: '\Drupal\monitoring\Controller\SensorList::content'
+    _title: Monitoring
+  requirements:
+    _permission: 'monitoring reports'
+
+monitoring.detail_form:
+  path: '/admin/reports/monitoring/sensors/{sensor_name}'
+  defaults:
+    _form: '\Drupal\monitoring\Form\SensorDetailForm'
+    _title_callback: '\Drupal\monitoring\Form\SensorDetailForm::formTitle'
+  requirements:
+    _permission: 'monitoring reports'
+
+monitoring.force_run_all:
+  path: 'monitoring/sensors/force'
+  defaults:
+    _controller: '\Drupal\monitoring\Controller\ForceRunController::forceRunAll'
+  requirements:
+    _permission: 'monitoring force run'
+
+monitoring.force_run_sensor:
+  path: 'monitoring/sensors/force/{sensor_name}'
+  defaults:
+    _controller: '\Drupal\monitoring\Controller\ForceRunController::forceRunSensor'
+  requirements:
+    _permission: 'monitoring force run'

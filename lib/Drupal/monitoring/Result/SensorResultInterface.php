@@ -136,6 +136,17 @@ interface SensorResultInterface {
   public function getValue();
 
   /**
+   * Gets the sensor metric value formatted for UI output.
+   *
+   * @param mixed $value
+   *   Sensor result value.
+   *
+   * @return mixed
+   *   Whatever value the sensor is supposed to return.
+   */
+  function getFormattedValue($value);
+
+  /**
    * Sets sensor value.
    *
    * @param mixed $value

@@ -3,6 +3,7 @@
  * @file
  * Monitoring munin tests.
  */
+use Drupal\monitoring\Tests\MonitoringTestBase;
 
 /**
  * Class MonitoringAPITest

@@ -3,6 +3,8 @@
  * @file
  * Set up dependencies for demo and tests.
  */
+use Drupal\Component\Utility\Random;
+use Drupal\Core\Language\Language;
 
 /**
  * Creates search_api default index.
@@ -127,22 +129,24 @@ function monitoring_setup_search_api() {
 /**
  * Creates comments for testing purposes.
  *
- * @param object $node
- *   Node to which the comment belongs.
  * @param array $settings
  *   Comment data.
  *
  * @return object
  *   Crated comment.
  */
-function _monitoring_setup_create_comment($node, $settings = array()) {
+function _monitoring_setup_create_comment($settings = array()) {
+  $random = new Random();
   $settings += array(
-    'status' => COMMENT_PUBLISHED,
-    'node_type' => $node->type,
-    'nid' => $node->nid,
+    'subject' => $random->name(),
+    'entity_id' => $settings['entity_id'],
+    'field_name' => 'comment',
+    'entity_type' => 'node',
+    'comment_body' => $random->name(40),
   );
+
   $comment = entity_create('comment', $settings);
-  comment_save($comment);
+  $comment->save();
   return $comment;
 }
 
@@ -152,26 +156,23 @@ function _monitoring_setup_create_comment($node, $settings = array()) {
  * @param array $settings
  *   Node data.
  *
- * @return object
+ * @return \Drupal\node\Entity\Node
  *   Created node.
  */
 function _monitoring_setup_create_node($settings = array()) {
+  $random = new Random();
   // Populate defaults array.
   $settings += array(
-    'body'      => array(LANGUAGE_NONE => array(array())),
-    'title'     => _monitoring_setup_random_name(8),
-    'comment'   => 2,
+    'body'      => array(array()),
+    'title'     => $random->name(8),
     'changed'   => REQUEST_TIME,
-    'moderate'  => 0,
-    'promote'   => 0,
+    'promote'   => NODE_NOT_PROMOTED,
     'revision'  => 1,
     'log'       => '',
-    'status'    => 1,
-    'sticky'    => 0,
+    'status'    => NODE_PUBLISHED,
+    'sticky'    => NODE_NOT_STICKY,
     'type'      => 'page',
-    'revisions' => NULL,
-    'language'  => LANGUAGE_NONE,
-    'uid'  => 0,
+    'langcode'  => Language::LANGCODE_NOT_SPECIFIED,
   );
 
   // Use the original node's created time for existing nodes.
@@ -179,39 +180,25 @@ function _monitoring_setup_create_node($settings = array()) {
     $settings['date'] = format_date($settings['created'], 'custom', 'Y-m-d H:i:s O');
   }
 
+  // If the node's user uid is not specified manually, use the currently
+  // logged in user if available, or else the user running the test.
+  if (!isset($settings['uid'])) {
+    $user = \Drupal::currentUser() ?: $GLOBALS['user'];
+    $settings['uid'] = $user->id();
+  }
+
   // Merge body field value and format separately.
-  $body = array(
-    'value' => _monitoring_setup_random_name(32),
+  $settings['body'][0] += array(
+    'value' => $random->name(32),
     'format' => filter_default_format(),
   );
-  $settings['body'][$settings['language']][0] += $body;
 
-  $node = (object) $settings;
-  node_save($node);
+  $node = entity_create('node', $settings);
+  if (!empty($settings['revision'])) {
+    $node->setNewRevision();
+  }
+  $node->save();
 
-  // Small hack to link revisions to our test user.
-  db_update('node_revision')
-    ->fields(array('uid' => $node->uid))
-    ->condition('vid', $node->vid)
-    ->execute();
   return $node;
 }
 
-/**
- * Generates random name.
- *
- * @param int $length
- *   Length of the generated string.
- *
- * @return string
- *   The generated string.
- */
-function _monitoring_setup_random_name($length = 8) {
-  $values = array_merge(range(65, 90), range(97, 122), range(48, 57));
-  $max = count($values) - 1;
-  $str = chr(mt_rand(97, 122));
-  for ($i = 1; $i < $length; $i++) {
-    $str .= chr($values[mt_rand(0, $max)]);
-  }
-  return $str;
-}

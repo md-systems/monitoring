@@ -6,6 +6,10 @@
 
 namespace Drupal\monitoring\Sensor;
 
+use Drupal\Component\Utility\NestedArray;
+use Drupal\Component\Utility\String;
+use Drupal\Core\Extension\ModuleHandlerInterface;
+
 /**
  * Manages sensor definitions and settings.
  *
@@ -24,6 +28,19 @@ class SensorManager {
    * @var \Drupal\monitoring\Sensor\SensorInfo[]
    */
   protected $info;
+
+  /**
+   * @var \Drupal\Core\Extension\ModuleHandlerInterface
+   */
+  protected $moduleHandler;
+
+  /**
+   * Constructes a sensor manager.
+   */
+  function __construct(ModuleHandlerInterface $module_handler) {
+    $this->moduleHandler = $module_handler;
+  }
+
 
   /**
    * Returns monitoring sensor info.
@@ -72,7 +89,7 @@ class SensorManager {
     if (isset($info[$sensor_name])) {
       return $info[$sensor_name];
     }
-    throw new NonExistingSensorException(format_string('Sensor @sensor_name does not exist', array('@sensor_name' => $sensor_name)));
+    throw new NonExistingSensorException(String::format('Sensor @sensor_name does not exist', array('@sensor_name' => $sensor_name)));
   }
 
   /**
@@ -128,10 +145,10 @@ class SensorManager {
       monitoring_sensor_settings_save($sensor_name, $settings);
       // @todo the following part is SensorDisappearedSensors specific. We need
       //   to move it into the sensor somehow.
-      $available_sensors = variable_get('monitoring_available_sensors', array());
+      $available_sensors = \Drupal::state()->get('monitoring.available_sensors', array());
       $available_sensors[$sensor_name]['enabled'] = TRUE;
       $available_sensors[$sensor_name]['name'] = $sensor_name;
-      variable_set('monitoring_available_sensors', $available_sensors);
+      \Drupal::state()->set('monitoring.available_sensors', $available_sensors);
     }
   }
 
@@ -155,10 +172,10 @@ class SensorManager {
       monitoring_sensor_settings_save($sensor_name, $settings);
       // @todo - the following part is SensorDisappearedSensors specific. We need
       //   to move it into the sensor somehow.
-      $available_sensors = variable_get('monitoring_available_sensors', array());
+      $available_sensors = \Drupal::state()->get('monitoring.available_sensors', array());
       $available_sensors[$sensor_name]['enabled'] = FALSE;
       $available_sensors[$sensor_name]['name'] = $sensor_name;
-      variable_set('monitoring_available_sensors', $available_sensors);
+      \Drupal::state()->set('monitoring.available_sensors', $available_sensors);
     }
   }
 
@@ -179,7 +196,7 @@ class SensorManager {
     // A module might provide a separate file with sensor definitions. Try to
     // include it prior to checking if a hook exists.
     // @todo: Use hook_hook_info().
-    foreach (module_list() as $module) {
+    foreach (array_keys($this->moduleHandler->getModuleList()) as $module) {
       $sensors_file = drupal_get_path('module', $module) . '/' . $module . '.monitoring_sensors.inc';
       if (file_exists($sensors_file)) {
         require_once $sensors_file;
@@ -187,26 +204,25 @@ class SensorManager {
     }
 
     // Collect sensors info.
-    $custom_implementations = module_implements('monitoring_sensor_info');
-    foreach (module_list() as $module) {
-
+    $custom_implementations = $this->moduleHandler->getImplementations('monitoring_sensor_info');
+    foreach (array_keys($this->moduleHandler->getModuleList()) as $module) {
       // Favor custom implementation.
       if (in_array($module, $custom_implementations)) {
-        $result = module_invoke($module, 'monitoring_sensor_info');
-        $info = drupal_array_merge_deep($info, $result);
+        $result = $this->moduleHandler->invoke($module, 'monitoring_sensor_info');
+        $info = NestedArray::mergeDeep($info, $result);
       }
       // If there is no custom implementation try to find local integration.
       elseif (function_exists('monitoring_' . $module . '_monitoring_sensor_info')) {
         $function = 'monitoring_' . $module . '_monitoring_sensor_info';
         $result = $function();
         if (is_array($result)) {
-          $info = drupal_array_merge_deep($info, $result);
+          $info = NestedArray::mergeDeep($info, $result);
         }
       }
     }
 
     // Allow to alter the collected sensors info.
-    drupal_alter('monitoring_sensor_info', $info);
+    $this->moduleHandler->alter('monitoring_sensor_info', $info);
 
     // Merge in saved sensor settings.
     foreach ($info as $key => &$value) {
@@ -226,9 +242,7 @@ class SensorManager {
       $value['settings'] = $this->mergeSettings($key, $value['settings']);
     }
 
-    // Support variable overrides.
-    // @todo This might change in https://drupal.org/node/2170955.
-    $info = drupal_array_merge_deep($info, variable_get('monitoring_sensor_info', array()));
+    $info = NestedArray::mergeDeep($info, (array)\Drupal::config('monitoring.sensor_info')->get());
 
     // Convert the arrays into SensorInfo objects.
     foreach ($info as $sensor_name => $sensor_info) {

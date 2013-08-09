@@ -1,0 +1,101 @@
+<?php
+/**
+ * @file
+ * Contains \Drupal\monitoring\Sensor\Sensors\SensorSimpleDatabaseAggregator.
+ */
+
+namespace Drupal\monitoring\Sensor\Sensors;
+
+
+use Drupal\Core\Database\Query\SelectInterface;
+use Drupal\monitoring\Result\SensorResultInterface;
+
+/**
+ * Simple database aggregator able to query a single db table.
+ */
+class SensorSimpleDatabaseAggregator extends SensorDatabaseAggregatorBase {
+
+  /**
+   * The fetched object from the query result.
+   *
+   * @var object
+   */
+  protected $queryString;
+
+  /**
+   * The arguments of the executed query.
+   *
+   * @var array
+   */
+  protected $queryArguments;
+
+  /**
+   * The arguments of the executed query.
+   *
+   * @var \Drupal\Core\Database\StatementInterface
+   */
+  protected $executedQuery;
+
+  protected $fetchedObject;
+
+  /**
+   * {@inheritdoc}
+   */
+  public function resultVerbose(SensorResultInterface $result) {
+    return "Query:\n{$this->queryString}\n\nArguments:\n" . var_export($this->queryArguments, TRUE);
+  }
+
+  /**
+   * Builds simple aggregate query over one db table.
+   *
+   * @return \Drupal\Core\Database\Query\Select
+   *   The select query object.
+   */
+  protected function getAggregateQuery() {
+    /** @var \Drupal\Core\Database\Connection $database */
+    $database = $this->getService('database');
+    $query = $database->select($this->info->getSetting('table'));
+    $this->addAggregateExpression($query);
+
+    foreach ($this->getConditions() as $condition) {
+      $query->condition($condition['field'], $condition['value'], isset($condition['operator']) ? $condition['operator'] : NULL);
+    }
+
+    if ($time_interval_field = $this->getTimeIntervalField()) {
+      $query->condition($this->getTimeIntervalField(), REQUEST_TIME - $this->getTimeIntervalValue(), '>');
+    }
+
+    return $query;
+  }
+
+  /**
+   * Adds the aggregate expression to the select query.
+   */
+  protected function addAggregateExpression(SelectInterface $select) {
+    $select->addExpression('COUNT(*)', 'records_count');
+  }
+
+
+  /**
+   * {@inheritdoc}
+   */
+  public function runSensor(SensorResultInterface $result) {
+
+    $query = $this->getAggregateQuery();
+
+    $this->queryArguments = $query->getArguments();
+    $this->executedQuery = $query->execute();
+    $this->queryString = $this->executedQuery->getQueryString();
+    $this->fetchedObject = $this->executedQuery->fetchObject();
+
+    if (!empty($this->fetchedObject->records_count)) {
+      $records_count = $this->fetchedObject->records_count;
+    }
+    else {
+      $records_count = 0;
+    }
+
+    $result->setValue($records_count);
+  }
+
+}

@@ -6,8 +6,10 @@
 
 namespace Drupal\monitoring\Sensor\Sensors;
 
+use Drupal\Component\Utility\String;
 use Drupal\monitoring\Result\SensorResultInterface;
 use Drupal\monitoring\Sensor\SensorConfigurable;
+use Drupal;
 
 /**
  * Monitors installed modules.
@@ -31,6 +33,8 @@ class SensorEnabledModules extends SensorConfigurable {
     );
 
     // Get current list of modules.
+    // @todo find a faster solution? If that happens we can drop caching the
+    //    result for 1 hour.
     $modules = system_rebuild_module_data();
     $visible_modules = array();
     $hidden_modules = array();
@@ -84,16 +88,18 @@ class SensorEnabledModules extends SensorConfigurable {
    */
   public function runSensor(SensorResultInterface $result) {
     // Load the info from the system table to display the label.
-    $module_data = db_select('system')
-      ->fields('system')
-      ->execute()
-      ->fetchAllAssoc('name');
     $result->setExpectedValue(0);
     $delta = 0;
 
+    $modules = system_rebuild_module_data();
+    $names = array();
+    foreach ($modules as $name => $module) {
+      $names[$name] = $module->info['name'];
+    }
+
     $monitoring_enabled_modules = array();
     // Filter out install profile.
-    foreach (module_list() as $module) {
+    foreach (array_keys(Drupal::moduleHandler()->getModuleList()) as $module) {
       $path_parts = explode('/', drupal_get_path('module', $module));
       if ($path_parts[0] != 'profiles') {
         $monitoring_enabled_modules[$module] = $module;
@@ -117,8 +123,12 @@ class SensorEnabledModules extends SensorConfigurable {
       $delta += count($non_installed_modules);
       $non_installed_modules_info = array();
       foreach ($non_installed_modules as $non_installed_module) {
-        $info = unserialize($module_data[$non_installed_module]->info);
-        $non_installed_modules_info[] = $info['name'] . ' (' . $non_installed_module . ')';
+        if (isset($names[$non_installed_module])) {
+          $non_installed_modules_info[] = $names[$non_installed_module] . ' (' . $non_installed_module . ')';
+        }
+        else {
+          $non_installed_modules_info[] = String::format('@module_name (unknown)', array('@module_name' => $non_installed_module));
+        }
       }
       $result->addStatusMessage('Following modules are expected to be installed: @modules', array('@modules' => implode(', ', $non_installed_modules_info)));
     }
@@ -130,8 +140,7 @@ class SensorEnabledModules extends SensorConfigurable {
       $delta += count($unexpected_modules);
       $unexpected_modules_info = array();
       foreach($unexpected_modules as $unexpected_module) {
-        $info = unserialize($module_data[$unexpected_module]->info);
-        $unexpected_modules_info[] = $info['name'] . ' (' . $unexpected_module . ')';
+        $unexpected_modules_info[] = $names[$unexpected_module] . ' (' . $unexpected_module . ')';
       }
       $result->addStatusMessage('Following modules are NOT expected to be installed: @modules', array('@modules' => implode(', ', $unexpected_modules_info)));
     }

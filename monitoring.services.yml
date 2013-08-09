@@ -1,0 +1,4 @@
+services:
+  monitoring.sensor_manager:
+    class: Drupal\monitoring\Sensor\SensorManager
+    arguments: ['@module_handler']
