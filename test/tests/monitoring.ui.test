@@ -1,0 +1,123 @@
+<?php
+use Drupal\monitoring\Sensor\SensorInfo;
+
+/**
+ * Class MonitoringAPITest
+ */
+class MonitoringUITest extends DrupalWebTestCase {
+
+  static function getInfo() {
+    return array(
+      'name' => 'Monitoring UI',
+      'description' => 'Monitoring UI tests.',
+      'group' => 'Monitoring',
+    );
+  }
+
+  function setUp() {
+    parent::setUp(array('monitoring', 'monitoring_test'));
+  }
+
+  /**
+   *
+   */
+  function testSensorSettingsUI() {
+    $account = $this->drupalCreateUser(array('administer monitoring'));
+    $this->drupalLogin($account);
+
+    $info = monitoring_sensor_info_instance();
+
+    // Test sensor exceeds.
+    /** @var SensorInfo $sensor_info */
+    $sensor_info = $info['test_sensor_exceeds'];
+    $data = array();
+    foreach ($sensor_info->getThresholdsIntervals() as $status => $threshold) {
+      $key = monitoring_sensor_settings_key('test_sensor_exceeds') . '[thresholds][intervals][' . $status . ']';
+      $data[$key] = $threshold + 1;
+    }
+    $this->drupalPost('admin/config/system/monitoring/sensors/test_sensor_exceeds', $data, t('Save'));
+
+    $this->drupalGet('admin/config/system/monitoring/sensors/test_sensor_exceeds');
+    foreach ($sensor_info->getThresholdsIntervals() as $status => $threshold) {
+      $key = monitoring_sensor_settings_key('test_sensor_exceeds') . '[thresholds][intervals][' . $status . ']';
+      $this->assertFieldByName($key, $threshold + 1);
+    }
+
+    // Test sensor falls.
+    $sensor_info = $info['test_sensor_falls'];
+    $data = array();
+    foreach ($sensor_info->getThresholdsIntervals() as $status => $threshold) {
+      $key = monitoring_sensor_settings_key('test_sensor_falls') . '[thresholds][intervals][' . $status . ']';
+      $data[$key] = $threshold + 1;
+    }
+    $this->drupalPost('admin/config/system/monitoring/sensors/test_sensor_falls', $data, t('Save'));
+
+    $this->drupalGet('admin/config/system/monitoring/sensors/test_sensor_falls');
+    foreach ($sensor_info->getThresholdsIntervals() as $status => $threshold) {
+      $key = monitoring_sensor_settings_key('test_sensor_falls') . '[thresholds][intervals][' . $status . ']';
+      $this->assertFieldByName($key, $threshold + 1);
+    }
+
+    // Test sensor inner interval.
+    $sensor_info = $info['test_sensor_inner'];
+    $data = array();
+    foreach ($sensor_info->getThresholdsIntervals() as $status => $threshold_inner) {
+      $key_inner = monitoring_sensor_settings_key('test_sensor_inner') . '[thresholds][intervals][' . $status . ']';
+      $data[$key_inner . '[0]'] = $threshold_inner[0] + 1;
+      $data[$key_inner . '[1]'] = $threshold_inner[1] + 1;
+      $this->drupalPost('admin/config/system/monitoring/sensors/test_sensor_inner', $data, t('Save'));
+    }
+
+    $this->drupalGet('admin/config/system/monitoring/sensors/test_sensor_inner');
+    foreach ($sensor_info->getThresholdsIntervals() as $status => $threshold) {
+      $key = monitoring_sensor_settings_key('test_sensor_inner') . '[thresholds][intervals][' . $status . ']';
+      $this->assertFieldByName($key . '[0]', $threshold[0] + 1);
+      $this->assertFieldByName($key . '[1]', $threshold[1] + 1);
+    }
+
+    // Test sensor outer interval.
+    $sensor_info = $info['test_sensor_outer'];
+    $data = array();
+    foreach ($sensor_info->getThresholdsIntervals() as $status => $threshold_outer) {
+      $key_outer = monitoring_sensor_settings_key('test_sensor_outer') . '[thresholds][intervals][' . $status . ']';
+      $data[$key_outer . '[0]'] = $threshold_outer[0] + 1;
+      $data[$key_outer . '[1]'] = $threshold_outer[1] + 1;
+    }
+    $this->drupalPost('admin/config/system/monitoring/sensors/test_sensor_outer', $data, t('Save'));
+
+    $this->drupalGet('admin/config/system/monitoring/sensors/test_sensor_outer');
+    foreach ($sensor_info->getThresholdsIntervals() as $status => $threshold) {
+      $key = monitoring_sensor_settings_key('test_sensor_outer') . '[thresholds][intervals][' . $status . ']';
+      $this->assertFieldByName($key . '[0]', $threshold[0] + 1);
+      $this->assertFieldByName($key . '[1]', $threshold[1] + 1);
+    }
+  }
+
+  function testSensorOverviewPage() {
+    $account = $this->drupalCreateUser(array('monitoring reports'));
+    $this->drupalLogin($account);
+
+    $this->drupalGet('admin/reports/monitoring');
+
+    $tbody = $this->xpath('//table[@id="monitoring-sensors-overview"]/tbody');
+    $rows = $tbody[0];
+
+    $i = 0;
+    foreach (monitoring_sensor_info_by_categories() as $category => $category_sensor_info) {
+      $tr = $rows->tr[$i];
+      $this->assertEqual($category, $tr->td->h3);
+
+      foreach ($category_sensor_info as $sensor_name => $info) {
+        $sensor_info = monitoring_sensor_info_instance($sensor_name);
+        if (!$sensor_info->isEnabled()) {
+          continue;
+        }
+        $i++;
+        $tr = $rows->tr[$i];
+        $this->assertEqual($tr->td[0]->span, $sensor_info->getLabel());
+      }
+
+      $i++;
+    }
+  }
+}

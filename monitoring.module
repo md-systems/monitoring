@@ -1,0 +1,592 @@
+<?php
+
+/**
+ * @file
+ * Monitoring bootstrap file.
+ */
+
+define('MONITORING_SENSOR_DEFAULT_CATEGORY', 'Other');
+
+use Drupal\monitoring\Sensor\SensorInfo;
+use Drupal\monitoring\Result\SensorResultInterface;
+use Drupal\monitoring\SensorRunner;
+
+/**
+ * Returns monitoring sensor info.
+ *
+ * @param string $sensor_name
+ *   Sensor id.
+ * @param boolean $reset
+ *   Static cache reset flag.
+ *
+ * @return array
+ *   Sensor info.
+ */
+function monitoring_sensor_info($sensor_name = NULL, $reset = FALSE) {
+  $info = &drupal_static(__FUNCTION__, array(), $reset);
+
+  if (empty($info)) {
+
+    // A module might provide a separate file with sensor definitions. Try to
+    // include it prior to checking if a hook exists.
+    foreach (module_list() as $module) {
+      $sensors_file = drupal_get_path('module', $module) . '/' . $module . '.monitoring_sensors.inc';
+      if (file_exists($sensors_file)) {
+        require_once $sensors_file;
+      }
+    }
+
+    // Collect sensors info.
+    $custom_implementations = module_implements('monitoring_sensor_info');
+    foreach (module_list() as $module) {
+
+      // Favor custom implementation.
+      if (in_array($module, $custom_implementations)) {
+        $result = module_invoke($module, 'monitoring_sensor_info');
+        $info = array_merge_recursive($info, $result);
+      }
+      // If there is no custom implementation try to find local integration.
+      elseif (function_exists('monitoring_' . $module . '_monitoring_sensor_info')) {
+        $function = 'monitoring_' . $module . '_monitoring_sensor_info';
+        $result = $function();
+        if (is_array($result)) {
+          $info = array_merge_recursive($info, $result);
+        }
+      }
+    }
+
+    // Allow to alter the collected sensors info.
+    drupal_alter('monitoring_sensor_info', $info);
+
+    // Merge in saved sensor settings.
+    foreach ($info as $key => &$value) {
+      // Set default values.
+      if (!isset($value['result class'])) {
+        $value['result class'] = 'Drupal\monitoring\Result\SensorResult';
+      }
+      if (!isset($value['type'])) {
+        $value['type'] = 'numeric';
+      }
+      if (!isset($value['settings'])) {
+        $value['settings'] = array();
+      }
+      $value['settings'] += array(
+        'enabled' => TRUE,
+        'caching time' => 0,
+        'category' => NULL,
+        'units_label' => NULL,
+      );
+      $value['settings'] = monitoring_sensor_settings_merge($key, $value['settings']);
+    }
+  }
+
+  if (!empty($sensor_name)) {
+    return $info[$sensor_name];
+  }
+
+  return $info;
+}
+
+/**
+ * Gets sensor info grouped by categories.
+ *
+ * @param bool $enabled
+ *   Sensor isEnabled flag.
+ *
+ * @return array
+ *   Sensor info.
+ */
+function monitoring_sensor_info_by_categories($enabled = TRUE) {
+  $info_by_categories = array();
+  /** @var SensorInfo $sensor_info */
+  foreach (monitoring_sensor_info_instance() as $sensor_name => $sensor_info) {
+    if ($sensor_info->isEnabled() != $enabled) {
+      continue;
+    }
+
+    if ($sensor_info->getCategory() != NULL) {
+      $info_by_categories[$sensor_info->getCategory()][$sensor_name] = $sensor_info;
+    }
+    else {
+      $info_by_categories[MONITORING_SENSOR_DEFAULT_CATEGORY][$sensor_name] = $sensor_info;
+    }
+  }
+
+  return $info_by_categories;
+}
+
+/**
+ * Helper class to get instance/s of SensorInfo.
+ *
+ * @param string $sensor_name
+ *   Sensor name.
+ * @param bool $reset
+ *   Flag to reset internal static cache.
+ *
+ * @return SensorInfo
+ */
+function monitoring_sensor_info_instance($sensor_name = NULL, $reset = FALSE) {
+  $instances = &drupal_static(__FUNCTION__, array(), $reset);
+
+  if (empty($instances)) {
+    foreach (monitoring_sensor_info(NULL, $reset) as $key => $value) {
+      $instances[$key] = new SensorInfo($key, $value);
+    }
+  }
+
+  if (!empty($sensor_name)) {
+    return isset($instances[$sensor_name]) ? $instances[$sensor_name] : NULL;
+  }
+
+  return $instances;
+}
+
+/**
+ * The sensor runner function.
+ *
+ * Note that in case there is a cached result for given sensor name, the sensor
+ * will not run and the cached result will be returned.
+ *
+ * @param $sensor_name
+ * @param $force_run
+ * @param $verbose
+ *
+ * @return SensorResultInterface
+ */
+function monitoring_sensor_run($sensor_name, $force_run = FALSE, &$verbose = NULL) {
+  $results = monitoring_sensor_run_multiple(array($sensor_name), $force_run, $verbose);
+  return reset($results);
+}
+
+/**
+ * Runs sensors.
+ *
+ * @param array $sensor_names
+ *   Sensor names to run.
+ * @param bool $force_run
+ *   Flag to force run.
+ * @param array $verbose
+ *   If empty array provided it will be filled with verbose output keyed by
+ *   sensor names.
+ *
+ * @return array<SensorResultInterface>
+ *   List of result objects.
+ */
+function monitoring_sensor_run_multiple($sensor_names = array(), $force_run = FALSE, &$verbose = NULL) {
+  // @todo Just quick solution - we need better way to request verbose output.
+  $get_verbose_output = $verbose !== NULL;
+
+  if (empty($sensor_names)) {
+    $sensors_info = monitoring_sensor_info_instance();
+  }
+  else {
+    $sensors_info = array();
+    foreach (monitoring_sensor_info_instance() as $sensor_name => $info) {
+      if (in_array($sensor_name, $sensor_names)) {
+        $sensors_info[$sensor_name] = $info;
+      }
+    }
+  }
+
+  // @todo - here we should throw an exception as returning array isn't explicit
+  // enough to say there has been a problem.
+  if (empty($sensors_info)) {
+    return array();
+  }
+
+  $runner = new SensorRunner($sensors_info);
+  $runner->setLoggingMode(variable_get('monitoring_sensor_call_logging', 'on_request'));
+  $runner->verbose($get_verbose_output);
+  $runner->forceRun($force_run);
+  $results = $runner->runSensors();
+  if ($get_verbose_output) {
+    $verbose = $runner->verboseOutput();
+  }
+  return $results;
+}
+
+/**
+ * Implements hook_entity_info()
+ */
+function monitoring_entity_info() {
+  $info['monitoring_sensor_result'] = array(
+    'label' => t('Monitoring sensor result'),
+    'module' => 'monitoring',
+    'controller class' => 'Drupal\monitoring\Controller\SensorResultController',
+    'metadata controller class' => 'Drupal\monitoring\Controller\SensorResultMetadataController',
+    'views controller class' => 'Drupal\monitoring\Controller\SensorResultViewsController',
+    'entity class' => 'Drupal\monitoring\Entity\SensorResultEntity',
+    'base table' => 'monitoring_sensor_result',
+    'uri callback' => 'entity_class_uri',
+    'label callback' => 'entity_class_label',
+    'entity keys' => array(
+      'id' => 'record_id',
+    ),
+  );
+
+  return $info;
+}
+
+/**
+ * Implements hook_views_api().
+ */
+function monitoring_views_api() {
+  return array(
+    'api' => 3,
+  );
+}
+
+/**
+ * Implements hook_preprocess_HOOK().
+ *
+ * Display a view as a table style.
+ */
+function monitoring_preprocess_views_view_table(&$vars) {
+  // We want to alter only the monitoring sensor results view.
+  if ($vars['view']->name != 'monitoring_sensor_results') {
+    return;
+  }
+
+  $vars['classes_array'][] = 'monitoring-severity-colors';
+
+  foreach ($vars['rows'] as $num => $row) {
+    if (isset($vars['result'][$num]->monitoring_sensor_result_sensor_status)) {
+      $vars['row_classes'][$num][] = 'monitoring-' . strtolower($vars['result'][$num]->monitoring_sensor_result_sensor_status);
+    }
+  }
+
+  drupal_add_css(drupal_get_path('module', 'monitoring') . '/monitoring.css');
+}
+
+/**
+ * Implements hook_menu().
+ */
+function monitoring_menu() {
+  $items['admin/config/system/monitoring'] = array(
+    'title' => 'Monitoring',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('monitoring_config_sensors_overview_form'),
+    'access arguments' => array('administer monitoring'),
+    'file' => 'monitoring.admin.inc',
+  );
+  $items['admin/config/system/monitoring/sensors'] = array(
+    'title' => 'Sensors',
+    'description' => 'Configure all available sensors',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => -10,
+  );
+  $items['admin/config/system/monitoring/settings'] = array(
+    'title' => 'Monitoring settings',
+    'description' => 'Configure monitoring behaviour',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('monitoring_settings_form'),
+    'access arguments' => array('administer monitoring'),
+    'file' => 'monitoring.admin.inc',
+    'weight' => -9,
+    'type' => MENU_LOCAL_TASK,
+  );
+  $items['admin/config/system/monitoring/sensors/%'] = array(
+    'title callback' => 'monitoring_sensor_action_title',
+    'title arguments' => array('settings', 5),
+    'description' => 'Monitoring sensor configuration',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('monitoring_sensor_settings_form', 5),
+    'access arguments' => array('administer monitoring'),
+    'file' => 'monitoring.admin.inc',
+    'type' => MENU_VISIBLE_IN_BREADCRUMB,
+    'weight' => -10,
+  );
+
+  $items['admin/reports/monitoring'] = array(
+    'title' => 'Monitoring',
+    'page callback' => 'monitoring_reports_sensors_overview',
+    'access arguments' => array('monitoring reports'),
+    'file' => 'monitoring.admin.inc',
+  );
+  $items['admin/reports/monitoring/sensors'] = array(
+    'title' => 'Sensors',
+    'description' => 'Overview of all enabled monitoring sensors.',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => -10,
+  );
+  $items['admin/reports/monitoring/sensors/%'] = array(
+    'title callback' => 'monitoring_sensor_action_title',
+    'title arguments' => array('details', 4),
+    'description' => 'Details',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('monitoring_sensor_details', 4),
+    'access arguments' => array('monitoring reports'),
+    'file' => 'monitoring.admin.inc',
+  );
+  $items['admin/reports/monitoring/sensors/%/details'] = array(
+    'title' => 'Details',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => -16,
+  );
+
+  return $items;
+}
+
+/**
+ * Sensor pages title callback.
+ *
+ * @param string $action
+ *   View/page action.
+ * @param $sensor_name
+ *   Sensor name.
+ *
+ * @return string
+ *   Title.
+ */
+function monitoring_sensor_action_title($action, $sensor_name) {
+  $sensor_info = monitoring_sensor_info($sensor_name);
+  switch ($action) {
+    case 'settings':
+      return t('@sensor settings', array('@sensor' => $sensor_info['label']));
+      break;
+    case 'details':
+      return $sensor_info['label'];
+      break;
+    case 'log':
+      return $sensor_info['label'];
+      break;
+  }
+
+  return '';
+}
+
+/**
+ * Implements hook_permission().
+ */
+function monitoring_permission() {
+  return array(
+    'administer monitoring' => array(
+      'title' => t('Administer monitoring'),
+    ),
+    'monitoring reports' => array(
+      'title' => t('View monitoring reports'),
+    ),
+    'monitoring verbose' => array(
+      'title' => t('Display verbose monitoring sensor info'),
+    ),
+    'monitoring force run' => array(
+      'title' => t('Force run monitoring sensor execution'),
+    ),
+  );
+}
+
+/**
+ * Merges provided sensor settings with saved settings.
+ *
+ * @param string $sensor_name
+ *   Sensor name.
+ * @param array $default_settings
+ *   Default sensor settings.
+ *
+ * @return array
+ *   Merged settings.
+ */
+function monitoring_sensor_settings_merge($sensor_name, array $default_settings) {
+  $saved_settings = monitoring_sensor_settings_get($sensor_name);
+  $default_settings = array_merge($default_settings, $saved_settings);
+  return $default_settings;
+}
+
+/**
+ * Saves sensor settings.
+ *
+ * @param $sensor_name
+ *   Sensor name.
+ * @param array $values
+ *   Settings to be saved.
+ */
+function monitoring_sensor_settings_save($sensor_name, $values) {
+  variable_set(monitoring_sensor_settings_key($sensor_name), $values);
+  // After settings save reset the static cache.
+  monitoring_sensor_info_instance(NULL, TRUE);
+}
+
+/**
+ * Gets sensor settings.
+ *
+ * @param $sensor_name
+ *   Sensor name.
+ *
+ * @return array
+ *   Sensor saved settings.
+ */
+function monitoring_sensor_settings_get($sensor_name) {
+  return variable_get(monitoring_sensor_settings_key($sensor_name), array());
+}
+
+/**
+ * Helper to build the sensor settings key.
+ *
+ * @param string $sensor_name
+ *   Sensor name.
+ *
+ * @return string
+ *   Sensor settings key.
+ */
+function monitoring_sensor_settings_key($sensor_name) {
+  return 'monitoring_' . $sensor_name . '_settings';
+}
+
+/**
+ * Saves the sensor result.
+ *
+ * @param SensorResultInterface $result
+ *   Sensor call result.
+ *
+ * @return \Drupal\monitoring\Entity\SensorResultEntity
+ *   Sensor result entity.
+ */
+function monitoring_sensor_result_save(SensorResultInterface $result) {
+  $values = $result->getEntityValues();
+  $values['sensor_name'] = $result->getSensorName();
+  $result_entity = entity_create('monitoring_sensor_result', $values);
+  entity_save('monitoring_sensor_result', $result_entity);
+  return $result_entity;
+}
+
+/**
+ * Gets last sensor result.
+ *
+ * @param string $sensor_name
+ * @return \Drupal\monitoring\Entity\SensorResultEntity
+ */
+function monitoring_sensor_result_last($sensor_name) {
+  $query = new EntityFieldQuery();
+  $query->entityCondition('entity_type', 'monitoring_sensor_result');
+  $query->propertyCondition('sensor_name', $sensor_name);
+  $query->propertyOrderBy('timestamp', 'DESC');
+  $query->range(0, 1);
+  $result = $query->execute();
+
+  if (isset($result['monitoring_sensor_result'])) {
+    $row = array_shift($result['monitoring_sensor_result']);
+    return entity_load_single('monitoring_sensor_result', $row->record_id);
+  }
+}
+
+/**
+ * Implements hook_views_pre_render()
+ *
+ * Alters the views page title.
+ */
+function monitoring_views_pre_render(View &$view) {
+  if ($view->name == 'monitoring_sensor_results' && !empty($view->args)) {
+    $view->build_info['title'] = monitoring_sensor_action_title('log', $view->args[0]);
+  }
+}
+
+/**
+ * Implements hook_theme().
+ */
+function monitoring_theme() {
+  return array(
+    'monitoring_config_box' => array(
+      'variables' => array(
+        'title' => NULL,
+        'description' => NULL,
+        'code' => NULL,
+        'code_height' => NULL,
+      ),
+    ),
+    'monitoring_overview_summary' => array(
+      'variables' => array('status_overview' => array(), 'total_execution_time' => NULL, 'non_cached_execution_time' => NULL),
+    ),
+  );
+}
+
+/**
+ * Monitoring config code box theme.
+ *
+ * @param array $variables
+ *   Theme variables.
+ *
+ * @return string
+ *   Formatted output.
+ */
+function theme_monitoring_config_box($variables) {
+  $output = '';
+
+  if (!empty($variables['title'])) {
+    $output .= '<h3>' . check_plain($variables['title']) . '</h3>';
+  }
+
+  if (!empty($variables['description'])) {
+    $output .= '<p>' . check_plain($variables['description']) . '</p>';
+  }
+
+  if (!empty($variables['code'])) {
+    $variables['code_height'] = !empty($variables['code_height']) ? $variables['code_height'] : '100';
+    $output .= '<pre style="border:1px solid silver;padding:4px;height:' . $variables['code_height'] . 'px;overflow:auto;">' . check_plain($variables['code']) . '</pre>';
+  }
+
+  return $output;
+}
+
+/**
+ * Helper function to get config code with dynamic vars.
+ *
+ * @param string module
+ *   Module name.
+ * @param string $type
+ *   Config type.
+ * @param array $variables
+ *   Dynamic values.
+ *
+ * @return string
+ *   Config code.
+ */
+function monitoring_config_code($module, $type, $variables = array()) {
+  $code = file_get_contents(drupal_get_path('module', $module) . '/config_tpl/' . $type . '.txt');
+  return format_string($code, $variables);
+}
+
+/**
+ * Monitoring overview page summary.
+ *
+ * @param array $variables
+ *   Theme variables.
+ *
+ * @return string
+ *   Formatted output.
+ */
+function theme_monitoring_overview_summary($variables) {
+  $output = '<div class="monitoring-overview-summary">';
+  $output .= t('<span class="monitoring-summary-time">Request execution time: <strong>@time_non_cachedms</strong> (including cached <strong>@time_totalms</strong>)</span>, <span class="monitoring-summary-ok">&nbsp;</span> @ok OK, <span class="monitoring-summary-info">&nbsp;</span> @info Info, <span class="monitoring-summary-warning">&nbsp;</span> @warning Warning, <span class="monitoring-summary-critical">&nbsp;</span> @critical Critical, <span class="monitoring-summary-unknown">&nbsp;</span> @unknown Unknown',
+    array(
+      '@time_total' => $variables['total_execution_time'],
+      '@time_non_cached' => $variables['non_cached_execution_time'],
+      '@ok' => $variables['status_overview'][SensorResultInterface::STATUS_OK],
+      '@info' => $variables['status_overview'][SensorResultInterface::STATUS_INFO],
+      '@warning' => $variables['status_overview'][SensorResultInterface::STATUS_WARNING],
+      '@critical' => $variables['status_overview'][SensorResultInterface::STATUS_CRITICAL],
+      '@unknown' => $variables['status_overview'][SensorResultInterface::STATUS_UNKNOWN],
+    ));
+  $output .= '</div>';
+  return $output;
+}
+
+/**
+ * Gets current site host.
+ *
+ * @return string
+ *   Site url.
+ */
+function monitoring_host() {
+  global $base_url;
+  return preg_replace('/^http(s)?:\/\//', '', $base_url);
+}
+
+/**
+ * Gets host key.
+ *
+ * @return string
+ *   Host key.
+ */
+function monitoring_host_key() {
+  return str_replace('.', '_', monitoring_host());
+}

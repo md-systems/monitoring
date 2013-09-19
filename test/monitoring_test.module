@@ -1,0 +1,197 @@
+<?php
+
+/**
+ * Monitoring test bootstrap file.
+ */
+
+use Drupal\monitoring\Result\SensorResultInterface;
+
+/**
+ * Implements hook_menu().
+ */
+function monitoring_test_menu() {
+  $items['monitoring/test_service'] = array(
+    'title' => 'Test',
+    'page callback' => 'monitoring_test_endpoint',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+
+  return $items;
+}
+
+function monitoring_test_cron_queue_info() {
+  $queues['monitoring_test'] = array(
+    'worker callback' => 'monitoring_test_queue_worker',
+    'time' => 60,
+  );
+  return $queues;
+}
+
+function monitoring_test_queue_worker() {
+
+}
+
+/**
+ * Implements monitoring_MODULE_monitoring_sensor_info().
+ */
+function monitoring_monitoring_test_monitoring_sensor_info() {
+  return array(
+    'test_sensor_integration' => array(
+      'label' => 'Test from integration hook',
+      'description' => '',
+      'sensor class' => 'Drupal\monitoring_test\Sensor\Sensors\TestSensor',
+      'settings' => array(
+        'log_calls' => FALSE,
+        'category' => 'Test',
+        'units_label' => 'Units',
+      ),
+    ),
+    'watchdog_aggregate_test' => array(
+      'label' => 'Watchdog aggregate test',
+      'description' => 'Test sensor for watchdog aggregate.',
+      'sensor class' => 'Drupal\monitoring\Sensor\Sensors\SensorDatabaseAggregator',
+      'settings' => array(
+        'log_calls' => FALSE,
+        'category' => 'Test',
+        'units_label' => 'Units',
+        'thresholds' => array(
+          'intervals' => array(
+            SensorResultInterface::STATUS_CRITICAL => 2,
+            SensorResultInterface::STATUS_WARNING => 1,
+          ),
+        ),
+        'table' => 'watchdog',
+      ),
+    ),
+    'db_aggregate_test' => array(
+      'label' => 'DB Aggregate test',
+      'description' => 'Tests the generic DB aggregate sensor.',
+      'sensor class' => 'Drupal\monitoring\Sensor\Sensors\SensorDatabaseAggregator',
+      'log_calls' => TRUE,
+      'settings' => array(
+        'category' => 'Test',
+        'units_label' => 'Units',
+        'table' => 'node',
+        'conditions' => array(
+          array('field' => 'promote', 'value' => '1'),
+        ),
+        'time_period' => array(
+          'field' => 'created',
+          'value' => 24 * 60 * 60,
+        ),
+        'thresholds' => array(
+          'type' => 'falls',
+          'intervals' => array(
+            SensorResultInterface::STATUS_CRITICAL => 2,
+            SensorResultInterface::STATUS_WARNING => 1,
+          ),
+        ),
+      ),
+    ),
+    'test_sensor' => array(
+      'label' => 'Test sensor',
+      'description' => 'Test sensor status',
+      'sensor class' => 'Drupal\monitoring_test\Sensor\Sensors\TestSensor',
+      'settings' => array(
+        'log_calls' => TRUE,
+        'category' => 'Test',
+        'units_label' => 'Units',
+        'caching time' => 3600,
+        'thresholds' => array(
+          'intervals' => array(
+            SensorResultInterface::STATUS_CRITICAL => NULL,
+            SensorResultInterface::STATUS_WARNING => NULL,
+          ),
+        ),
+      ),
+    ),
+    'test_sensor_inner' => array(
+      'label' => 'Test sensor inner',
+      'description' => 'Test sensor that sets inner error intervals',
+      'sensor class' => 'Drupal\monitoring_test\Sensor\Sensors\TestSensor',
+      'settings' => array(
+        'log_calls' => TRUE,
+        'category' => 'Test',
+        'units_label' => 'Units',
+        'thresholds' => array(
+          'type' => 'inner_interval',
+          'intervals' => array(
+            SensorResultInterface::STATUS_CRITICAL => array(3, 6),
+            SensorResultInterface::STATUS_WARNING => array(1, 8),
+          ),
+        ),
+      ),
+    ),
+    'test_sensor_outer' => array(
+      'label' => 'Test sensor outer',
+      'description' => 'Test sensor that sets outer error intervals',
+      'sensor class' => 'Drupal\monitoring_test\Sensor\Sensors\TestSensor',
+      'settings' => array(
+        'log_calls' => TRUE,
+        'category' => 'Test',
+        'units_label' => 'Units',
+        'thresholds' => array(
+          'type' => 'outer_interval',
+          'intervals' => array(
+            SensorResultInterface::STATUS_CRITICAL => array(10, 50),
+            SensorResultInterface::STATUS_WARNING => array(20, 40),
+          ),
+        ),
+      ),
+    ),
+    'test_sensor_exceeds' => array(
+      'label' => 'Test sensor exceeds',
+      'description' => 'Test sensor that sets error interval above give value',
+      'sensor class' => 'Drupal\monitoring_test\Sensor\Sensors\TestSensor',
+      'settings' => array(
+        'log_calls' => TRUE,
+        'category' => 'Test',
+        'units_label' => 'Units',
+        'thresholds' => array(
+          'intervals' => array(
+            SensorResultInterface::STATUS_CRITICAL => 10,
+            SensorResultInterface::STATUS_WARNING => 5,
+          ),
+        ),
+      ),
+    ),
+    'test_sensor_falls' => array(
+      'label' => 'Test sensor falls',
+      'description' => 'Test sensor that sets error interval below give value',
+      'sensor class' => 'Drupal\monitoring_test\Sensor\Sensors\TestSensor',
+      'settings' => array(
+        'log_calls' => TRUE,
+        'category' => 'Test',
+        'units_label' => 'Units',
+        'thresholds' => array(
+          'type' => 'falls',
+          'intervals' => array(
+            SensorResultInterface::STATUS_CRITICAL => 5,
+            SensorResultInterface::STATUS_WARNING => 10,
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
+/**
+ * Endpoint callback.
+ *
+ * Purpose of this endpoint is to provide a proof of concept. There is no
+ * test coverage for this as it adds no value, use it just for development
+ * purposes.
+ */
+function monitoring_test_endpoint() {
+  drupal_page_is_cacheable(FALSE);
+
+  $sensor_name = $_GET['sensor'];
+  $result = monitoring_sensor_run($sensor_name);
+  drupal_json_output(array(
+    'sensor_value' => $result->getSensorValue(),
+    'sensor_message' => $result->getSensorMessage(),
+    'sensor_status' => $result->getSensorStatus(),
+  ));
+  drupal_exit();
+}

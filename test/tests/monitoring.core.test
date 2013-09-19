@@ -1,0 +1,356 @@
+<?php
+/**
+ * @file
+ * Contains \MonitoringCronTest
+ */
+
+use Drupal\monitoring\Result\SensorResultInterface;
+
+/**
+ * Cron sensor tests.
+ */
+class MonitoringCoreTest extends DrupalWebTestCase {
+
+  static function getInfo() {
+    return array(
+      'name' => 'Monitoring Drupal core',
+      'description' => 'Drupal core sensors tests.',
+      'group' => 'Monitoring',
+    );
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  function setUp() {
+    parent::setUp(array('monitoring', 'monitoring_test', 'dblog'));
+  }
+
+  /**
+   * Tests individual sensors.
+   */
+  function testSensors() {
+
+    // ======= SensorLastCronRun tests ======= //
+
+    $time_shift = (60 * 60 * 24 + 1);
+    variable_set('cron_last', REQUEST_TIME - $time_shift);
+    $result = monitoring_sensor_run('last_cron_run', TRUE);
+    $this->assertEqual($result->getSensorStatus(), SensorResultInterface::STATUS_WARNING);
+    $this->assertEqual($result->getSensorValue(), $time_shift);
+
+    $time_shift = (60 * 60 * 24 * 3 + 1);
+    variable_set('cron_last', REQUEST_TIME - $time_shift);
+    $result = monitoring_sensor_run('last_cron_run', TRUE);
+    $this->assertEqual($result->getSensorStatus(), SensorResultInterface::STATUS_CRITICAL);
+    $this->assertEqual($result->getSensorValue(), $time_shift);
+
+    drupal_cron_run();
+
+    $result = monitoring_sensor_run('last_cron_run', TRUE);
+    $this->assertEqual($result->getSensorStatus(), SensorResultInterface::STATUS_OK);
+    $this->assertEqual($result->getSensorValue(), 0);
+
+    // ======= Cron safe threshold (poormanscron) tests ======= //
+
+    $result = monitoring_sensor_run('cron_safe_threshold_enabled', TRUE);
+    $this->assertEqual($result->getSensorStatus(), SensorResultInterface::STATUS_CRITICAL);
+    variable_set('cron_safe_threshold', '0');
+    $result = monitoring_sensor_run('cron_safe_threshold_enabled', TRUE);
+    $this->assertEqual($result->getSensorStatus(), SensorResultInterface::STATUS_OK);
+
+    // ======= SensorQueue tests ======= //
+
+    /** @var DrupalQueueInterface $queue */
+    $queue = DrupalQueue::get('monitoring_test');
+    $queue->createItem(array());
+    $queue->createItem(array());
+    // Set thresholds to test the status.
+    monitoring_sensor_settings_save('queue_monitoring_test', array(
+      'enabled' => TRUE,
+      'thresholds' => array(
+        'intervals' => array(
+          SensorResultInterface::STATUS_CRITICAL => 2,
+          SensorResultInterface::STATUS_WARNING => 1,
+        ),
+      ),
+    ));
+    $result = monitoring_sensor_run('queue_monitoring_test', TRUE);
+    $this->assertEqual($result->getSensorValue(), 2);
+    $this->assertEqual($result->getSensorStatus(), SensorResultInterface::STATUS_CRITICAL);
+    $this->assertTrue(strpos($result->getSensorMessage(), 'monitoring_test') !== FALSE);
+
+    // ======= SensorDrupalRequirements tests ======= //
+
+    $result = monitoring_sensor_run('drupal_requirements_monitoring_test');
+    $this->assertEqual($result->getSensorStatus(), SensorResultInterface::STATUS_OK);
+    $this->assertEqual($result->getSensorMessage(), 'Value OK, Requirements check for module monitoring_test OK');
+
+    // Set basic requirements saying that all is ok.
+    $requirements = array(
+      'requirement1' => array(
+        'title' => 'requirement1',
+        'description' => 'requirement1 description',
+        'severity' => REQUIREMENT_OK,
+      ),
+      'requirement_excluded' => array(
+        'title' => 'excluded requirement',
+        'description' => 'requirement that should be excluded from monitoring by the sensor',
+        // Set the severity to ERROR to test if the sensor result is not
+        // affected by this requirement.
+        'severity' => REQUIREMENT_ERROR,
+      ),
+    );
+    variable_set('monitoring_test_requirements', $requirements);
+
+    // Set requirements exclude keys into the sensor settings.
+    $settings = monitoring_sensor_settings_get('drupal_requirements_monitoring_test');
+    $settings['exclude keys'] = array('requirement_excluded');
+    monitoring_sensor_settings_save('drupal_requirements_monitoring_test', $settings);
+
+    // We still should have OK status but with different message
+    $result = monitoring_sensor_run('drupal_requirements_monitoring_test', TRUE);
+    // We expect OK status as REQUIREMENT_ERROR is set by excluded requirement.
+    $this->assertEqual($result->getSensorStatus(), SensorResultInterface::STATUS_OK);
+    $this->assertEqual($result->getSensorMessage(), 'Value OK, requirement1, requirement1 description');
+
+    // Add warning state.
+    $requirements['requirement2'] = array(
+      'title' => 'requirement2',
+      'description' => 'requirement2 description',
+      'severity' => REQUIREMENT_WARNING,
+    );
+    variable_set('monitoring_test_requirements', $requirements);
+
+    // Now the sensor should have escalated to the requirement in warning state.
+    $result = monitoring_sensor_run('drupal_requirements_monitoring_test', TRUE);
+    $this->assertEqual($result->getSensorStatus(), SensorResultInterface::STATUS_WARNING);
+    $this->assertEqual($result->getSensorMessage(), 'Value WARNING, requirement2, requirement2 description');
+
+    // Add error state.
+    $requirements['requirement3'] = array(
+      'title' => 'requirement3',
+      'description' => 'requirement3 description',
+      'severity' => REQUIREMENT_ERROR,
+    );
+    variable_set('monitoring_test_requirements', $requirements);
+
+    // Now the sensor should have escalated to the requirement in warning state.
+    $result = monitoring_sensor_run('drupal_requirements_monitoring_test', TRUE);
+    $this->assertEqual($result->getSensorStatus(), SensorResultInterface::STATUS_CRITICAL);
+    $this->assertEqual($result->getSensorMessage(), 'Value CRITICAL, requirement3, requirement3 description');
+
+    // ======= Watchdog 404 in last 24 hours tests ======= //
+
+    watchdog('page not found', 'not/found');
+    $result = monitoring_sensor_run('404_in_last_24_hours', TRUE);
+    $this->assertEqual($result->getSensorStatus(), SensorResultInterface::STATUS_OK);
+    $this->assertEqual($result->getSensorMessage(), 'Value 1, not/found');
+    $this->assertEqual($result->getSensorValue(), 1);
+
+    for ($i = 1; $i < 20; $i++) {
+      watchdog('page not found', 'not/found');
+    }
+
+    $result = monitoring_sensor_run('404_in_last_24_hours', TRUE);
+    $this->assertEqual($result->getSensorValue(), 20);
+    $this->assertEqual($result->getSensorStatus(), SensorResultInterface::STATUS_WARNING);
+
+    for ($i = 0; $i < 100; $i++) {
+      watchdog('page not found', 'not/found/another');
+    }
+
+    $result = monitoring_sensor_run('404_in_last_24_hours', TRUE);
+    $this->assertEqual($result->getSensorValue(), 100);
+    $this->assertEqual($result->getSensorStatus(), SensorResultInterface::STATUS_CRITICAL);
+
+    // ======= SensorWatchdogMissingImageStyle tests ======= //
+
+    for ($i = 0; $i < 5; $i++) {
+      watchdog('image', 'Source image at %source_image_path not found while trying to generate derivative image at %derivative_path.',
+        array(
+          '%source_image_path' => 'public://portrait-pictures/redmouse.jpeg',
+          '%derivative_path' => 'hash://styles/preview/1234.jpeg',
+        ));
+    }
+    watchdog('image', 'Source image at %source_image_path not found while trying to generate derivative image at %derivative_path.',
+      array(
+        '%source_image_path' => 'public://portrait-pictures/bluemouse.jpeg',
+        '%derivative_path' => 'hash://styles/preview/5678.jpeg',
+      ));
+
+    $result = monitoring_sensor_run('missing_image_style', TRUE, $verbose);
+    $this->assertEqual(5, $result->getSensorValue());
+    $this->assertTrue(strpos($result->getSensorMessage(), 'public://portrait-pictures/redmouse.jpeg') !== FALSE);
+    $this->assertEqual(SensorResultInterface::STATUS_WARNING, $result->getSensorStatus());
+
+    // ======= SensorWatchdogSeverity tests ======= //
+
+    // Create watchdog entry with severity alert.
+    watchdog('test', 'test message', array(), WATCHDOG_ALERT);
+    // Set thresholds to test the status.
+    monitoring_sensor_settings_save('watchdog_severity_' . WATCHDOG_ALERT, array(
+      'enabled' => TRUE,
+      'thresholds' => array(
+        'intervals' => array(
+          SensorResultInterface::STATUS_CRITICAL => 2,
+          SensorResultInterface::STATUS_WARNING => 1,
+        ),
+      ),
+    ));
+    // Run sensor and test the output.
+    $result = monitoring_sensor_run('watchdog_severity_' . WATCHDOG_ALERT, TRUE);
+    $levels = watchdog_severity_levels();
+    $this->assertEqual($result->getSensorStatus(), SensorResultInterface::STATUS_WARNING);
+    $this->assertTrue(strpos($result->getSensorMessage(), $levels[WATCHDOG_ALERT]) !== FALSE);
+    $this->assertEqual($result->getSensorValue(), 1);
+
+    // ======= SensorFailedUserLogins tests ======= //
+
+    watchdog('user', 'Login attempt failed for %user.', array('%user' => 'user1'), WATCHDOG_NOTICE);
+    watchdog('user', 'Login attempt failed for %user.', array('%user' => 'user1'), WATCHDOG_NOTICE);
+    watchdog('user', 'Login attempt failed for %user.', array('%user' => 'user2'), WATCHDOG_NOTICE);
+
+    $result = monitoring_sensor_run('failed_user_logins', TRUE);
+    $this->assertEqual($result->getSensorValue(), 3);
+    $this->assertTrue(strpos($result->getSensorMessage(), 'user1: 2') !== FALSE);
+    $this->assertTrue(strpos($result->getSensorMessage(), 'user2: 1') !== FALSE);
+
+    // ======= SensorGitDirtyTree tests ======= //
+
+    // Enable the sensor and set cmd to output something
+    monitoring_sensor_settings_save('git_dirty_tree', array(
+      'enabled' => TRUE,
+      'cmd' => 'echo "dummy output\nanother dummy output"',
+    ));
+    $verbose = array();
+    $result = monitoring_sensor_run('git_dirty_tree', TRUE, $verbose);
+    $this->assertEqual($result->getSensorStatus(), SensorResultInterface::STATUS_CRITICAL);
+    // The verbose output should contain the cmd output.
+    $this->assertTrue(strpos(serialize($verbose), 'dummy output') !== FALSE);
+    // Two lines of cmd output.
+    $this->assertEqual($result->getSensorValue(), 2);
+
+    // Now echo empty string
+    monitoring_sensor_settings_save('git_dirty_tree', array(
+      'enabled' => TRUE,
+      'cmd' => 'echo ""',
+    ));
+    $result = monitoring_sensor_run('git_dirty_tree', TRUE);
+    $this->assertEqual($result->getSensorStatus(), SensorResultInterface::STATUS_OK);
+    // The message should say that it is ok.
+    $this->assertTrue(strpos($result->getSensorMessage(), 'Git repository clean') !== FALSE);
+
+  }
+
+  /**
+   * Tests the watchdog entries aggregator.
+   */
+  function testGenericDBAggregate() {
+
+    // Aggregate by watchdog type.
+    monitoring_sensor_settings_save('watchdog_aggregate_test', array(
+      'conditions' => array(
+        array('field' => 'type', 'value' => 'test_type'),
+      ),
+    ));
+    watchdog('test_type', $this->randomName());
+    watchdog('test_type', $this->randomName());
+    watchdog('other_test_type', $this->randomName());
+    $result = monitoring_sensor_run('watchdog_aggregate_test', TRUE);
+    $this->assertEqual($result->getSensorValue(), 2);
+
+    // Aggregate by watchdog message.
+    monitoring_sensor_settings_save('watchdog_aggregate_test', array(
+      'conditions' => array(
+        array('field' => 'message', 'value' => 'test_message'),
+      )
+    ));
+    watchdog($this->randomName(), 'test_message');
+    watchdog($this->randomName(), 'another_test_message');
+    watchdog($this->randomName(), 'another_test_message');
+    $result = monitoring_sensor_run('watchdog_aggregate_test', TRUE);
+    $this->assertEqual($result->getSensorValue(), 1);
+
+    // Aggregate by watchdog severity.
+    monitoring_sensor_settings_save('watchdog_aggregate_test', array(
+      'conditions' => array(
+        array('field' => 'severity', 'value' => WATCHDOG_CRITICAL),
+      )
+    ));
+    watchdog($this->randomName(), $this->randomName(), array(), WATCHDOG_CRITICAL);
+    watchdog($this->randomName(), $this->randomName(), array(), WATCHDOG_CRITICAL);
+    watchdog($this->randomName(), $this->randomName(), array(), WATCHDOG_CRITICAL);
+    watchdog($this->randomName(), $this->randomName(), array(), WATCHDOG_CRITICAL);
+    $result = monitoring_sensor_run('watchdog_aggregate_test', TRUE);
+    $this->assertEqual($result->getSensorValue(), 4);
+
+    // Aggregate by watchdog location.
+    monitoring_sensor_settings_save('watchdog_aggregate_test', array(
+      'conditions' => array(
+        array('field' => 'location', 'value' => 'http://some.url.dev'),
+      )
+    ));
+    // Update two watchdog entries with custom location.
+    db_query('UPDATE {watchdog} SET location = :location LIMIT 2', array(':location' => 'http://some.url.dev'));
+    $result = monitoring_sensor_run('watchdog_aggregate_test', TRUE);
+    $this->assertEqual($result->getSensorValue(), 2);
+
+    // Filter for time period.
+    monitoring_sensor_settings_save('watchdog_aggregate_test', array(
+      'time_period' => array('field' => 'timestamp', 'value' => 10),
+    ));
+    db_query('UPDATE {watchdog} SET timestamp = :timestamp LIMIT 3', array(':timestamp' => time() - 20));
+    $count_latest = db_query('SELECT COUNT(*) FROM {watchdog} WHERE timestamp > timestamp - 10')->fetchField();
+    $result = monitoring_sensor_run('watchdog_aggregate_test', TRUE);
+    $this->assertEqual($result->getSensorValue(), $count_latest);
+
+    // Test for thresholds and statuses.
+    monitoring_sensor_settings_save('watchdog_aggregate_test', array(
+      'conditions' => array(
+        array('field' => 'type', 'value' => 'test_watchdog_aggregate_sensor'),
+      )
+    ));
+    $result = monitoring_sensor_run('watchdog_aggregate_test', TRUE);
+    $this->assertEqual($result->getSensorStatus(), SensorResultInterface::STATUS_OK);
+    $this->assertEqual($result->getSensorValue(), 0);
+
+    watchdog('test_watchdog_aggregate_sensor', 'testing');
+    $result = monitoring_sensor_run('watchdog_aggregate_test', TRUE);
+    $this->assertEqual($result->getSensorStatus(), SensorResultInterface::STATUS_WARNING);
+    $this->assertEqual($result->getSensorValue(), 1);
+
+    watchdog('test_watchdog_aggregate_sensor', 'testing');
+    $result = monitoring_sensor_run('watchdog_aggregate_test', TRUE);
+    $this->assertEqual($result->getSensorStatus(), SensorResultInterface::STATUS_CRITICAL);
+    $this->assertEqual($result->getSensorValue(), 2);
+
+    // Test with different db table.
+    $info = monitoring_sensor_info_instance('db_aggregate_test');
+    $time_period = $info->getSetting('time_period');
+    $this->drupalCreateNode(array('promote' => '1'));
+    $this->drupalCreateNode(array('promote' => '0'));
+    $this->drupalCreateNode(array('promote' => '0'));
+    // Create one node that should not meet the time_period condition.
+    $node = $this->drupalCreateNode(array('promote' => '0'));
+    db_query('UPDATE {node} SET created = :created WHERE nid = :nid', array(
+      ':created' => REQUEST_TIME - ($time_period['value'] + 10),
+      ':nid' => $node->nid,
+    ));
+
+    // Based on default sensor settings we should get the promoted node.
+    $result = monitoring_sensor_run('db_aggregate_test', TRUE);
+    $this->assertEqual($result->getSensorValue(), 1);
+
+    // Test with settings updated.
+    $settings = monitoring_sensor_settings_get('db_aggregate_test');
+    $settings['conditions'] = array(
+      array('field' => 'promote', 'value' => '0'),
+    );
+    monitoring_sensor_settings_save('db_aggregate_test', $settings);
+    $result = monitoring_sensor_run('db_aggregate_test', TRUE);
+    // There should be two nodes with promote 0 and created in last 24 hours.
+    $this->assertEqual($result->getSensorValue(), 2);
+  }
+
+}
