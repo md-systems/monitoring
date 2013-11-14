@@ -191,11 +191,22 @@ class SensorRunner implements \IteratorAggregate {
    *   Results to be saved.
    */
   protected function saveResults(array $results) {
+    /** @var \Drupal\monitoring\Result\SensorResultInterface $result */
     foreach ($results as $result) {
-      /** @var \Drupal\monitoring\Result\SensorResultInterface $result */
-      // Skip if the result is cached or logging is off.
-      if ($result->isCached() || $this->loggingMode == 'none') {
+      // Skip if the result is cached.
+      if ($result->isCached()) {
         continue;
+      }
+
+      // Define which sensor categories should not be logged by watchdog.
+      $skip_categories = array('Past', 'Watchdog');
+      // If we have critical log the event into using watchdog.
+      if ($result->isCritical() && (!in_array($result->getSensorInfo()->getCategory(), $skip_categories))) {
+        watchdog('monitoring', 'Failing sensor %name with message %message and value %value', array(
+          '%name' => $result->getSensorInfo()->getLabel(),
+          '%message' => $result->getSensorMessage(),
+          '%value' => $result->getSensorValue(),
+        ), WATCHDOG_ERROR);
       }
 
       $old_status = NULL;

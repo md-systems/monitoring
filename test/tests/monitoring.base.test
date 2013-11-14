@@ -299,10 +299,34 @@ class MonitoringBaseTest extends DrupalWebTestCase {
     variable_set('monitoring_sensor_call_logging', 'none');
     // Despite log_calls TRUE we should not log any call.
     $settings = monitoring_sensor_settings_get('test_sensor');
-    $settings['log_calls'] = FALSE;
+    $settings['log_calls'] = TRUE;
     monitoring_sensor_settings_save('test_sensor', $settings);
     $logs = $this->loadSensorData('test_sensor');
+    monitoring_sensor_run('test_sensor', TRUE);
     $this->assertEqual(count($logs), 3);
+
+    // Test logging critical events to watchdog.
+    $test_sensor_result_data = array(
+      'sensor_status' => SensorResultInterface::STATUS_CRITICAL,
+    );
+    variable_set('test_sensor_result_data', $test_sensor_result_data);
+    monitoring_sensor_run('test_sensor', TRUE);
+    // See if the event was logged with proper data.
+    $results = db_select('watchdog', 'w')->fields('w')->condition('type', 'monitoring')->execute()->fetchAll();
+    $result = array_shift($results);
+    $this->assertEqual($result->message, 'Failing sensor %name with message %message and value %value');
+    $variables = unserialize($result->variables);
+    $this->assertEqual($variables['%name'], 'Test sensor');
+    $this->assertEqual($variables['%message'], 'Value CRITICAL');
+    $this->assertEqual($variables['%value'], 'CRITICAL');
+
+    // Run test sensor which is in category Watchdog. Note that sensor_status
+    // is still critical.
+    monitoring_sensor_run('test_sensor_cat_watchdog', TRUE);
+    // Get results form watchdog - there should be only one as the Watchdog
+    // category should not get logged.
+    $results = db_select('watchdog', 'w')->fields('w')->condition('type', 'monitoring')->execute()->fetchAll();
+    $this->assertEqual(count($results), 1);
   }
 
   /**

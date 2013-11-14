@@ -173,6 +173,15 @@ function monitoring_monitoring_test_monitoring_sensor_info() {
         ),
       ),
     ),
+    'test_sensor_cat_watchdog' => array(
+      'label' => 'Test sensor category Watchdog',
+      'description' => 'Test sensor with Watchdog category to test the watchdog logging',
+      'sensor class' => 'Drupal\monitoring_test\Sensor\Sensors\TestSensor',
+      'settings' => array(
+        'category' => 'Watchdog',
+        'units_label' => 'Units',
+      ),
+    ),
   );
 }
 
