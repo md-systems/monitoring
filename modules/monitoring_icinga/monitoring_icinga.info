@@ -1,0 +1,6 @@
+name = Monitoring Nagios
+description = Monitoring Nagios integration.
+package = Monitoring
+core = 7.x
+
+dependencies[] = monitoring
