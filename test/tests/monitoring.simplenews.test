@@ -1,0 +1,61 @@
+<?php
+/**
+ * @file
+ * Contains \MonitoringSimplenewsTest
+ */
+
+use Drupal\monitoring\Result\SensorResultInterface;
+
+/**
+ * Simplenews sensor tests.
+ */
+class MonitoringSimplenewsTest extends DrupalWebTestCase {
+
+  protected $profile = 'testing';
+
+  static function getInfo() {
+    return array(
+      'name' => 'Monitoring simplenews',
+      'description' => 'Simplenews sensor tests.',
+      'group' => 'Monitoring',
+      'dependencies' => array('simplenews'),
+    );
+  }
+
+  function setUp() {
+    parent::setUp(array('monitoring', 'monitoring_test', 'simplenews'));
+  }
+
+  /**
+   * Tests individual sensors.
+   */
+  function testSensors() {
+
+    // No spool items - status OK.
+    monitoring_sensor_settings_save('simplenews_pending', array(
+      'enabled' => TRUE,
+      'thresholds' => array('intervals' => array(
+        SensorResultInterface::STATUS_CRITICAL => 2,
+        SensorResultInterface::STATUS_WARNING => 1,
+      )),
+    ));
+    $result = monitoring_sensor_run('simplenews_pending', TRUE);
+    $this->assertEqual($result->getSensorStatus(), SensorResultInterface::STATUS_OK);
+
+    // Crate a spool item in state pending - state WARNING.
+    simplenews_save_spool(array(
+      'mail' => 'mail@example.com',
+      'nid' => 1,
+      'tid' => 1,
+      'snid' => 1,
+      'data' => array('data' => 'data'),
+    ));
+    $result = monitoring_sensor_run('simplenews_pending', TRUE);
+    $this->assertEqual($result->getSensorStatus(), SensorResultInterface::STATUS_WARNING);
+
+
+
+
+  }
+
+}

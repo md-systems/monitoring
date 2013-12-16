@@ -1,0 +1,193 @@
+<?php
+/**
+ * @file
+ * Contains \MonitoringSearchAPITest
+ */
+
+use Drupal\monitoring\Result\SensorResultInterface;
+
+/**
+ * Class MonitoringAPITest
+ */
+class MonitoringSearchAPITest extends DrupalWebTestCase {
+
+  protected $profile = 'testing';
+
+  static function getInfo() {
+    return array(
+      'name' => 'Monitoring search API',
+      'description' => 'Search API sensors tests',
+      'group' => 'Monitoring',
+      'dependencies' => array('search_api', 'search_api_db'),
+    );
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  function setUp() {
+    parent::setUp(array('monitoring', 'monitoring_test', 'search_api', 'search_api_db'));
+  }
+
+  /**
+   * Tests individual sensors.
+   */
+  function testSensors() {
+
+    // Create content first to avoid a Division by zero error.
+    // @todo: This should be fixed in Search API in theme_search_api_index().
+    $this->drupalCreateContentType(array('type' => 'article', 'name' => 'article'));
+    $this->drupalCreateNode(array('type' => 'article'));
+    $this->drupalCreateNode(array('type' => 'article'));
+
+    // Configure Search API.
+    _monitoring_test_create_search_index();
+    $account = $this->drupalCreateUser(array('administer search_api'));
+    $this->drupalLogin($account);
+    $this->drupalPostAJAX('admin/config/search/search_api/add_server', array('class' => 'search_api_db_service'), 'class');
+    $this->drupalPost(NULL, array(
+      'name' => 'test_search_server',
+      'machine_name' => 'test_search_server',
+      'class' => 'search_api_db_service',
+    ), t('Create server'));
+    $this->drupalPost('admin/config/search/search_api/index/monitoring_test_index/edit',
+      array('server' => 'test_search_server'), t('Save settings'));
+    // After being configured enable the index from the view page.
+    $this->clickLink(t('enable'));
+    // Reset sensor info so that sensor for newly created search api index
+    // gets picked up.
+    monitoring_sensor_settings_save('search_api_monitoring_test_index', array(
+      'enabled' => TRUE,
+      'thresholds' => array(
+        'intervals' => array(
+          SensorResultInterface::STATUS_CRITICAL => 2,
+          SensorResultInterface::STATUS_WARNING => 1,
+        ),
+      ),
+    ));
+    monitoring_sensor_info_instance(NULL, TRUE);
+    // Load indexes.
+    $indexes = search_api_index_load_multiple(FALSE);
+
+    // Two new articles, none indexed
+    $result = monitoring_sensor_run('search_api_monitoring_test_index', TRUE);
+    $this->assertEqual($result->getSensorValue(), 2);
+
+    // Index existing content.
+    search_api_index_items($indexes['monitoring_test_index']);
+    // Create additional content.
+    $this->drupalCreateNode(array('type' => 'article'));
+    $this->drupalCreateNode(array('type' => 'article'));
+    $this->drupalCreateNode(array('type' => 'article'));
+
+    // New articles are not yet indexed
+    $result = monitoring_sensor_run('search_api_monitoring_test_index', TRUE);
+    $this->assertEqual($result->getSensorValue(), 3);
+
+    // Index remaining articles.
+    search_api_index_items($indexes['monitoring_test_index']);
+
+    // Everything should be indexed.
+    $result = monitoring_sensor_run('search_api_monitoring_test_index', TRUE);
+    $this->assertEqual($result->getSensorValue(), 0);
+
+  }
+
+}
+
+/**
+ * We need for testing this default index.
+ *
+ * This is copied from search_api_install() where the code will not run in case
+ * of active batch process which is the case of running tests.
+ *
+ * @see search_api_install()
+ */
+function _monitoring_test_create_search_index() {
+  $name = 'Monitoring test index';
+  $values = array(
+    'name' => $name,
+    'machine_name' => preg_replace('/[^a-z0-9]+/', '_', drupal_strtolower($name)),
+    'description' => 'An automatically created search index for indexing node data. Might be configured to specific needs.',
+    'server' => NULL,
+    'item_type' => 'node',
+    'options' => array(
+      'index_directly' => 1,
+      'cron_limit' => '50',
+      'data_alter_callbacks' => array(
+        'search_api_alter_node_access' => array(
+          'status' => 1,
+          'weight' => '0',
+          'settings' => array(),
+        ),
+      ),
+      'processors' => array(
+        'search_api_case_ignore' => array(
+          'status' => 1,
+          'weight' => '0',
+          'settings' => array(
+            'strings' => 0,
+          ),
+        ),
+        'search_api_html_filter' => array(
+          'status' => 1,
+          'weight' => '10',
+          'settings' => array(
+            'title' => 0,
+            'alt' => 1,
+            'tags' => "h1 = 5\n" .
+            "h2 = 3\n" .
+            "h3 = 2\n" .
+            "strong = 2\n" .
+            "b = 2\n" .
+            "em = 1.5\n" .
+            "u = 1.5",
+          ),
+        ),
+        'search_api_tokenizer' => array(
+          'status' => 1,
+          'weight' => '20',
+          'settings' => array(
+            'spaces' => '[^\\p{L}\\p{N}]',
+            'ignorable' => '[-]',
+          ),
+        ),
+      ),
+      'fields' => array(
+        'type' => array(
+          'type' => 'string',
+        ),
+        'title' => array(
+          'type' => 'text',
+          'boost' => '5.0',
+        ),
+        'promote' => array(
+          'type' => 'boolean',
+        ),
+        'sticky' => array(
+          'type' => 'boolean',
+        ),
+        'created' => array(
+          'type' => 'date',
+        ),
+        'changed' => array(
+          'type' => 'date',
+        ),
+        'author' => array(
+          'type' => 'integer',
+          'entity_type' => 'user',
+        ),
+        'comment_count' => array(
+          'type' => 'integer',
+        ),
+        'search_api_language' => array(
+          'type' => 'string',
+        ),
+        'body:value' => array(
+          'type' => 'text',
+        ),
+      ),
+    ),
+  );
+  search_api_index_insert($values);
+}

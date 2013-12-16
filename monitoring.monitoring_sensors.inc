@@ -283,6 +283,78 @@ function monitoring_dblog_monitoring_sensor_info() {
 /**
  * Implements monitoring_MODULE_monitoring_sensor_info().
  *
+ * Module: past_db
+ */
+function monitoring_past_db_monitoring_sensor_info() {
+  $info = array();
+
+  foreach (past_event_severities() as $severity => $name) {
+    $info['past_severity_' . $severity] = array(
+      'label' => format_string('Past severity @severity', array('@severity' => $name)),
+      'description' => format_string('Checks for past entries of severity @severity in last 24 hours.', array('@severity' => $name)),
+      'sensor class' => 'Drupal\monitoring\Sensor\Sensors\SensorDatabaseAggregator',
+      'settings' => array(
+        'category' => 'Past',
+        'units_label' => 'Past entries',
+        // Cache for one hour.
+        'caching time' => 3600,
+        'table' => 'past_event',
+        'conditions' => array(
+          array('field' => 'severity', 'value' => $severity),
+          // This is to exclude monitoring records.
+          array('field' => 'type', 'value' => 'monitoring', 'operator' => '!='),
+        ),
+        'time_period' => array(
+          'field' => 'timestamp',
+          'value' => 24 * 60 * 60,
+        ),
+      ),
+    );
+  }
+
+  // Default thresholds for criticals (fatal errors).
+  $info['past_severity_' . PAST_SEVERITY_CRITICAL]['settings']['thresholds'] = array(
+    'type' => 'exceeds',
+    'intervals' => array(
+      SensorResultInterface::STATUS_CRITICAL => 5,
+      SensorResultInterface::STATUS_WARNING => 1,
+    ),
+  );
+  return $info;
+}
+
+/**
+ * Implements monitoring_MODULE_monitoring_sensor_info().
+ *
+ * Module: past_form
+ */
+function monitoring_past_form_monitoring_sensor_info() {
+  $info['past_form'] = array(
+    'label' => 'Past form submissions',
+    'description' => 'Past events logging form submissions',
+    'sensor class' => 'Drupal\monitoring\Sensor\Sensors\SensorDatabaseAggregator',
+    'settings' => array(
+      'category' => 'Past',
+      'units_label' => 'Past entries',
+      // Cache for one hour.
+      'caching time' => 3600,
+      'table' => 'past_event',
+      'conditions' => array(
+        array('field' => 'module', 'value' => 'past_form'),
+      ),
+      'time_period' => array(
+        'field' => 'timestamp',
+        'value' => 24 * 60 * 60,
+      ),
+    ),
+  );
+
+  return $info;
+}
+
+/**
+ * Implements monitoring_MODULE_monitoring_sensor_info().
+ *
  * Module: system
  */
 function monitoring_system_monitoring_sensor_info() {
@@ -400,6 +472,59 @@ function monitoring_system_monitoring_sensor_info() {
 /**
  * Implements monitoring_MODULE_monitoring_sensor_info().
  *
+ * Module: search_api
+ */
+function monitoring_search_api_monitoring_sensor_info() {
+  $info = array();
+
+  $indexes = search_api_index_load_multiple(FALSE);
+
+  if (!empty($indexes)) {
+    foreach ($indexes as $index) {
+      $info['search_api_' . $index->machine_name] = array(
+        'label' => format_string('Queue size of @index', array('@index' => $index->name)),
+        'description' => format_string('Search index queue size of @index', array('@index' => $index->name)),
+        'sensor class' => 'Drupal\monitoring\Sensor\Sensors\SensorSearchApi',
+        'settings' => array(
+          'category' => 'Search API',
+          'units_label' => 'Unindexed items',
+          // Cache for 15 minutes.
+          'caching time' => 900,
+          'index_id' => $index->id,
+          'enabled' => FALSE,
+        ),
+      );
+    }
+  }
+
+  return $info;
+}
+
+/**
+ * Implements monitoring_MODULE_monitoring_sensor_info().
+ *
+ * Module: simplenews
+ */
+function monitoring_simplenews_monitoring_sensor_info() {
+  $info = array();
+
+  $info['simplenews_pending'] = array(
+    'label' => 'Simplenews spool size',
+    'description' => 'Pending items in the simplenews spool.',
+    'sensor class' => 'Drupal\monitoring\Sensor\Sensors\SensorSimplenewsPending',
+    'settings' => array(
+      'category' => 'Simplenews',
+      'units_label' => 'Pending items',
+      'enabled' => FALSE,
+    ),
+  );
+
+  return $info;
+}
+
+/**
+ * Implements monitoring_MODULE_monitoring_sensor_info().
+ *
  * Module: update
  */
 function monitoring_update_monitoring_sensor_info() {
@@ -431,6 +556,48 @@ function monitoring_update_monitoring_sensor_info() {
       'type' => 'contrib',
     ),
   );
+
+  return $info;
+}
+
+/**
+ * Implements monitoring_MODULE_monitoring_sensor_info().
+ *
+ * Module: elysia_cron
+ */
+function monitoring_elysia_cron_monitoring_sensor_info() {
+  $info = array();
+
+  $result = db_select('elysia_cron', 'e')->fields('e', array('name'))->execute()->fetchAll();
+
+  foreach($result as $row) {
+    // Remove the colon from the name as it breaks munin graphs.
+    $name = str_replace(':', '', $row->name);
+    $info['elysia_' . $name . '_last_execution'] = array(
+      'label' => format_string('Elysia @name execution', array('@name' => $row->name)),
+      'description' => format_string('Last execution duration for elysia @name cron', array('@name' => $row->name)),
+      'sensor class' => 'Drupal\monitoring\Sensor\Sensors\SensorElysiaCron',
+      'settings' => array(
+        'category' => 'Elysia Cron',
+        'units_label' => 'Seconds',
+        'enabled' => FALSE,
+        'name' => $row->name,
+        'metric' => 'last_execution_time',
+      ),
+    );
+    $info['elysia_' . $name . '_last_run'] = array(
+      'label' => format_string('Elysia @name run', array('@name' => $row->name)),
+      'description' => format_string('Number of seconds since last elysia @name run', array('@name' => $row->name)),
+      'sensor class' => 'Drupal\monitoring\Sensor\Sensors\SensorElysiaCron',
+      'settings' => array(
+        'category' => 'Elysia Cron',
+        'units_label' => 'Seconds',
+        'enabled' => FALSE,
+        'name' => $row->name,
+        'metric' => 'last_run',
+      ),
+    );
+  }
 
   return $info;
 }
