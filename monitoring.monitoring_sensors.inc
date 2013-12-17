@@ -293,7 +293,7 @@ function monitoring_past_db_monitoring_sensor_info() {
   foreach (past_event_severities() as $severity => $name) {
     $info['past_severity_' . $severity] = array(
       'label' => format_string('Past severity @severity', array('@severity' => $name)),
-      'description' => format_string('Checks for past entries of severity @severity in last 24 hours.', array('@severity' => $name)),
+      'description' => format_string('Past events with severity @severity in last 24 hours', array('@severity' => $name)),
       'sensor class' => 'Drupal\monitoring\Sensor\Sensors\SensorDatabaseAggregator',
       'settings' => array(
         'category' => 'Past',
