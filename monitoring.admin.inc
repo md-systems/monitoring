@@ -82,6 +82,7 @@ function monitoring_reports_sensors_overview() {
   $rows = array();
   $runner = new SensorRunner();
   $results = $runner->runSensors();
+
   $status_overview = array(
     SensorResultInterface::STATUS_OK => 0,
     SensorResultInterface::STATUS_INFO => 0,

@@ -52,9 +52,11 @@ class SensorRunner implements \IteratorAggregate {
   /**
    * Result logging mode.
    *
-   * @var bool
+   * Possible values: none, on_request, all
+   *
+   * @var string
    */
-  protected $loggingMode = FALSE;
+  protected $loggingMode = 'none';
 
   /**
    * SensorRunner
@@ -67,6 +69,8 @@ class SensorRunner implements \IteratorAggregate {
     if (empty($sensors)) {
       $this->sensors = monitoring_sensor_info_instance();
     }
+    // @todo LOW Cleanly variable based installation should go into a factory.
+    $this->loggingMode = variable_get('monitoring_sensor_call_logging', 'on_request');
     $this->loadCache();
   }
 
@@ -142,7 +146,7 @@ class SensorRunner implements \IteratorAggregate {
         $results[$name] = $result;
       }
     }
-    $this->saveResults($results);
+    $this->logResults($results);
     $this->cacheResults($results);
     return $results;
   }
@@ -185,12 +189,12 @@ class SensorRunner implements \IteratorAggregate {
   }
 
   /**
-   * Helper method to save results into result log.
+   * Helper method to log results if needed.
    *
    * @param array $results
    *   Results to be saved.
    */
-  protected function saveResults(array $results) {
+  protected function logResults(array $results) {
     /** @var \Drupal\monitoring\Result\SensorResultInterface $result */
     foreach ($results as $result) {
       // Skip if the result is cached.

@@ -195,7 +195,6 @@ function monitoring_sensor_run_multiple($sensor_names = array(), $force_run = FA
   }
 
   $runner = new SensorRunner($sensors_info);
-  $runner->setLoggingMode(variable_get('monitoring_sensor_call_logging', 'on_request'));
   $runner->verbose($get_verbose_output);
   $runner->forceRun($force_run);
   $results = $runner->runSensors();
