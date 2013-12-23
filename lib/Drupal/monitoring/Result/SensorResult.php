@@ -113,19 +113,14 @@ class SensorResult implements SensorResultInterface {
   public function compile() {
 
     // If the status is UNKNOWN we do the value assessment.
+    $threshold_message = NULL;
     if ($this->getSensorStatus() == SensorResultInterface::STATUS_UNKNOWN) {
       if ($this->getSensorInfo()->isDefiningThresholds()) {
-        $this->assessThresholds();
+        $threshold_message = $this->assessThresholds();
       }
       elseif ($this->getSensorExpectedValue() !== NULL) {
         $this->assessComparison();
       }
-    }
-
-    // In case the sensor value is not set provide it explicitly as the status
-    // code.
-    if ($this->getSensorValue() === NULL) {
-      $this->setSensorValue($this->getSensorStatus());
     }
 
     if (is_bool($this->getSensorValue())) {
@@ -155,17 +150,26 @@ class SensorResult implements SensorResultInterface {
     }
     else {
       $messages = array();
-      foreach ($this->statusMessages as $msg) {
-        $messages[] = format_string($msg['message'], array_merge($default_variables, $msg['variables']));
-      }
 
-      // Set the expected value message.
-      if ($this->getSensorExpectedValue() !== NULL) {
-        array_unshift($messages, format_string('expected @expected', $default_variables));
-      }
       // Set the sensor value message
       if ($this->getSensorValue() !== NULL) {
-        array_unshift($messages, format_string('Value @value', $default_variables));
+        $messages[] = format_string('Value @value', $default_variables);
+      }
+      elseif (empty($this->statusMessages)) {
+        $messages[] = 'No value';
+      }
+
+      // Set the expected value message if the sensor did not match.
+      if ($this->isCritical() && $this->getSensorExpectedValue() !== NULL) {
+        $messages[] = format_string('expected @expected', $default_variables);
+      }
+      // Set the threshold message if there is any.
+      if ($threshold_message !== NULL) {
+        $messages[] = $threshold_message;
+      }
+
+      foreach ($this->statusMessages as $msg) {
+        $messages[] = format_string($msg['message'], array_merge($default_variables, $msg['variables']));
       }
 
       $message = implode(', ', $messages);
@@ -189,6 +193,9 @@ class SensorResult implements SensorResultInterface {
 
   /**
    * Helper method to deal with thresholds.
+   *
+   * @return string
+   *   The message associated with the threshold.
    */
   protected function assessThresholds() {
     $thresholds = new Thresholds($this->sensorInfo->getThresholdsType(), $this->sensorInfo->getThresholdsIntervals());
@@ -196,9 +203,7 @@ class SensorResult implements SensorResultInterface {
 
     // Set sensor status based on matched threshold.
     $this->setSensorStatus($matched_threshold);
-    if ($message = $thresholds->getStatusMessage()) {
-      $this->addSensorStatusMessage($message);
-    }
+    return $thresholds->getStatusMessage();
   }
 
   /**

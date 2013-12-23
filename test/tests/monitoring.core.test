@@ -78,13 +78,13 @@ class MonitoringCoreTest extends DrupalWebTestCase {
     $result = monitoring_sensor_run('queue_monitoring_test', TRUE);
     $this->assertEqual($result->getSensorValue(), 2);
     $this->assertEqual($result->getSensorStatus(), SensorResultInterface::STATUS_CRITICAL);
-    $this->assertTrue(strpos($result->getSensorMessage(), 'monitoring_test') !== FALSE);
+    $this->assertEqual($result->getSensorMessage(), 'Value 2, exceeds 2');
 
     // ======= SensorDrupalRequirements tests ======= //
 
     $result = monitoring_sensor_run('drupal_requirements_monitoring_test');
     $this->assertEqual($result->getSensorStatus(), SensorResultInterface::STATUS_OK);
-    $this->assertEqual($result->getSensorMessage(), 'Value OK, Requirements check for module monitoring_test OK');
+    $this->assertEqual($result->getSensorMessage(), 'Requirements check OK');
 
     // Set basic requirements saying that all is ok.
     $requirements = array(
@@ -112,7 +112,7 @@ class MonitoringCoreTest extends DrupalWebTestCase {
     $result = monitoring_sensor_run('drupal_requirements_monitoring_test', TRUE);
     // We expect OK status as REQUIREMENT_ERROR is set by excluded requirement.
     $this->assertEqual($result->getSensorStatus(), SensorResultInterface::STATUS_OK);
-    $this->assertEqual($result->getSensorMessage(), 'Value OK, requirement1, requirement1 description');
+    $this->assertEqual($result->getSensorMessage(), 'requirement1, requirement1 description');
 
     // Add warning state.
     $requirements['requirement2'] = array(
@@ -125,7 +125,7 @@ class MonitoringCoreTest extends DrupalWebTestCase {
     // Now the sensor should have escalated to the requirement in warning state.
     $result = monitoring_sensor_run('drupal_requirements_monitoring_test', TRUE);
     $this->assertEqual($result->getSensorStatus(), SensorResultInterface::STATUS_WARNING);
-    $this->assertEqual($result->getSensorMessage(), 'Value WARNING, requirement2, requirement2 description');
+    $this->assertEqual($result->getSensorMessage(), 'requirement2, requirement2 description');
 
     // Add error state.
     $requirements['requirement3'] = array(
@@ -138,7 +138,7 @@ class MonitoringCoreTest extends DrupalWebTestCase {
     // Now the sensor should have escalated to the requirement in warning state.
     $result = monitoring_sensor_run('drupal_requirements_monitoring_test', TRUE);
     $this->assertEqual($result->getSensorStatus(), SensorResultInterface::STATUS_CRITICAL);
-    $this->assertEqual($result->getSensorMessage(), 'Value CRITICAL, requirement3, requirement3 description');
+    $this->assertEqual($result->getSensorMessage(), 'requirement3, requirement3 description');
 
     // ======= Watchdog 404 in last 24 hours tests ======= //
 
@@ -184,7 +184,7 @@ class MonitoringCoreTest extends DrupalWebTestCase {
     $this->assertTrue(strpos($result->getSensorMessage(), 'public://portrait-pictures/redmouse.jpeg') !== FALSE);
     $this->assertEqual(SensorResultInterface::STATUS_WARNING, $result->getSensorStatus());
 
-    // ======= SensorWatchdogSeverity tests ======= //
+    // ======= Watchdog sensor tests ======= //
 
     // Create watchdog entry with severity alert.
     watchdog('test', 'test message', array(), WATCHDOG_ALERT);
@@ -202,7 +202,7 @@ class MonitoringCoreTest extends DrupalWebTestCase {
     $result = monitoring_sensor_run('watchdog_severity_' . WATCHDOG_ALERT, TRUE);
     $levels = watchdog_severity_levels();
     $this->assertEqual($result->getSensorStatus(), SensorResultInterface::STATUS_WARNING);
-    $this->assertTrue(strpos($result->getSensorMessage(), $levels[WATCHDOG_ALERT]) !== FALSE);
+    $this->assertEqual($result->getSensorMessage(), 'Value 1, exceeds 1');
     $this->assertEqual($result->getSensorValue(), 1);
 
     // ======= SensorFailedUserLogins tests ======= //

@@ -37,7 +37,7 @@ class SensorDrupalRequirements extends Sensor {
       }
     }
 
-    $severity = drupal_requirements_severity($this->requirements);
+    $severity = $this->getHighestSeverity($this->requirements);
 
     if ($severity == REQUIREMENT_ERROR) {
       $result->setSensorStatus(SensorResultInterface::STATUS_CRITICAL);
@@ -71,7 +71,32 @@ class SensorDrupalRequirements extends Sensor {
     }
     // In case no requirements returned, it is assumed that all is okay.
     else {
-      $result->addSensorStatusMessage('Requirements check for module @module OK', array('@module' => $module));
+      $result->addSensorStatusMessage('Requirements check OK');
     }
+  }
+
+  /**
+   * Extracts the highest severity from the requirements array.
+   *
+   * Replacement for drupal_requirements_severity(), which ignores
+   * the INFO severity, which results in those messages not being displayed.
+   *
+   * @param $requirements
+   *   An array of requirements, in the same format as is returned by
+   *   hook_requirements().
+   *
+   * @return
+   *   The highest severity in the array.
+   *
+   *
+   */
+  protected function getHighestSeverity(&$requirements) {
+    $severity = REQUIREMENT_INFO;
+    foreach ($requirements as $requirement) {
+      if (isset($requirement['severity'])) {
+        $severity = max($severity, $requirement['severity']);
+      }
+    }
+    return $severity;
   }
 }

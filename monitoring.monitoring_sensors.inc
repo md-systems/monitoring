@@ -205,7 +205,7 @@ function monitoring_dblog_monitoring_sensor_info() {
     $info['watchdog_severity_' . $level] = array(
       'label' => format_string('Watchdog severity @severity', array('@severity' => $name)),
       'description' => format_string('Watchdog entries of severity @severity in last 24 hours', array('@severity' => $name)),
-      'sensor class' => 'Drupal\monitoring\Sensor\Sensors\SensorWatchdogSeverity',
+      'sensor class' => 'Drupal\monitoring\Sensor\Sensors\SensorDatabaseAggregator',
       'settings' => array(
         'category' => 'Watchdog',
         'units_label' => 'Watchdog entries',

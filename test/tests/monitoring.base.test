@@ -231,15 +231,14 @@ class MonitoringBaseTest extends DrupalWebTestCase {
     $this->assertEqual($result->getSensorStatus(), SensorResultInterface::STATUS_CRITICAL);
     $this->assertEqual($result->getSensorMessage(), t('Value 3, falls below @expected', array('@expected' => '5')));
 
-    // Test the case when sensor value is not set. It should be explicitly set
-    // as the status code.
+    // Test the case when sensor value is not set.
     $test_sensor_result_data = array(
       'sensor_value' => NULL,
       'sensor_status' => SensorResultInterface::STATUS_CRITICAL,
     );
     variable_set('test_sensor_result_data', $test_sensor_result_data);
     $result = monitoring_sensor_run('test_sensor', TRUE);
-    $this->assertEqual($result->getSensorValue(), SensorResultInterface::STATUS_CRITICAL);
+    $this->assertNull($result->getSensorValue());
   }
 
   function testLogging() {
@@ -317,8 +316,8 @@ class MonitoringBaseTest extends DrupalWebTestCase {
     $this->assertEqual($result->message, 'Failing sensor %name with message %message and value %value');
     $variables = unserialize($result->variables);
     $this->assertEqual($variables['%name'], 'Test sensor');
-    $this->assertEqual($variables['%message'], 'Value CRITICAL');
-    $this->assertEqual($variables['%value'], 'CRITICAL');
+    $this->assertEqual($variables['%message'], 'No value');
+    $this->assertEqual($variables['%value'], NULL);
 
     // Run test sensor which is in category Watchdog. Note that sensor_status
     // is still critical.

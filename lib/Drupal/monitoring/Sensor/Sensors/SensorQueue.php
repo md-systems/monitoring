@@ -21,6 +21,5 @@ class SensorQueue extends SensorThresholds {
     /** @var \DrupalQueueInterface $queue */
     $queue = \DrupalQueue::get($this->info->getSetting('queue'));
     $result->setSensorValue($queue->numberOfItems());
-    $result->addSensorStatusMessage($this->info->getSetting('queue'));
   }
 }
