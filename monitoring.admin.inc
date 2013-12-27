@@ -14,7 +14,6 @@ function monitoring_config_sensors_overview_form($form, &$form_state) {
   $options = array();
   $default_value = array();
 
-  /** @var SensorInfo $sensor_info */
   foreach (monitoring_sensor_info_instance() as $sensor_name => $sensor_info) {
     $row = array(
       'label' => $sensor_info->getLabel(),
@@ -110,7 +109,6 @@ function monitoring_reports_sensors_overview() {
       if (!isset($results[$sensor_name])) {
         continue;
       }
-      /** @var Drupal\monitoring\Result\SensorResultInterface $sensor_result */
       $sensor_result = $results[$sensor_name];
 
       $sensor_info = monitoring_sensor_info_instance($sensor_name);

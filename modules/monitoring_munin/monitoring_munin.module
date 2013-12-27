@@ -98,7 +98,6 @@ function monitoring_munin_multigraph_delete($title) {
   variable_set('monitoring_munin_multigraphs', $multigraphs);
 
   // Remove from settings.
-  /** @var \Drupal\monitoring\Sensor\SensorInfo $info */
   foreach (monitoring_sensor_info_instance() as $info) {
     $munin_settings = $info->getSetting('munin');
 

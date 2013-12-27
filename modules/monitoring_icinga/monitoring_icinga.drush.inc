@@ -39,7 +39,6 @@ function monitoring_icinga_drush_callback($sensor_name = NULL) {
   $results = monitoring_sensor_run_multiple();
   $output = '';
 
-  /** @var SensorResultInterface $result */
   foreach ($results as $result) {
     $message = iconv('utf-8', 'ASCII', truncate_utf8(strip_tags($result->getSensorMessage()), 124, TRUE, TRUE));
     $service_description = monitoring_icinga_service_description($result->getSensorInfo());

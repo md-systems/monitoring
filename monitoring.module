@@ -93,12 +93,11 @@ function monitoring_sensor_info($sensor_name = NULL, $reset = FALSE) {
  * @param bool $enabled
  *   Sensor isEnabled flag.
  *
- * @return array
+ * @return \Drupal\monitoring\Sensor\SensorInfo[]
  *   Sensor info.
  */
 function monitoring_sensor_info_by_categories($enabled = TRUE) {
   $info_by_categories = array();
-  /** @var SensorInfo $sensor_info */
   foreach (monitoring_sensor_info_instance() as $sensor_name => $sensor_info) {
     if ($sensor_info->isEnabled() != $enabled) {
       continue;
@@ -123,7 +122,7 @@ function monitoring_sensor_info_by_categories($enabled = TRUE) {
  * @param bool $reset
  *   Flag to reset internal static cache.
  *
- * @return SensorInfo
+ * @return \Drupal\monitoring\Sensor\SensorInfo[]
  *   A populated SensorInfo object.
  */
 function monitoring_sensor_info_instance($sensor_name = NULL, $reset = FALSE) {
@@ -175,7 +174,7 @@ function monitoring_sensor_run($sensor_name, $force_run = FALSE, &$verbose = NUL
  *   If empty array provided it will be filled with verbose output keyed by
  *   sensor names.
  *
- * @return array<SensorResultInterface>
+ * @return \Drupal\monitoring\Result\SensorResultInterface[]
  *   List of result objects.
  */
 function monitoring_sensor_run_multiple($sensor_names = array(), $force_run = FALSE, &$verbose = NULL) {

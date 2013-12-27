@@ -170,7 +170,6 @@ function monitoring_icinga_objects_definitions_output($active_checks = TRUE, $ch
 
   $services_def = array();
   $servicegroups = array();
-  /** @var \Drupal\monitoring\Sensor\SensorInfo $sensor_info */
   foreach (monitoring_sensor_info_instance() as $sensor_name => $sensor_info) {
 
     if (!$sensor_info->isEnabled()) {
