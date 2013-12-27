@@ -38,6 +38,7 @@ class TestSensor extends SensorThresholds implements SensorExtendedInfoInterface
       'sensor_message'=> NULL,
       'sensor_value' => NULL,
       'sensor_expected_value' => NULL,
+      'sensor_exception_message' => NULL,
     ));
   }
 
@@ -45,6 +46,11 @@ class TestSensor extends SensorThresholds implements SensorExtendedInfoInterface
     // Sleep here for a while as running this sensor may result in 0 execution
     // time.
     usleep(1);
+
+    if (isset($this->testSensorResultData['sensor_exception_message'])) {
+      throw new \RuntimeException($this->testSensorResultData['sensor_exception_message']);
+    }
+
     if (isset($this->testSensorResultData['sensor_value'])) {
       $result->setSensorValue($this->testSensorResultData['sensor_value']);
     }

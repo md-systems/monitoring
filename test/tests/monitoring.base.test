@@ -326,6 +326,15 @@ class MonitoringBaseTest extends DrupalWebTestCase {
     // category should not get logged.
     $results = db_select('watchdog', 'w')->fields('w')->condition('type', 'monitoring')->execute()->fetchAll();
     $this->assertEqual(count($results), 1);
+
+    // Test exception handling in the sensor runner.
+    variable_set('test_sensor_result_data', array('sensor_exception_message' => 'Example exception'));
+    $result = monitoring_sensor_run('test_sensor', TRUE);
+    $this->assertTrue($result->isCritical());
+    debug($result->getSensorMessage());
+    // See if the event was logged with proper data.
+    $results = db_select('watchdog', 'w')->fields('w')->condition('type', 'monitoring_exception')->execute()->fetchAll();
+    $this->assertEqual(count($results), 1);
   }
 
   /**

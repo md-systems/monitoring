@@ -28,6 +28,9 @@ interface SensorInterface {
    *
    * @param SensorResultInterface $sensor_result
    *   Sensor result object.
+   *
+   * @throws \Exception
+   *   Can throw any exception, must be catched and handled by the caller.
    */
   function runSensor(SensorResultInterface $sensor_result);
 

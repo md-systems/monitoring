@@ -171,9 +171,20 @@ class SensorRunner implements \IteratorAggregate {
     if (!$result->isCached()) {
 
       timer_start($sensor_info->getName());
-      $sensor->runSensor($result);
-      $timer = timer_stop($sensor_info->getName());
+      try {
+        $sensor->runSensor($result);
+      } catch (\Exception $e) {
+        // In case the sensor execution results in an exception, mark it as
+        // critical and set the sensor status message.
+        $result->setSensorStatus(SensorResultInterface::STATUS_CRITICAL);
+        $result->setSensorMessage(get_class($e) . ': ' . $e->getMessage());
+        // Log the error to watchdog.
+        watchdog_exception('monitoring_exception', $e);
+        // @todo Improve logging by e.g. integrating with past or save the
+        //   backtrace as part of the sensor verbose output.
+      }
 
+      $timer = timer_stop($sensor_info->getName());
       $result->setSensorExecutionTime($timer['time']);
       $result->compile();
     }
