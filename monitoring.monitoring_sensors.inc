@@ -617,3 +617,26 @@ function monitoring_elysia_cron_monitoring_sensor_info() {
 
   return $info;
 }
+
+/**
+ * Implements monitoring_MODULE_monitoring_sensor_info().
+ *
+ * Module: maillog
+ */
+function monitoring_maillog_monitoring_sensor_info() {
+  $info['maillog_records_count'] = array(
+    'label' => 'Maillog records count',
+    'description' => 'Maillog records in last 24 hours.',
+    'sensor class' => 'Drupal\monitoring\Sensor\Sensors\SensorDatabaseAggregator',
+    'settings' => array(
+      'units_label' => 'Mail records',
+      'table' => 'maillog',
+      'time_period' => array(
+        'field' => 'sent_date',
+        'value' => 24 * 60 * 60,
+      ),
+    ),
+  );
+
+  return $info;
+}
