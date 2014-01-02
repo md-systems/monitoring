@@ -22,11 +22,15 @@ function monitoring_drush_command() {
   $items['monitoring-run'] = array(
     'callback' => 'monitoring_drush_run',
     'description' => 'Runs specific sensor and provides verbose data.',
-    'options' => array(
+    'arguments' => array(
       'sensor_name' => 'Sensor name to invoke.',
+    ),
+    'options' => array(
+      'verbose' => 'Display verbose information'
     ),
     'examples' => array(
       'drush monitoring-run git_dirty_tree' => 'Runs sensor to monitor the git status',
+      'drush monitoring-run --verbose git_dirty_tree' => 'Runs sensor to monitor the git status and displays verbose information',
     ),
     'drupal dependencies' => array('monitoring'),
   );
@@ -77,13 +81,40 @@ function monitoring_drush_info() {
  *   Sensor name to run.
  */
 function monitoring_drush_run($sensor_name) {
-  $verbose = '';
+  $verbose = drush_get_option('verbose') ? array() : NULL;
   $result = monitoring_sensor_run($sensor_name, TRUE, $verbose);
-  if (!empty($verbose)) {
-    drush_print($verbose);
+
+  // The sensor might be disabled or not exist.
+  if ($result) {
+    $rows = array(
+      array(dt('Name'), $result->getSensorName()),
+      array(dt('Status'), $result->getSensorStatus()),
+      array(dt('Value'), $result->getSensorValue()),
+      array(dt('Message'), $result->getSensorMessage()),
+      array(dt('Execution time'), $result->getSensorExecutionTime() . 'ms'),
+    );
+
+    // Add the verbose output if requested.
+    if (!empty($verbose[$sensor_name])) {
+      $rows[] = array(dt('Verbose output'), $verbose[$sensor_name]);
+    }
+    drush_print_table($rows);
+
+    // Set the exit status based on the sensor status.
+    if ($result->isOk()) {
+      return 0;
+    }
+    elseif ($result->isWarning()) {
+      return 1;
+    }
+    elseif ($result->isCritical()) {
+      return 2;
+    }
   }
-  drush_print('==== Sensor result ===');
-  drush_print(var_export($result->getEntityValues(), TRUE));
+  else {
+    drush_set_error(dt('Sensor "@name" does not exist or is not enabled.', array('@name' => $sensor_name)));
+    return 2;
+  }
 }
 
 /**
