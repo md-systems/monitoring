@@ -133,6 +133,46 @@ function monitoring_user_monitoring_sensor_info() {
 /**
  * Implements monitoring_MODULE_monitoring_sensor_info().
  *
+ * Module: image
+ */
+function monitoring_image_monitoring_sensor_info() {
+  // Sensor requires the {watchdog} table from the dblog module.
+  // @todo: Provide an alternative for past_db.
+  if (module_exists('dblog')) {
+    $info['image_style_missing_count'] = array(
+      'label' => 'Image derivative creation fail',
+      'description' => 'Image derivative creation fails in last 24 hours',
+      'sensor class' => 'Drupal\monitoring\Sensor\Sensors\SensorWatchdogMissingImageStyle',
+      'settings' => array(
+        'category' => 'Watchdog',
+        'units_label' => 'Watchdog entries',
+        // Cache for one hour.
+        'caching time' => 3600,
+        'thresholds' => array(
+          'type' => 'exceeds',
+          'intervals' => array(
+            SensorResultInterface::STATUS_CRITICAL => 20,
+            SensorResultInterface::STATUS_WARNING => 5,
+          ),
+        ),
+        'table' => 'watchdog',
+        'conditions' => array(
+          array('field' => 'type', 'value' => 'image'),
+          array('field' => 'message', 'value' => 'Source image at %source_image_path not found while trying to generate derivative image at %derivative_path.'),
+        ),
+        'time_period' => array(
+          'field' => 'timestamp',
+          'value' => 24 * 60 * 60,
+        ),
+      ),
+    );
+  }
+  return $info;
+}
+
+/**
+ * Implements monitoring_MODULE_monitoring_sensor_info().
+ *
  * Module: dblog
  */
 function monitoring_dblog_monitoring_sensor_info() {
@@ -162,33 +202,7 @@ function monitoring_dblog_monitoring_sensor_info() {
       ),
     ),
   );
-  $info['missing_image_style'] = array(
-    'label' => 'Image derivative creation fail',
-    'description' => 'Image derivative creation fails in last 24 hours',
-    'sensor class' => 'Drupal\monitoring\Sensor\Sensors\SensorWatchdogMissingImageStyle',
-    'settings' => array(
-      'category' => 'Watchdog',
-      'units_label' => 'Watchdog entries',
-      // Cache for one hour.
-      'caching time' => 3600,
-      'thresholds' => array(
-        'type' => 'exceeds',
-        'intervals' => array(
-          SensorResultInterface::STATUS_CRITICAL => 20,
-          SensorResultInterface::STATUS_WARNING => 5,
-        ),
-      ),
-      'table' => 'watchdog',
-      'conditions' => array(
-        array('field' => 'type', 'value' => 'image'),
-        array('field' => 'message', 'value' => 'Source image at %source_image_path not found while trying to generate derivative image at %derivative_path.'),
-      ),
-      'time_period' => array(
-        'field' => 'timestamp',
-        'value' => 24 * 60 * 60,
-      ),
-    ),
-  );
+
 
   foreach (watchdog_severity_levels() as $level => $name) {
     // Error level and higher cache for 5 minutes, the other 15.

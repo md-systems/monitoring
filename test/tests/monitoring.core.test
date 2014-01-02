@@ -11,6 +11,8 @@ use Drupal\monitoring\Result\SensorResultInterface;
  */
 class MonitoringCoreTest extends DrupalWebTestCase {
 
+  protected $profile = 'testing';
+
   static function getInfo() {
     return array(
       'name' => 'Monitoring Drupal core',
@@ -23,7 +25,7 @@ class MonitoringCoreTest extends DrupalWebTestCase {
    * {@inheritdoc}
    */
   function setUp() {
-    parent::setUp(array('monitoring', 'monitoring_test', 'dblog'));
+    parent::setUp(array('monitoring', 'monitoring_test', 'dblog', 'image'));
   }
 
   /**
@@ -179,7 +181,7 @@ class MonitoringCoreTest extends DrupalWebTestCase {
         '%derivative_path' => 'hash://styles/preview/5678.jpeg',
       ));
 
-    $result = monitoring_sensor_run('missing_image_style', TRUE, $verbose);
+    $result = monitoring_sensor_run('image_style_missing_count', TRUE, $verbose);
     $this->assertEqual(5, $result->getSensorValue());
     $this->assertTrue(strpos($result->getSensorMessage(), 'public://portrait-pictures/redmouse.jpeg') !== FALSE);
     $this->assertEqual(SensorResultInterface::STATUS_WARNING, $result->getSensorStatus());

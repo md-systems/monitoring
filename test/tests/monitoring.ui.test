@@ -6,6 +6,8 @@ use Drupal\monitoring\Sensor\SensorInfo;
  */
 class MonitoringUITest extends DrupalWebTestCase {
 
+  protected $profile = 'testing';
+
   static function getInfo() {
     return array(
       'name' => 'Monitoring UI',
@@ -15,7 +17,7 @@ class MonitoringUITest extends DrupalWebTestCase {
   }
 
   function setUp() {
-    parent::setUp(array('monitoring', 'monitoring_test'));
+    parent::setUp(array('monitoring', 'monitoring_test', 'dblog'));
   }
 
   /**
