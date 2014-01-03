@@ -1,10 +1,14 @@
 <?php
+/**
+ * @file
+ * Contains \MonitoringUITest.
+ */
 use Drupal\monitoring\Sensor\SensorInfo;
 
 /**
- * Class MonitoringAPITest
+ * Tests the Monitoring UI.
  */
-class MonitoringUITest extends DrupalWebTestCase {
+class MonitoringUITest extends MonitoringTestBase {
 
   protected $profile = 'testing';
 
@@ -16,8 +20,11 @@ class MonitoringUITest extends DrupalWebTestCase {
     );
   }
 
+  /**
+   * {@inheritdoc}
+   */
   function setUp() {
-    parent::setUp(array('monitoring', 'monitoring_test', 'dblog'));
+    parent::setUp(array('dblog'));
   }
 
   /**

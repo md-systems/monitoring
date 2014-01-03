@@ -1,17 +1,13 @@
 <?php
 /**
  * @file
- * Contains \MonitoringSearchAPITest
+ * Contains \MonitoringSearchAPITest.
  */
-
-use Drupal\monitoring\Result\SensorResultInterface;
 
 /**
- * Class MonitoringAPITest
+ * Search API sensor tests.
  */
-class MonitoringSearchAPITest extends DrupalWebTestCase {
-
-  protected $profile = 'testing';
+class MonitoringSearchAPITest extends MonitoringTestBase {
 
   static function getInfo() {
     return array(
@@ -26,7 +22,7 @@ class MonitoringSearchAPITest extends DrupalWebTestCase {
    * {@inheritdoc}
    */
   function setUp() {
-    parent::setUp(array('monitoring', 'monitoring_test', 'search_api', 'search_api_db'));
+    parent::setUp(array('search_api', 'search_api_db'));
   }
 
   /**
@@ -56,21 +52,12 @@ class MonitoringSearchAPITest extends DrupalWebTestCase {
     $this->clickLink(t('enable'));
     // Reset sensor info so that sensor for newly created search api index
     // gets picked up.
-    monitoring_sensor_settings_save('search_api_monitoring_test_index', array(
-      'enabled' => TRUE,
-      'thresholds' => array(
-        'intervals' => array(
-          SensorResultInterface::STATUS_CRITICAL => 2,
-          SensorResultInterface::STATUS_WARNING => 1,
-        ),
-      ),
-    ));
     monitoring_sensor_info_instance(NULL, TRUE);
     // Load indexes.
     $indexes = search_api_index_load_multiple(FALSE);
 
     // Two new articles, none indexed
-    $result = monitoring_sensor_run('search_api_monitoring_test_index', TRUE);
+    $result = $this->runSensor('search_api_monitoring_test_index');
     $this->assertEqual($result->getSensorValue(), 2);
 
     // Index existing content.
@@ -81,14 +68,14 @@ class MonitoringSearchAPITest extends DrupalWebTestCase {
     $this->drupalCreateNode(array('type' => 'article'));
 
     // New articles are not yet indexed
-    $result = monitoring_sensor_run('search_api_monitoring_test_index', TRUE);
+    $result = $this->runSensor('search_api_monitoring_test_index');
     $this->assertEqual($result->getSensorValue(), 3);
 
     // Index remaining articles.
     search_api_index_items($indexes['monitoring_test_index']);
 
     // Everything should be indexed.
-    $result = monitoring_sensor_run('search_api_monitoring_test_index', TRUE);
+    $result = $this->runSensor('search_api_monitoring_test_index');
     $this->assertEqual($result->getSensorValue(), 0);
 
   }

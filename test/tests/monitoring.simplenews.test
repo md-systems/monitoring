@@ -1,17 +1,13 @@
 <?php
 /**
  * @file
- * Contains \MonitoringSimplenewsTest
+ * Contains \MonitoringSimplenewsTest.
  */
-
-use Drupal\monitoring\Result\SensorResultInterface;
 
 /**
  * Simplenews sensor tests.
  */
-class MonitoringSimplenewsTest extends DrupalWebTestCase {
-
-  protected $profile = 'testing';
+class MonitoringSimplenewsTest extends MonitoringTestBase {
 
   static function getInfo() {
     return array(
@@ -22,8 +18,11 @@ class MonitoringSimplenewsTest extends DrupalWebTestCase {
     );
   }
 
+  /**
+   * {@inheritdoc}
+   */
   function setUp() {
-    parent::setUp(array('monitoring', 'monitoring_test', 'simplenews'));
+    parent::setUp(array('simplenews'));
   }
 
   /**
@@ -32,17 +31,10 @@ class MonitoringSimplenewsTest extends DrupalWebTestCase {
   function testSensors() {
 
     // No spool items - status OK.
-    monitoring_sensor_settings_save('simplenews_pending', array(
-      'enabled' => TRUE,
-      'thresholds' => array('intervals' => array(
-        SensorResultInterface::STATUS_CRITICAL => 2,
-        SensorResultInterface::STATUS_WARNING => 1,
-      )),
-    ));
-    $result = monitoring_sensor_run('simplenews_pending', TRUE);
-    $this->assertEqual($result->getSensorStatus(), SensorResultInterface::STATUS_OK);
+    $result = $this->runSensor('simplenews_pending');
+    $this->assertEqual($result->getSensorValue(), 0);
 
-    // Crate a spool item in state pending - state WARNING.
+    // Crate a spool item in state pending.
     simplenews_save_spool(array(
       'mail' => 'mail@example.com',
       'nid' => 1,
@@ -50,11 +42,8 @@ class MonitoringSimplenewsTest extends DrupalWebTestCase {
       'snid' => 1,
       'data' => array('data' => 'data'),
     ));
-    $result = monitoring_sensor_run('simplenews_pending', TRUE);
-    $this->assertEqual($result->getSensorStatus(), SensorResultInterface::STATUS_WARNING);
-
-
-
+    $result = $this->runSensor('simplenews_pending');
+    $this->assertEqual($result->getSensorValue(), 1);
 
   }
 

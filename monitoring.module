@@ -604,3 +604,21 @@ function monitoring_host() {
 function monitoring_host_key() {
   return str_replace('.', '_', monitoring_host());
 }
+
+/**
+ * Enable a sensor.
+ *
+ * Checks if the sensor is enabled and enables it if not.
+ *
+ * @todo - We should move all the settings actions to the Sensor API/interface.
+ *
+ * @param string $sensor_name
+ *   Sensor name to be enabled.
+ */
+function monitoring_sensor_enable($sensor_name) {
+  $settings = monitoring_sensor_settings_get($sensor_name);
+  if (empty($settings['enabled'])) {
+    $settings['enabled'] = TRUE;
+    monitoring_sensor_settings_save($sensor_name, $settings);
+  }
+}

@@ -1,15 +1,13 @@
 <?php
 /**
  * @file
- * Contains \MonitoringCronTest
+ * Contains \MonitoringCoreTest.
  */
-
-use Drupal\monitoring\Result\SensorResultInterface;
 
 /**
  * Cron sensor tests.
  */
-class MonitoringCoreTest extends DrupalWebTestCase {
+class MonitoringCoreTest extends MonitoringTestBase {
 
   protected $profile = 'testing';
 
@@ -25,7 +23,7 @@ class MonitoringCoreTest extends DrupalWebTestCase {
    * {@inheritdoc}
    */
   function setUp() {
-    parent::setUp(array('monitoring', 'monitoring_test', 'dblog', 'image'));
+    parent::setUp(array('dblog', 'image'));
   }
 
   /**
@@ -37,29 +35,29 @@ class MonitoringCoreTest extends DrupalWebTestCase {
 
     $time_shift = (60 * 60 * 24 + 1);
     variable_set('cron_last', REQUEST_TIME - $time_shift);
-    $result = monitoring_sensor_run('last_cron_run', TRUE);
-    $this->assertEqual($result->getSensorStatus(), SensorResultInterface::STATUS_WARNING);
+    $result = $this->runSensor('last_cron_run');
+    $this->assertTrue($result->isWarning());
     $this->assertEqual($result->getSensorValue(), $time_shift);
 
     $time_shift = (60 * 60 * 24 * 3 + 1);
     variable_set('cron_last', REQUEST_TIME - $time_shift);
-    $result = monitoring_sensor_run('last_cron_run', TRUE);
-    $this->assertEqual($result->getSensorStatus(), SensorResultInterface::STATUS_CRITICAL);
+    $result = $this->runSensor('last_cron_run');
+    $this->assertTrue($result->isCritical());
     $this->assertEqual($result->getSensorValue(), $time_shift);
 
     drupal_cron_run();
 
-    $result = monitoring_sensor_run('last_cron_run', TRUE);
-    $this->assertEqual($result->getSensorStatus(), SensorResultInterface::STATUS_OK);
+    $result = $this->runSensor('last_cron_run');
+    $this->assertTrue($result->isOk());
     $this->assertEqual($result->getSensorValue(), 0);
 
     // ======= Cron safe threshold (poormanscron) tests ======= //
 
-    $result = monitoring_sensor_run('cron_safe_threshold_enabled', TRUE);
-    $this->assertEqual($result->getSensorStatus(), SensorResultInterface::STATUS_CRITICAL);
+    $result = $this->runSensor('cron_safe_threshold_enabled');
+    $this->assertTrue($result->isCritical());
     variable_set('cron_safe_threshold', '0');
-    $result = monitoring_sensor_run('cron_safe_threshold_enabled', TRUE);
-    $this->assertEqual($result->getSensorStatus(), SensorResultInterface::STATUS_OK);
+    $result = $this->runSensor('cron_safe_threshold_enabled');
+    $this->assertTrue($result->isOk());
 
     // ======= SensorQueue tests ======= //
 
@@ -67,25 +65,13 @@ class MonitoringCoreTest extends DrupalWebTestCase {
     $queue = DrupalQueue::get('monitoring_test');
     $queue->createItem(array());
     $queue->createItem(array());
-    // Set thresholds to test the status.
-    monitoring_sensor_settings_save('queue_monitoring_test', array(
-      'enabled' => TRUE,
-      'thresholds' => array(
-        'intervals' => array(
-          SensorResultInterface::STATUS_CRITICAL => 2,
-          SensorResultInterface::STATUS_WARNING => 1,
-        ),
-      ),
-    ));
-    $result = monitoring_sensor_run('queue_monitoring_test', TRUE);
+    $result = $this->runSensor('queue_monitoring_test');
     $this->assertEqual($result->getSensorValue(), 2);
-    $this->assertEqual($result->getSensorStatus(), SensorResultInterface::STATUS_CRITICAL);
-    $this->assertEqual($result->getSensorMessage(), 'Value 2, exceeds 2');
 
     // ======= SensorDrupalRequirements tests ======= //
 
-    $result = monitoring_sensor_run('drupal_requirements_monitoring_test');
-    $this->assertEqual($result->getSensorStatus(), SensorResultInterface::STATUS_OK);
+    $result = $this->runSensor('drupal_requirements_monitoring_test');
+    $this->assertTrue($result->isOk());
     $this->assertEqual($result->getSensorMessage(), 'Requirements check OK');
 
     // Set basic requirements saying that all is ok.
@@ -111,9 +97,9 @@ class MonitoringCoreTest extends DrupalWebTestCase {
     monitoring_sensor_settings_save('drupal_requirements_monitoring_test', $settings);
 
     // We still should have OK status but with different message
-    $result = monitoring_sensor_run('drupal_requirements_monitoring_test', TRUE);
+    $result = $this->runSensor('drupal_requirements_monitoring_test');
     // We expect OK status as REQUIREMENT_ERROR is set by excluded requirement.
-    $this->assertEqual($result->getSensorStatus(), SensorResultInterface::STATUS_OK);
+    $this->assertTrue($result->isOk());
     $this->assertEqual($result->getSensorMessage(), 'requirement1, requirement1 description');
 
     // Add warning state.
@@ -125,8 +111,8 @@ class MonitoringCoreTest extends DrupalWebTestCase {
     variable_set('monitoring_test_requirements', $requirements);
 
     // Now the sensor should have escalated to the requirement in warning state.
-    $result = monitoring_sensor_run('drupal_requirements_monitoring_test', TRUE);
-    $this->assertEqual($result->getSensorStatus(), SensorResultInterface::STATUS_WARNING);
+    $result = $this->runSensor('drupal_requirements_monitoring_test');
+    $this->assertTrue($result->isWarning());
     $this->assertEqual($result->getSensorMessage(), 'requirement2, requirement2 description');
 
     // Add error state.
@@ -137,16 +123,16 @@ class MonitoringCoreTest extends DrupalWebTestCase {
     );
     variable_set('monitoring_test_requirements', $requirements);
 
-    // Now the sensor should have escalated to the requirement in warning state.
-    $result = monitoring_sensor_run('drupal_requirements_monitoring_test', TRUE);
-    $this->assertEqual($result->getSensorStatus(), SensorResultInterface::STATUS_CRITICAL);
+    // Now the sensor should have escalated to the requirement in critical state.
+    $result = $this->runSensor('drupal_requirements_monitoring_test');
+    $this->assertTrue($result->isCritical());
     $this->assertEqual($result->getSensorMessage(), 'requirement3, requirement3 description');
 
     // ======= Watchdog 404 in last 24 hours tests ======= //
 
     watchdog('page not found', 'not/found');
-    $result = monitoring_sensor_run('404_in_last_24_hours', TRUE);
-    $this->assertEqual($result->getSensorStatus(), SensorResultInterface::STATUS_OK);
+    $result = $this->runSensor('404_in_last_24_hours');
+    $this->assertTrue($result->isOk());
     $this->assertEqual($result->getSensorMessage(), 'Value 1, not/found');
     $this->assertEqual($result->getSensorValue(), 1);
 
@@ -156,7 +142,7 @@ class MonitoringCoreTest extends DrupalWebTestCase {
 
     $result = monitoring_sensor_run('404_in_last_24_hours', TRUE);
     $this->assertEqual($result->getSensorValue(), 20);
-    $this->assertEqual($result->getSensorStatus(), SensorResultInterface::STATUS_WARNING);
+    $this->assertTrue($result->isWarning());
 
     for ($i = 0; $i < 100; $i++) {
       watchdog('page not found', 'not/found/another');
@@ -164,7 +150,7 @@ class MonitoringCoreTest extends DrupalWebTestCase {
 
     $result = monitoring_sensor_run('404_in_last_24_hours', TRUE);
     $this->assertEqual($result->getSensorValue(), 100);
-    $this->assertEqual($result->getSensorStatus(), SensorResultInterface::STATUS_CRITICAL);
+    $this->assertTrue($result->isCritical());
 
     // ======= SensorWatchdogMissingImageStyle tests ======= //
 
@@ -181,30 +167,18 @@ class MonitoringCoreTest extends DrupalWebTestCase {
         '%derivative_path' => 'hash://styles/preview/5678.jpeg',
       ));
 
-    $result = monitoring_sensor_run('image_style_missing_count', TRUE, $verbose);
+    $result = $this->runSensor('image_style_missing_count');
     $this->assertEqual(5, $result->getSensorValue());
     $this->assertTrue(strpos($result->getSensorMessage(), 'public://portrait-pictures/redmouse.jpeg') !== FALSE);
-    $this->assertEqual(SensorResultInterface::STATUS_WARNING, $result->getSensorStatus());
+    $this->assertTrue($result->isWarning());
 
     // ======= Watchdog sensor tests ======= //
 
     // Create watchdog entry with severity alert.
     watchdog('test', 'test message', array(), WATCHDOG_ALERT);
-    // Set thresholds to test the status.
-    monitoring_sensor_settings_save('watchdog_severity_' . WATCHDOG_ALERT, array(
-      'enabled' => TRUE,
-      'thresholds' => array(
-        'intervals' => array(
-          SensorResultInterface::STATUS_CRITICAL => 2,
-          SensorResultInterface::STATUS_WARNING => 1,
-        ),
-      ),
-    ));
+
     // Run sensor and test the output.
-    $result = monitoring_sensor_run('watchdog_severity_' . WATCHDOG_ALERT, TRUE);
-    $levels = watchdog_severity_levels();
-    $this->assertEqual($result->getSensorStatus(), SensorResultInterface::STATUS_WARNING);
-    $this->assertEqual($result->getSensorMessage(), 'Value 1, exceeds 1');
+    $result = $this->runSensor('watchdog_severity_' . WATCHDOG_ALERT);
     $this->assertEqual($result->getSensorValue(), 1);
 
     // ======= SensorFailedUserLogins tests ======= //
@@ -213,7 +187,7 @@ class MonitoringCoreTest extends DrupalWebTestCase {
     watchdog('user', 'Login attempt failed for %user.', array('%user' => 'user1'), WATCHDOG_NOTICE);
     watchdog('user', 'Login attempt failed for %user.', array('%user' => 'user2'), WATCHDOG_NOTICE);
 
-    $result = monitoring_sensor_run('failed_user_logins', TRUE);
+    $result = $this->runSensor('failed_user_logins');
     $this->assertEqual($result->getSensorValue(), 3);
     $this->assertTrue(strpos($result->getSensorMessage(), 'user1: 2') !== FALSE);
     $this->assertTrue(strpos($result->getSensorMessage(), 'user2: 1') !== FALSE);
@@ -227,7 +201,7 @@ class MonitoringCoreTest extends DrupalWebTestCase {
     ));
     $verbose = array();
     $result = monitoring_sensor_run('git_dirty_tree', TRUE, $verbose);
-    $this->assertEqual($result->getSensorStatus(), SensorResultInterface::STATUS_CRITICAL);
+    $this->assertTrue($result->isCritical());
     // The verbose output should contain the cmd output.
     $this->assertTrue(strpos(serialize($verbose), 'dummy output') !== FALSE);
     // Two lines of cmd output.
@@ -239,7 +213,7 @@ class MonitoringCoreTest extends DrupalWebTestCase {
       'cmd' => 'echo ""',
     ));
     $result = monitoring_sensor_run('git_dirty_tree', TRUE);
-    $this->assertEqual($result->getSensorStatus(), SensorResultInterface::STATUS_OK);
+    $this->assertTrue($result->isOk());
     // The message should say that it is ok.
     $this->assertTrue(strpos($result->getSensorMessage(), 'Git repository clean') !== FALSE);
 
@@ -259,7 +233,7 @@ class MonitoringCoreTest extends DrupalWebTestCase {
     watchdog('test_type', $this->randomName());
     watchdog('test_type', $this->randomName());
     watchdog('other_test_type', $this->randomName());
-    $result = monitoring_sensor_run('watchdog_aggregate_test', TRUE);
+    $result = $this->runSensor('watchdog_aggregate_test');
     $this->assertEqual($result->getSensorValue(), 2);
 
     // Aggregate by watchdog message.
@@ -271,7 +245,7 @@ class MonitoringCoreTest extends DrupalWebTestCase {
     watchdog($this->randomName(), 'test_message');
     watchdog($this->randomName(), 'another_test_message');
     watchdog($this->randomName(), 'another_test_message');
-    $result = monitoring_sensor_run('watchdog_aggregate_test', TRUE);
+    $result = $this->runSensor('watchdog_aggregate_test');
     $this->assertEqual($result->getSensorValue(), 1);
 
     // Aggregate by watchdog severity.
@@ -284,7 +258,7 @@ class MonitoringCoreTest extends DrupalWebTestCase {
     watchdog($this->randomName(), $this->randomName(), array(), WATCHDOG_CRITICAL);
     watchdog($this->randomName(), $this->randomName(), array(), WATCHDOG_CRITICAL);
     watchdog($this->randomName(), $this->randomName(), array(), WATCHDOG_CRITICAL);
-    $result = monitoring_sensor_run('watchdog_aggregate_test', TRUE);
+    $result = $this->runSensor('watchdog_aggregate_test');
     $this->assertEqual($result->getSensorValue(), 4);
 
     // Aggregate by watchdog location.
@@ -295,7 +269,7 @@ class MonitoringCoreTest extends DrupalWebTestCase {
     ));
     // Update two watchdog entries with custom location.
     db_query('UPDATE {watchdog} SET location = :location LIMIT 2', array(':location' => 'http://some.url.dev'));
-    $result = monitoring_sensor_run('watchdog_aggregate_test', TRUE);
+    $result = $this->runSensor('watchdog_aggregate_test');
     $this->assertEqual($result->getSensorValue(), 2);
 
     // Filter for time period.
@@ -304,7 +278,7 @@ class MonitoringCoreTest extends DrupalWebTestCase {
     ));
     db_query('UPDATE {watchdog} SET timestamp = :timestamp LIMIT 3', array(':timestamp' => time() - 20));
     $count_latest = db_query('SELECT COUNT(*) FROM {watchdog} WHERE timestamp > timestamp - 10')->fetchField();
-    $result = monitoring_sensor_run('watchdog_aggregate_test', TRUE);
+    $result = $this->runSensor('watchdog_aggregate_test');
     $this->assertEqual($result->getSensorValue(), $count_latest);
 
     // Test for thresholds and statuses.
@@ -313,18 +287,18 @@ class MonitoringCoreTest extends DrupalWebTestCase {
         array('field' => 'type', 'value' => 'test_watchdog_aggregate_sensor'),
       )
     ));
-    $result = monitoring_sensor_run('watchdog_aggregate_test', TRUE);
-    $this->assertEqual($result->getSensorStatus(), SensorResultInterface::STATUS_OK);
+    $result = $this->runSensor('watchdog_aggregate_test');
+    $this->assertTrue($result->isOk());
     $this->assertEqual($result->getSensorValue(), 0);
 
     watchdog('test_watchdog_aggregate_sensor', 'testing');
-    $result = monitoring_sensor_run('watchdog_aggregate_test', TRUE);
-    $this->assertEqual($result->getSensorStatus(), SensorResultInterface::STATUS_WARNING);
+    $result = $this->runSensor('watchdog_aggregate_test');
+    $this->assertTrue($result->isWarning());
     $this->assertEqual($result->getSensorValue(), 1);
 
     watchdog('test_watchdog_aggregate_sensor', 'testing');
-    $result = monitoring_sensor_run('watchdog_aggregate_test', TRUE);
-    $this->assertEqual($result->getSensorStatus(), SensorResultInterface::STATUS_CRITICAL);
+    $result = $this->runSensor('watchdog_aggregate_test');
+    $this->assertTrue($result->isCritical());
     $this->assertEqual($result->getSensorValue(), 2);
 
     // Test with different db table.
@@ -341,7 +315,7 @@ class MonitoringCoreTest extends DrupalWebTestCase {
     ));
 
     // Based on default sensor settings we should get the promoted node.
-    $result = monitoring_sensor_run('db_aggregate_test', TRUE);
+    $result = $this->runSensor('db_aggregate_test');
     $this->assertEqual($result->getSensorValue(), 1);
 
     // Test with settings updated.
@@ -350,7 +324,7 @@ class MonitoringCoreTest extends DrupalWebTestCase {
       array('field' => 'promote', 'value' => '0'),
     );
     monitoring_sensor_settings_save('db_aggregate_test', $settings);
-    $result = monitoring_sensor_run('db_aggregate_test', TRUE);
+    $result = $this->runSensor('db_aggregate_test');
     // There should be two nodes with promote 0 and created in last 24 hours.
     $this->assertEqual($result->getSensorValue(), 2);
   }

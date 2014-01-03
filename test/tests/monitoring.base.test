@@ -1,371 +1,46 @@
 <?php
 /**
  * @file
- * Monitoring base tests.
+ * Contains \MonitoringTestBase.
  */
-
-use Drupal\monitoring\Result\SensorResultInterface;
 
 /**
- * Class MonitoringAPITest
+ * Base class for all monitoring tests.
  */
-class MonitoringBaseTest extends DrupalWebTestCase {
-
-  static function getInfo() {
-    return array(
-      'name' => 'Monitoring base',
-      'description' => 'Monitoring base tests.',
-      'group' => 'Monitoring',
-    );
-  }
-
-  function setUp() {
-    parent::setUp(array('monitoring', 'monitoring_test'));
-  }
+abstract class MonitoringTestBase extends DrupalWebTestCase {
 
   /**
-   * Test the base class if info is set and passed correctly.
-   */
-  function testAPI() {
-
-    // == Test basic sensor infrastructure - value, status and message. == //
-
-    $test_sensor_result_data = array(
-      'sensor_value' => 3,
-      'sensor_status' => SensorResultInterface::STATUS_OK,
-      'sensor_message' => 'All OK',
-      'execution_time' => 1,
-    );
-    variable_set('test_sensor_result_data', $test_sensor_result_data);
-    $result = monitoring_sensor_run('test_sensor');
-
-    $this->assertTrue($result->getSensorExecutionTime() > 0);
-    $this->assertEqual($result->getSensorStatus(), $test_sensor_result_data['sensor_status']);
-    $this->assertEqual($result->getSensorMessage(), 'Value 3, ' . $test_sensor_result_data['sensor_message']);
-    $this->assertEqual($result->getSensorValue(), $test_sensor_result_data['sensor_value']);
-
-    // == Test sensor result cache == //
-
-    // Test cached result
-    $result_cached = monitoring_sensor_run('test_sensor');
-    $this->assertTrue($result_cached->isCached());
-    $this->assertEqual($result_cached->getTimestamp(), REQUEST_TIME);
-    $this->assertEqual($result_cached->getSensorStatus(), $test_sensor_result_data['sensor_status']);
-    $this->assertEqual($result_cached->getSensorMessage(), 'Value 3, ' . $test_sensor_result_data['sensor_message']);
-    $this->assertEqual($result_cached->getSensorValue(), $test_sensor_result_data['sensor_value']);
-
-    // Call a setter method to invalidate cache and reset values.
-    $result_cached->setSensorValue(5);
-    $this->assertFalse($result_cached->isCached());
-
-    // == Test disabled sensor. == //
-
-    $sensor_info = monitoring_sensor_info('test_sensor');
-    $sensor_info['settings']['enabled'] = FALSE;
-    variable_set('test_sensor_info', $sensor_info);
-
-    // Running a disabled sensor must return a NULL result.
-    $result = monitoring_sensor_run('test_sensor');
-    $this->assertTrue(empty($result));
-
-    // Null the info so it will not affect other assertions.
-    variable_set('test_sensor_info', NULL);
-
-    // == Test settings. == //
-
-    // == inner_interval gives error statuses.
-
-    // Test for OK values.
-    $test_sensor_result_data = array(
-      'sensor_value' => 9,
-    );
-    variable_set('test_sensor_result_data', $test_sensor_result_data);
-    $result = monitoring_sensor_run('test_sensor_inner', TRUE);
-    $this->assertEqual($result->getSensorStatus(), SensorResultInterface::STATUS_OK);
-    $this->assertEqual($result->getSensorMessage(), 'Value 9');
-
-    $test_sensor_result_data = array(
-      'sensor_value' => 0,
-    );
-    variable_set('test_sensor_result_data', $test_sensor_result_data);
-    $result = monitoring_sensor_run('test_sensor_inner', TRUE);
-    $this->assertEqual($result->getSensorStatus(), SensorResultInterface::STATUS_OK);
-    $this->assertEqual($result->getSensorMessage(), 'Value 0');
-
-    // Test for warning values.
-    $test_sensor_result_data = array(
-      'sensor_value' => 7,
-    );
-    variable_set('test_sensor_result_data', $test_sensor_result_data);
-    $result = monitoring_sensor_run('test_sensor_inner', TRUE);
-    $this->assertEqual($result->getSensorStatus(), SensorResultInterface::STATUS_WARNING);
-    $this->assertEqual($result->getSensorMessage(), t('Value 7, violating the interval @expected', array('@expected' => '1 - 8')));
-
-    $test_sensor_result_data = array(
-      'sensor_value' => 2,
-    );
-    variable_set('test_sensor_result_data', $test_sensor_result_data);
-    $result = monitoring_sensor_run('test_sensor_inner', TRUE);
-    $this->assertEqual($result->getSensorStatus(), SensorResultInterface::STATUS_WARNING);
-    $this->assertEqual($result->getSensorMessage(), t('Value 2, violating the interval @expected', array('@expected' => '1 - 8')));
-
-    // Test for critical values.
-    $test_sensor_result_data = array(
-      'sensor_value' => 5,
-    );
-    variable_set('test_sensor_result_data', $test_sensor_result_data);
-    $result = monitoring_sensor_run('test_sensor_inner', TRUE);
-    $this->assertEqual($result->getSensorStatus(), SensorResultInterface::STATUS_CRITICAL);
-    $this->assertEqual($result->getSensorMessage(), t('Value 5, violating the interval @expected', array('@expected' => '3 - 6')));
-
-    $test_sensor_result_data = array(
-      'sensor_value' => 3,
-    );
-    variable_set('test_sensor_result_data', $test_sensor_result_data);
-    $result = monitoring_sensor_run('test_sensor_inner', TRUE);
-    $this->assertEqual($result->getSensorStatus(), SensorResultInterface::STATUS_CRITICAL);
-    $this->assertEqual($result->getSensorMessage(), t('Value 3, violating the interval @expected', array('@expected' => '3 - 6')));
-
-    // == outer_intervals give error statuses.
-
-    // Test for ok values.
-    $test_sensor_result_data = array(
-      'sensor_value' => 21,
-    );
-    variable_set('test_sensor_result_data', $test_sensor_result_data);
-    $result = monitoring_sensor_run('test_sensor_outer', TRUE);
-    $this->assertEqual($result->getSensorStatus(), SensorResultInterface::STATUS_OK);
-    $this->assertEqual($result->getSensorMessage(), 'Value 21');
-
-    $test_sensor_result_data = array(
-      'sensor_value' => 39,
-    );
-    variable_set('test_sensor_result_data', $test_sensor_result_data);
-    $result = monitoring_sensor_run('test_sensor_outer', TRUE);
-    $this->assertEqual($result->getSensorStatus(), SensorResultInterface::STATUS_OK);
-    $this->assertEqual($result->getSensorMessage(), 'Value 39');
-
-    // Test for warning values.
-    $test_sensor_result_data = array(
-      'sensor_value' => 20,
-    );
-    variable_set('test_sensor_result_data', $test_sensor_result_data);
-    $result = monitoring_sensor_run('test_sensor_outer', TRUE);
-    $this->assertEqual($result->getSensorStatus(), SensorResultInterface::STATUS_WARNING);
-    $this->assertEqual($result->getSensorMessage(), t('Value 20, outside the allowed interval @expected', array('@expected' => '20 - 40')));
-
-    $test_sensor_result_data = array(
-      'sensor_value' => 42,
-    );
-    variable_set('test_sensor_result_data', $test_sensor_result_data);
-    $result = monitoring_sensor_run('test_sensor_outer', TRUE);
-    $this->assertEqual($result->getSensorStatus(), SensorResultInterface::STATUS_WARNING);
-    $this->assertEqual($result->getSensorMessage(), t('Value 42, outside the allowed interval @expected', array('@expected' => '20 - 40')));
-
-    // Test for critical values.
-    $test_sensor_result_data = array(
-      'sensor_value' => 10,
-    );
-    variable_set('test_sensor_result_data', $test_sensor_result_data);
-    $result = monitoring_sensor_run('test_sensor_outer', TRUE);
-    $this->assertEqual($result->getSensorStatus(), SensorResultInterface::STATUS_CRITICAL);
-    $this->assertEqual($result->getSensorMessage(), t('Value 10, outside the allowed interval @expected', array('@expected' => '10 - 50')));
-
-    $test_sensor_result_data = array(
-      'sensor_value' => 60,
-    );
-    variable_set('test_sensor_result_data', $test_sensor_result_data);
-    $result = monitoring_sensor_run('test_sensor_outer', TRUE);
-    $this->assertEqual($result->getSensorStatus(), SensorResultInterface::STATUS_CRITICAL);
-    $this->assertEqual($result->getSensorMessage(), t('Value 60, outside the allowed interval @expected', array('@expected' => '10 - 50')));
-
-    // == Exceeds interval gives error statuses.
-
-    $test_sensor_result_data = array(
-      'sensor_value' => 4,
-    );
-    variable_set('test_sensor_result_data', $test_sensor_result_data);
-    $result = monitoring_sensor_run('test_sensor_exceeds', TRUE);
-    $this->assertEqual($result->getSensorStatus(), SensorResultInterface::STATUS_OK);
-    $this->assertEqual($result->getSensorMessage(), 'Value 4');
-
-    $test_sensor_result_data = array(
-      'sensor_value' => 5,
-    );
-    variable_set('test_sensor_result_data', $test_sensor_result_data);
-    $result = monitoring_sensor_run('test_sensor_exceeds', TRUE);
-    $this->assertEqual($result->getSensorStatus(), SensorResultInterface::STATUS_WARNING);
-    $this->assertEqual($result->getSensorMessage(), t('Value 5, exceeds @expected', array('@expected' => '5')));
-
-    $test_sensor_result_data = array(
-      'sensor_value' => 14,
-    );
-    variable_set('test_sensor_result_data', $test_sensor_result_data);
-    $result = monitoring_sensor_run('test_sensor_exceeds', TRUE);
-    $this->assertEqual($result->getSensorStatus(), SensorResultInterface::STATUS_CRITICAL);
-    $this->assertEqual($result->getSensorMessage(), t('Value 14, exceeds @expected', array('@expected' => '10')));
-
-    // == Falls interval gives error statuses.
-
-    $test_sensor_result_data = array(
-      'sensor_value' => 12,
-    );
-    variable_set('test_sensor_result_data', $test_sensor_result_data);
-    $result = monitoring_sensor_run('test_sensor_falls', TRUE);
-    $this->assertEqual($result->getSensorStatus(), SensorResultInterface::STATUS_OK);
-    $this->assertEqual($result->getSensorMessage(), 'Value 12');
-
-    $test_sensor_result_data = array(
-      'sensor_value' => 10,
-    );
-    variable_set('test_sensor_result_data', $test_sensor_result_data);
-    $result = monitoring_sensor_run('test_sensor_falls', TRUE);
-    $this->assertEqual($result->getSensorStatus(), SensorResultInterface::STATUS_WARNING);
-    $this->assertEqual($result->getSensorMessage(), t('Value 10, falls below @expected', array('@expected' => '10')));
-
-    $test_sensor_result_data = array(
-      'sensor_value' => 3,
-    );
-    variable_set('test_sensor_result_data', $test_sensor_result_data);
-    $result = monitoring_sensor_run('test_sensor_falls', TRUE);
-    $this->assertEqual($result->getSensorStatus(), SensorResultInterface::STATUS_CRITICAL);
-    $this->assertEqual($result->getSensorMessage(), t('Value 3, falls below @expected', array('@expected' => '5')));
-
-    // Test the case when sensor value is not set.
-    $test_sensor_result_data = array(
-      'sensor_value' => NULL,
-      'sensor_status' => SensorResultInterface::STATUS_CRITICAL,
-    );
-    variable_set('test_sensor_result_data', $test_sensor_result_data);
-    $result = monitoring_sensor_run('test_sensor', TRUE);
-    $this->assertNull($result->getSensorValue());
-  }
-
-  function testLogging() {
-
-    // First perform tests with the logging strategy in default mode - that is
-    // "Log only on request or on status change".
-
-    $test_sensor_result_data = array(
-      'sensor_value' => 1,
-      'sensor_message' => 'test message',
-      'sensor_status' => SensorResultInterface::STATUS_OK,
-    );
-    variable_set('test_sensor_result_data', $test_sensor_result_data);
-    $settings = monitoring_sensor_settings_get('test_sensor');
-    $settings['log_calls'] = TRUE;
-    monitoring_sensor_settings_save('test_sensor', $settings);
-    monitoring_sensor_run('test_sensor', TRUE);
-
-    $logs = $this->loadSensorData('test_sensor');
-    $this->assertEqual(count($logs), 1);
-    $log = array_shift($logs);
-    $this->assertEqual($log->sensor_name, 'test_sensor');
-    $this->assertEqual($log->sensor_status, SensorResultInterface::STATUS_OK);
-    $this->assertEqual($log->sensor_value, 1);
-    $this->assertEqual($log->sensor_message, 'Value 1, test message');
-
-    // Set log_calls sensor settings to false - that should prevent logging.
-    $settings = monitoring_sensor_settings_get('test_sensor');
-    $settings['log_calls'] = FALSE;
-    monitoring_sensor_settings_save('test_sensor', $settings);
-    monitoring_sensor_run('test_sensor', TRUE);
-    $logs = $this->loadSensorData('test_sensor');
-    $this->assertEqual(count($logs), 1);
-
-    // Now change the status - that should result in the call being logged.
-    $test_sensor_result_data = array(
-      'sensor_status' => SensorResultInterface::STATUS_WARNING,
-    );
-    variable_set('test_sensor_result_data', $test_sensor_result_data);
-    monitoring_sensor_run('test_sensor', TRUE);
-    $logs = $this->loadSensorData('test_sensor');
-    $this->assertEqual(count($logs), 2);
-    $log = array_pop($logs);
-    $this->assertEqual($log->sensor_status, SensorResultInterface::STATUS_WARNING);
-
-    // Set the logging strategy to "Log all events".
-    variable_set('monitoring_sensor_call_logging', 'all');
-    // Running the sensor with 'log_calls' settings FALSE must record the call.
-    $settings = monitoring_sensor_settings_get('test_sensor');
-    $settings['log_calls'] = FALSE;
-    monitoring_sensor_settings_save('test_sensor', $settings);
-    monitoring_sensor_run('test_sensor', TRUE);
-    $logs = $this->loadSensorData('test_sensor');
-    $this->assertEqual(count($logs), 3);
-
-    // Set the logging strategy to "No logging".
-    variable_set('monitoring_sensor_call_logging', 'none');
-    // Despite log_calls TRUE we should not log any call.
-    $settings = monitoring_sensor_settings_get('test_sensor');
-    $settings['log_calls'] = TRUE;
-    monitoring_sensor_settings_save('test_sensor', $settings);
-    $logs = $this->loadSensorData('test_sensor');
-    monitoring_sensor_run('test_sensor', TRUE);
-    $this->assertEqual(count($logs), 3);
-
-    // Test logging critical events to watchdog.
-    $test_sensor_result_data = array(
-      'sensor_status' => SensorResultInterface::STATUS_CRITICAL,
-    );
-    variable_set('test_sensor_result_data', $test_sensor_result_data);
-    monitoring_sensor_run('test_sensor', TRUE);
-    // See if the event was logged with proper data.
-    $results = db_select('watchdog', 'w')->fields('w')->condition('type', 'monitoring')->execute()->fetchAll();
-    $result = array_shift($results);
-    $this->assertEqual($result->message, 'Failing sensor %name with message %message and value %value');
-    $variables = unserialize($result->variables);
-    $this->assertEqual($variables['%name'], 'Test sensor');
-    $this->assertEqual($variables['%message'], 'No value');
-    $this->assertEqual($variables['%value'], NULL);
-
-    // Run test sensor which is in category Watchdog. Note that sensor_status
-    // is still critical.
-    monitoring_sensor_run('test_sensor_cat_watchdog', TRUE);
-    // Get results form watchdog - there should be only one as the Watchdog
-    // category should not get logged.
-    $results = db_select('watchdog', 'w')->fields('w')->condition('type', 'monitoring')->execute()->fetchAll();
-    $this->assertEqual(count($results), 1);
-
-    // Test exception handling in the sensor runner.
-    variable_set('test_sensor_result_data', array('sensor_exception_message' => 'Example exception'));
-    $result = monitoring_sensor_run('test_sensor', TRUE);
-    $this->assertTrue($result->isCritical());
-    debug($result->getSensorMessage());
-    // See if the event was logged with proper data.
-    $results = db_select('watchdog', 'w')->fields('w')->condition('type', 'monitoring_exception')->execute()->fetchAll();
-    $this->assertEqual(count($results), 1);
-  }
-
-  /**
-   * Test if custom sensor info hook implementation takes precedence from
-   * the local implementation.
+   * Use testing profile to speed up tests.
    *
-   * We need to run this test as last as it includes a file that will result
-   * in other tests failures.
+   * @var string
    */
-  function testSensorInfoPrecedence() {
-    // == Test monitoring sensor info. == //
+  protected $profile = 'testing';
 
-    $sensor_info = monitoring_sensor_info();
-    // The integration hook must be loaded.
-    $this->assertTrue(isset($sensor_info['test_sensor_integration']));
-
-    // Include file with custom hook implementation.
-    require_once drupal_get_path('module', 'monitoring_test') . '/monitoring_test.custom_hook.inc';
-    $sensor_info = monitoring_sensor_info(NULL, TRUE);
-    // The custom hook must take precedence.
-    $this->assertTrue(isset($sensor_info['test_sensor_integration']));
-  }
-
-  protected function loadSensorData($sensor_name) {
-    $query = new EntityFieldQuery();
-    $query->entityCondition('entity_type', 'monitoring_sensor_result');
-    $query->propertyCondition('sensor_name', $sensor_name);
-    $result = $query->execute();
-    if (isset($result['monitoring_sensor_result'])) {
-      return entity_load('monitoring_sensor_result', array_keys($result['monitoring_sensor_result']));
+  /**
+   * {@inheritdoc}
+   */
+  function setUp() {
+    $modules = func_get_args();
+    if (isset($modules[0]) && is_array($modules[0])) {
+      $modules = $modules[0];
     }
-    return array();
+    $modules = array_merge(array('monitoring', 'monitoring_test'), $modules);
+    parent::setUp($modules);
   }
+
+  /**
+   * Executes a sensor and returns the result.
+   *
+   * @param string $sensor_name
+   *   Name of the sensor to execute.
+   *
+   * @return \Drupal\monitoring\Result\SensorResultInterface
+   *   The sensor result.
+   */
+  protected function runSensor($sensor_name) {
+    // Make sure the sensor is enabled.
+    monitoring_sensor_enable($sensor_name);
+    return monitoring_sensor_run($sensor_name, TRUE);
+  }
+
 }

@@ -10,10 +10,11 @@ dependencies[] = xautoload
 test_dependencies[] = dblog
 test_dependencies[] = search_api
 test_dependencies[] = search_api_db
-test_dependencies[] = simplenews
+test_dependencies[] = simplenews (1.x)
 test_dependencies[] = elysia_cron
 
 files[] = test/tests/monitoring.base.test
+files[] = test/tests/monitoring.api.test
 files[] = test/tests/monitoring.core.test
 files[] = test/tests/monitoring.elysia.test
 files[] = test/tests/monitoring.search_api.test
