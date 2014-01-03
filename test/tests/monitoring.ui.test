@@ -129,4 +129,36 @@ class MonitoringUITest extends MonitoringTestBase {
       $i++;
     }
   }
+
+  /**
+   * Tests the force execute all command.
+   */
+  function testForceExecuteAll() {
+    $account = $this->drupalCreateUser(array('monitoring force run', 'monitoring reports'));
+    $this->drupalLogin($account);
+
+    // Set a specific test sensor result to look for.
+    $test_sensor_result_data = array(
+      'sensor_message' => 'First message',
+    );
+    variable_set('test_sensor_result_data', $test_sensor_result_data);
+
+    $this->drupalGet('admin/reports/monitoring');
+    $this->assertText('First message');
+
+    // Update the sensor message.
+    $test_sensor_result_data['sensor_message'] = 'Second message';
+    variable_set('test_sensor_result_data', $test_sensor_result_data);
+
+    // Access the page again, we should still see the first message because the
+    // cached result is returned.
+    $this->drupalGet('admin/reports/monitoring');
+    $this->assertText('First message');
+
+    // Force sensor execution, the changed message should be displayed now.
+    $this->clickLink(t('Force execute all'));
+    $this->assertNoText('First message');
+    $this->assertText('Second message');
+  }
+
 }

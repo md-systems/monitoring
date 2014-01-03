@@ -347,13 +347,16 @@ function monitoring_sensor_details($form, &$form_state, $sensor_name) {
 }
 
 function monitoring_sensor_details_submit($form, &$form_state) {
-  $result = monitoring_sensor_run($form_state['sensor_name'], TRUE);
-  if (!empty($result)) {
-    drupal_set_message(t('Sensor force run executed.'));
-  }
-  else {
-    drupal_set_message(t('Error executing sensor force run.'), 'error');
-  }
+  SensorRunner::resetCache(array($form_state['sensor_name']));
+  drupal_set_message(t('Sensor force run executed.'));
+}
+
+/**
+ * Page callback to clear sensor caches.
+ */
+function monitoring_force_execution() {
+  SensorRunner::resetCache();
+  drupal_goto('admin/reports/monitoring');
 }
 
 /**

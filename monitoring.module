@@ -330,6 +330,13 @@ function monitoring_menu() {
     'weight' => -16,
   );
 
+  $items['monitoring/sensors/force'] = array(
+    'title' => 'Force run all sensors',
+    'page callback' => 'monitoring_force_execution',
+    'access arguments' => array('monitoring force run'),
+    'file' => 'monitoring.admin.inc',
+  );
+
   return $items;
 }
 
@@ -581,6 +588,9 @@ function theme_monitoring_overview_summary($variables) {
       '@unknown' => $variables['status_overview'][SensorResultInterface::STATUS_UNKNOWN],
     ));
   $output .= '</div>';
+  if (user_access('monitoring force run')) {
+    $output .= '<div class="monitoring-overview-summary-actions-right">' . l(t('Force execute all'), 'monitoring/sensors/force') . '</div>';
+  }
   return $output;
 }
 

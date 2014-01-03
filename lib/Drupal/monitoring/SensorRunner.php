@@ -294,8 +294,27 @@ class SensorRunner implements \IteratorAggregate {
    * @return string
    *   Cache id.
    */
-  public function getSensorCid($sensor_name) {
+  protected static function getSensorCid($sensor_name) {
     return 'monitoring_sensor_result:' . $sensor_name;
+  }
+
+  /**
+   * Reset sensor result caches.
+   *
+   * @param array $sensor_names
+   *   (optional) Array of sensors to reset the cache for. An empty array clears
+   *   all results, which is the default.
+   */
+  public static function resetCache(array $sensor_names = array()) {
+    if (empty($sensor_names)) {
+      // No sensor names provided, clear all caches.
+      cache_clear_all('monitoring_sensor_result:', 'cache', TRUE);
+    }
+    else {
+      foreach ($sensor_names as $sensor_name) {
+        cache_clear_all('monitoring_sensor_result:' . self::getSensorCid($sensor_name), 'cache');
+      }
+    }
   }
 
   /**
