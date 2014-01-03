@@ -92,6 +92,10 @@ function monitoring_reports_sensors_overview() {
   $total_execution_time = 0;
   $non_cached_execution_time = 0;
 
+  // Include views admin styles for the dropbutton.
+  module_load_include('inc', 'views', 'includes/admin');
+  views_ui_add_admin_css();
+
   foreach (monitoring_sensor_info_by_categories() as $category => $category_sensor_info) {
 
     // Category grouping row.
@@ -117,7 +121,7 @@ function monitoring_reports_sensors_overview() {
 
       $row['data']['sensor_status'] = array(
         'data' => $sensor_result->getSensorStatus(),
-        'class' => array('status'),
+        'class' => array('status', 'having-dropbutton'),
       );
 
       $row['data']['timestamp'] = format_interval(REQUEST_TIME - $sensor_result->getTimestamp());
@@ -144,7 +148,7 @@ function monitoring_reports_sensors_overview() {
       $row['data']['actions'] = array();
       if (!empty($links)) {
         $row['data']['actions']['data'] = theme('links__ctools_dropbutton',
-          array('links' => $links, 'attributes' => array('class' => array('links', 'inline'))));
+          array('links' => $links));
       }
 
       $rows[] = $row;
@@ -201,12 +205,6 @@ function monitoring_reports_sensors_overview() {
     '#attached' => array(
       'css' => array(
         drupal_get_path('module', 'monitoring') . '/monitoring.css',
-        // Yes, we must include all these to get that ctools dropbutton look and
-        // work properly.
-        drupal_get_path('module', 'ctools') . '/css/dropbutton.css',
-        drupal_get_path('module', 'views') . '/css/views-admin.contextual.css',
-        drupal_get_path('module', 'views') . '/css/views-admin.ctools.css',
-        drupal_get_path('module', 'views') . '/css/views-admin.seven.css',
       ),
       'js' => array(
         array(

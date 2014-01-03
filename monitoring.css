@@ -38,12 +38,23 @@ table.monitoring-severity-colors tr.monitoring-critical td.views-field-sensor-st
   background: url(images/message-16-error.png) no-repeat 0% 50%;
 }
 
+table.monitoring-severity-colors tr.monitoring-critical td.status.having-dropbutton,
+table.monitoring-severity-colors tr.monitoring-critical td.views-field-sensor-status.having-dropbutton
+{
+  background-position: 0% 12px;
+}
+
 table.monitoring-severity-colors tr.monitoring-warning {
   border-left: 8px solid #E09600;
 }
 
 table.monitoring-severity-colors tr.monitoring-warning td.status {
   background: url(images/message-16-warning.png) no-repeat 0% 50%;
+}
+
+table.monitoring-severity-colors tr.monitoring-warning td.status.having-dropbutton
+{
+  background-position: 0% 12px;
 }
 
 table.monitoring-severity-colors tr.monitoring-info {
