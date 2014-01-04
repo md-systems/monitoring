@@ -267,8 +267,11 @@ class MonitoringCoreTest extends MonitoringTestBase {
         array('field' => 'location', 'value' => 'http://some.url.dev'),
       )
     ));
-    // Update two watchdog entries with custom location.
-    db_query('UPDATE {watchdog} SET location = :location LIMIT 2', array(':location' => 'http://some.url.dev'));
+    // Update the two test_type watchdog entries with a custom location.
+    db_update('watchdog')
+      ->fields(array('location' => 'http://some.url.dev'))
+      ->condition('type', 'test_type')
+      ->execute();
     $result = $this->runSensor('watchdog_aggregate_test');
     $this->assertEqual($result->getSensorValue(), 2);
 
@@ -276,8 +279,13 @@ class MonitoringCoreTest extends MonitoringTestBase {
     monitoring_sensor_settings_save('watchdog_aggregate_test', array(
       'time_period' => array('field' => 'timestamp', 'value' => 10),
     ));
-    db_query('UPDATE {watchdog} SET timestamp = :timestamp LIMIT 3', array(':timestamp' => time() - 20));
-    $count_latest = db_query('SELECT COUNT(*) FROM {watchdog} WHERE timestamp > timestamp - 10')->fetchField();
+
+    // Make all system watchdog messages older than the configured time period.
+    db_update('watchdog')
+      ->fields(array('timestamp' => REQUEST_TIME - 20))
+      ->condition('type', 'system')
+      ->execute();
+    $count_latest = db_query('SELECT COUNT(*) FROM {watchdog} WHERE timestamp > :timestamp', array(':timestamp' => REQUEST_TIME - 10))->fetchField();
     $result = $this->runSensor('watchdog_aggregate_test');
     $this->assertEqual($result->getSensorValue(), $count_latest);
 
@@ -309,10 +317,10 @@ class MonitoringCoreTest extends MonitoringTestBase {
     $this->drupalCreateNode(array('promote' => '0'));
     // Create one node that should not meet the time_period condition.
     $node = $this->drupalCreateNode(array('promote' => '0'));
-    db_query('UPDATE {node} SET created = :created WHERE nid = :nid', array(
-      ':created' => REQUEST_TIME - ($time_period['value'] + 10),
-      ':nid' => $node->nid,
-    ));
+    db_update('node')
+      ->fields(array('created' => REQUEST_TIME - ($time_period['value'] + 10)))
+      ->condition('nid', $node->nid)
+      ->execute();
 
     // Based on default sensor settings we should get the promoted node.
     $result = $this->runSensor('db_aggregate_test');
