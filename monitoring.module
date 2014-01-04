@@ -5,8 +5,6 @@
  * Monitoring bootstrap file.
  */
 
-define('MONITORING_SENSOR_DEFAULT_CATEGORY', 'Other');
-
 use Drupal\monitoring\Sensor\SensorInfo;
 use Drupal\monitoring\Result\SensorResultInterface;
 use Drupal\monitoring\SensorRunner;
@@ -61,19 +59,16 @@ function monitoring_sensor_info($sensor_name = NULL, $reset = FALSE) {
     // Merge in saved sensor settings.
     foreach ($info as $key => &$value) {
       // Set default values.
-      if (!isset($value['result class'])) {
-        $value['result class'] = 'Drupal\monitoring\Result\SensorResult';
-      }
-      if (!isset($value['type'])) {
-        $value['type'] = 'numeric';
-      }
-      if (!isset($value['settings'])) {
-        $value['settings'] = array();
-      }
+      $value += array(
+        'description' => '',
+        'result class' => 'Drupal\monitoring\Result\SensorResult',
+        'type' => 'numeric',
+        'settings' => array(),
+      );
       $value['settings'] += array(
         'enabled' => TRUE,
         'caching time' => 0,
-        'category' => NULL,
+        'category' => 'Other',
         'units_label' => NULL,
       );
       $value['settings'] = monitoring_sensor_settings_merge($key, $value['settings']);
@@ -103,12 +98,7 @@ function monitoring_sensor_info_by_categories($enabled = TRUE) {
       continue;
     }
 
-    if ($sensor_info->getCategory() != NULL) {
-      $info_by_categories[$sensor_info->getCategory()][$sensor_name] = $sensor_info;
-    }
-    else {
-      $info_by_categories[MONITORING_SENSOR_DEFAULT_CATEGORY][$sensor_name] = $sensor_info;
-    }
+    $info_by_categories[$sensor_info->getCategory()][$sensor_name] = $sensor_info;
   }
 
   return $info_by_categories;
@@ -353,15 +343,14 @@ function monitoring_menu() {
  */
 function monitoring_sensor_action_title($action, $sensor_name) {
   $sensor_info = monitoring_sensor_info($sensor_name);
+  $placeholders = array('@category' => $sensor_info['settings']['category'], '@label' => $sensor_info['label']);
   switch ($action) {
     case 'settings':
-      return t('@sensor settings', array('@sensor' => $sensor_info['label']));
+      return t('@label settings (@category)', $placeholders);
 
     case 'details':
-      return $sensor_info['label'];
-
     case 'log':
-      return $sensor_info['label'];
+      return t('@label (@category)', $placeholders);
   }
 
   return '';

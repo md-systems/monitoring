@@ -47,6 +47,7 @@ class MonitoringUITest extends MonitoringTestBase {
     $this->drupalPost('admin/config/system/monitoring/sensors/test_sensor_exceeds', $data, t('Save'));
 
     $this->drupalGet('admin/config/system/monitoring/sensors/test_sensor_exceeds');
+    $this->assertTitle(t('@label settings (@category) | Drupal', array('@label' => $sensor_info->getLabel(), '@category' => $sensor_info->getCategory())));
     foreach ($sensor_info->getThresholdsIntervals() as $status => $threshold) {
       $key = monitoring_sensor_settings_key('test_sensor_exceeds') . '[thresholds][intervals][' . $status . ']';
       $this->assertFieldByName($key, $threshold + 1);
@@ -128,6 +129,10 @@ class MonitoringUITest extends MonitoringTestBase {
 
       $i++;
     }
+
+    $sensor_info = monitoring_sensor_info_instance('test_sensor');
+    $this->drupalGet('admin/reports/monitoring/sensors/test_sensor');
+    $this->assertTitle(t('@label (@category) | Drupal', array('@label' => $sensor_info->getLabel(), '@category' => $sensor_info->getCategory())));
   }
 
   /**

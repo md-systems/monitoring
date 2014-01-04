@@ -42,6 +42,10 @@ class SensorInfo {
   /**
    * Gets sensor label.
    *
+   * The sensor label might not be self-explaining enough or unique without
+   * the category, the category should always be present when the label is
+   * displayed.
+   *
    * @return string
    *   Sensor label.
    */

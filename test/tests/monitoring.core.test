@@ -133,7 +133,7 @@ class MonitoringCoreTest extends MonitoringTestBase {
     watchdog('page not found', 'not/found');
     $result = $this->runSensor('404_in_last_24_hours');
     $this->assertTrue($result->isOk());
-    $this->assertEqual($result->getSensorMessage(), '1 watchdog items, not/found');
+    $this->assertEqual($result->getSensorMessage(), '1 watchdog events, not/found');
     $this->assertEqual($result->getSensorValue(), 1);
 
     for ($i = 1; $i < 20; $i++) {

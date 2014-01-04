@@ -17,8 +17,9 @@ function hook_monitoring_sensor_info() {
   $sensors = array();
 
   $sensor['cron_run'] = array(
-    // Name/label of the sensor.
-    'label' => 'Cron run',
+    // Name/label of the sensor. Should always be displayed in combination
+    // with the category and does not have to unnecessarily repeat the category.
+    'label' => 'Last cron run',
     // Description to better understand the sensor purpose.
     'description' => 'Monitors cron run',
     // Sensor class that will trigger checks.

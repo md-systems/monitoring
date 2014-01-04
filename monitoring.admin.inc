@@ -16,6 +16,7 @@ function monitoring_config_sensors_overview_form($form, &$form_state) {
 
   foreach (monitoring_sensor_info_instance() as $sensor_name => $sensor_info) {
     $row = array(
+      'category' => $sensor_info->getCategory(),
       'label' => $sensor_info->getLabel(),
       'description' => $sensor_info->getDescription(),
     );
@@ -38,7 +39,8 @@ function monitoring_config_sensors_overview_form($form, &$form_state) {
   }
 
   $header = array(
-    'label' => t('Sensor name'),
+    'category' => t('Category'),
+    'label' => t('Label'),
     'description' => t('Description'),
     'status' => t('Status'),
     'actions' => t('Actions'),
