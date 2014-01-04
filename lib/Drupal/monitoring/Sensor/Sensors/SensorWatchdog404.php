@@ -17,11 +17,13 @@ class SensorWatchdog404 extends SensorDatabaseAggregator {
   /**
    * {@inheritdoc}
    */
-  public function alterQuery(\SelectQuery $query) {
+  public function buildQuery() {
+    $query = parent::buildQuery();
     $query->addField('watchdog', 'message');
     $query->groupBy('message');
     $query->orderBy('records_count', 'DESC');
     $query->range(0, 1);
+    return $query;
   }
 
   /**

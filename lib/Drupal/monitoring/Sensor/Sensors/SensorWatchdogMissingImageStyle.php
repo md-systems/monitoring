@@ -22,10 +22,12 @@ class SensorWatchdogMissingImageStyle extends SensorDatabaseAggregator {
    *
    * Extends the watchdog query.
    */
-  public function alterQuery(\SelectQuery $query) {
+  public function buildQuery() {
+    $query = parent::buildQuery();
     $query->addField('watchdog', 'variables');
     $query->groupBy('variables');
     $query->orderBy('records_count', 'DESC');
+    return $query;
   }
 
   /**

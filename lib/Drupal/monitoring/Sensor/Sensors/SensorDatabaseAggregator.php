@@ -33,9 +33,20 @@ class SensorDatabaseAggregator extends SensorThresholds implements SensorExtende
    *
    * @var \DatabaseStatementInterface
    */
-  protected $executedQuery;
+  protected $queryResult;
 
+  /**
+   * The fetched object from the query result.
+   *
+   * @var object
+   */
   protected $fetchedObject;
+
+  /**
+   * The arguments of the executed query.
+   *
+   * @var array
+   */
   protected $queryArguments;
 
 
@@ -46,17 +57,40 @@ class SensorDatabaseAggregator extends SensorThresholds implements SensorExtende
    */
   public function __construct(SensorInfo $info) {
     parent::__construct($info);
-    $query = $this->buildQuery();
-    $this->alterQuery($query);
-    $this->queryArguments = $query->getArguments();
-    $this->executedQuery = $query->execute();
+  }
+
+  /**
+   * Executes the query and returns the result.
+   *
+   * @return \DatabaseStatementInterface
+   *   The query result.
+   */
+  protected function getQueryResult() {
+    if ($this->queryResult === NULL) {
+      $query = $this->buildQuery();
+      $this->queryArguments = $query->getArguments();
+      $this->queryResult = $query->execute();
+    }
+    return $this->queryResult;
+  }
+
+  /**
+   * Returns query arguments of the last executed query.
+   *
+   * SensorDatabaseAggregator::getQueryResult() must be called first.
+   *
+   * @return array
+   *   The query arguments as an array.
+   */
+  protected function getQueryArguments() {
+    return $this->queryArguments;
   }
 
   /**
    * {@inheritdoc}
    */
   public function sensorVerbose() {
-    return "Query:\n{$this->executedQuery->getQueryString()}\n\nArguments:\n" . var_export($this->queryArguments, TRUE);
+    return "Query:\n{$this->getQueryResult()->getQueryString()}\n\nArguments:\n" . var_export($this->getQueryArguments(), TRUE);
   }
 
   /**
@@ -76,7 +110,7 @@ class SensorDatabaseAggregator extends SensorThresholds implements SensorExtende
    */
   public function fetchObject() {
     if ($this->fetchedObject === NULL) {
-      $this->fetchedObject = $this->executedQuery->fetchObject();
+      $this->fetchedObject = $this->getQueryResult()->fetchObject();
     }
     return $this->fetchedObject;
   }
@@ -89,7 +123,7 @@ class SensorDatabaseAggregator extends SensorThresholds implements SensorExtende
   protected function buildQuery() {
     $table = $this->info->getSetting('table');
     $query = db_select($table);
-    $query->addExpression('COUNT(*)', 'records_count');
+    $this->buildQueryAggregate($query);
 
     if ($conditions = $this->info->getSetting('conditions')) {
       foreach ($conditions as $condition) {
@@ -98,7 +132,7 @@ class SensorDatabaseAggregator extends SensorThresholds implements SensorExtende
     }
 
     if ($time_period = $this->info->getSetting('time_period')) {
-      $query->where(check_plain($time_period['field']) . ' > :timestamp_value',
+      $query->where(db_escape_field($time_period['field']) . ' > :timestamp_value',
         array(
           ':timestamp_value' => REQUEST_TIME - $time_period['value'],
         ));
@@ -108,12 +142,15 @@ class SensorDatabaseAggregator extends SensorThresholds implements SensorExtende
   }
 
   /**
-   * Extending sensors can alter the query via overriding this method.
+   * Adds aggregate expressions to the query.
    *
-   * @param \SelectQuery $query
+   * Defaults to COUNT(*), override this method to use a different aggregation.
+   *
+   * @param \SelectQueryInterface $query
+   *  The select query that should be aggregated.
    */
-  public function alterQuery(\SelectQuery $query) {
-
+  protected function buildQueryAggregate(\SelectQueryInterface $query) {
+    $query->addExpression('COUNT(*)', 'records_count');
   }
 
   /**
