@@ -54,7 +54,6 @@ function monitoring_monitoring_test_monitoring_sensor_info() {
       'settings' => array(
         'log_calls' => FALSE,
         'category' => 'Test',
-        'units_label' => 'Units',
         'thresholds' => array(
           'intervals' => array(
             SensorResultInterface::STATUS_CRITICAL => 2,
@@ -71,7 +70,6 @@ function monitoring_monitoring_test_monitoring_sensor_info() {
       'log_calls' => TRUE,
       'settings' => array(
         'category' => 'Test',
-        'units_label' => 'Units',
         'table' => 'node',
         'conditions' => array(
           array('field' => 'promote', 'value' => '1'),
@@ -96,7 +94,6 @@ function monitoring_monitoring_test_monitoring_sensor_info() {
       'settings' => array(
         'log_calls' => TRUE,
         'category' => 'Test',
-        'units_label' => 'Units',
         'caching time' => 3600,
         'thresholds' => array(
           'intervals' => array(
@@ -113,7 +110,6 @@ function monitoring_monitoring_test_monitoring_sensor_info() {
       'settings' => array(
         'log_calls' => TRUE,
         'category' => 'Test',
-        'units_label' => 'Units',
         'thresholds' => array(
           'type' => 'inner_interval',
           'intervals' => array(
@@ -130,7 +126,6 @@ function monitoring_monitoring_test_monitoring_sensor_info() {
       'settings' => array(
         'log_calls' => TRUE,
         'category' => 'Test',
-        'units_label' => 'Units',
         'thresholds' => array(
           'type' => 'outer_interval',
           'intervals' => array(
@@ -147,7 +142,6 @@ function monitoring_monitoring_test_monitoring_sensor_info() {
       'settings' => array(
         'log_calls' => TRUE,
         'category' => 'Test',
-        'units_label' => 'Units',
         'thresholds' => array(
           'intervals' => array(
             SensorResultInterface::STATUS_CRITICAL => 10,
@@ -163,7 +157,6 @@ function monitoring_monitoring_test_monitoring_sensor_info() {
       'settings' => array(
         'log_calls' => TRUE,
         'category' => 'Test',
-        'units_label' => 'Units',
         'thresholds' => array(
           'type' => 'falls',
           'intervals' => array(
@@ -179,7 +172,6 @@ function monitoring_monitoring_test_monitoring_sensor_info() {
       'sensor class' => 'Drupal\monitoring_test\Sensor\Sensors\TestSensor',
       'settings' => array(
         'category' => 'Watchdog',
-        'units_label' => 'Units',
       ),
     ),
   );
