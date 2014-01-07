@@ -12,6 +12,8 @@ use Drupal\monitoring\Sensor\Sensor;
 
 /**
  * Monitors a specific module hook_requirements.
+ *
+ * @todo Shorten sensor message and add improved verbose output.
  */
 class SensorDrupalRequirements extends Sensor {
 
@@ -21,24 +23,75 @@ class SensorDrupalRequirements extends Sensor {
    * {@inheritdoc}
    */
   public function runSensor(SensorResultInterface $result) {
-    $module = $this->info->getSetting('module');
+    $requirements = $this->getRequirements($this->info->getSetting('module'));
+
+    // Ignore requirements that were explicitly excluded.
+    foreach ($this->info->getSetting('exclude keys', array()) as $exclude_key) {
+      if (isset($requirements[$exclude_key])) {
+        unset($requirements[$exclude_key]);
+      }
+    }
+
+    $this->processRequirements($result, $requirements);
+  }
+
+  /**
+   * Extracts the highest severity from the requirements array.
+   *
+   * Replacement for drupal_requirements_severity(), which ignores
+   * the INFO severity, which results in those messages not being displayed.
+   *
+   * @param $requirements
+   *   An array of requirements, in the same format as is returned by
+   *   hook_requirements().
+   *
+   * @return
+   *   The highest severity in the array.
+   */
+  protected function getHighestSeverity(&$requirements) {
+    $severity = REQUIREMENT_INFO;
+    foreach ($requirements as $requirement) {
+      if (isset($requirement['severity'])) {
+        $severity = max($severity, $requirement['severity']);
+      }
+    }
+    return $severity;
+  }
+
+  /**
+   * Executes the requirements hook of a module and returns the results.
+   *
+   * @param string $module
+   *   Name of the module to return requirements for.
+   *
+   * @return array
+   *   Array of requirements
+   *
+   * @throws \RuntimeException
+   *   Thrown when the given module does not provide a requirements hook.
+   */
+  protected function getRequirements($module) {
     module_load_include('install', $module);
     $function = $module . '_requirements';
 
     if (!function_exists($function)) {
-      $result->setSensorStatus(SensorResultInterface::STATUS_CRITICAL);
+      throw new \RuntimeException(format_string('Requirement function @function not found', array('@function' => $function)));
     }
 
-    $this->requirements = $function('runtime');
+    return (array)$function('runtime');
+  }
 
-    foreach ($this->info->getSetting('exclude keys', array()) as $exclude_key) {
-      if (isset($this->requirements[$exclude_key])) {
-        unset($this->requirements[$exclude_key]);
-      }
-    }
+  /**
+   * Sets sensor result status and status messages for the given requirements.
+   *
+   * @param SensorResultInterface $result
+   *   The result object to update.
+   * @param array $requirements
+   *   Array of requirements to process.
+   */
+  protected function processRequirements(SensorResultInterface $result, $requirements) {
 
-    $severity = $this->getHighestSeverity($this->requirements);
-
+    $severity = $this->getHighestSeverity($requirements);
     if ($severity == REQUIREMENT_ERROR) {
       $result->setSensorStatus(SensorResultInterface::STATUS_CRITICAL);
     }
@@ -49,8 +102,8 @@ class SensorDrupalRequirements extends Sensor {
       $result->setSensorStatus(SensorResultInterface::STATUS_OK);
     }
 
-    if (!empty($this->requirements)) {
-      foreach ($this->requirements as $requirement) {
+    if (!empty($requirements)) {
+      foreach ($requirements as $requirement) {
         // Skip if we do not have the highest requirements severity.
         if (!isset($requirement['severity']) || $requirement['severity'] != $severity) {
           continue;
@@ -73,30 +126,5 @@ class SensorDrupalRequirements extends Sensor {
     else {
       $result->addSensorStatusMessage('Requirements check OK');
     }
-  }
-
-  /**
-   * Extracts the highest severity from the requirements array.
-   *
-   * Replacement for drupal_requirements_severity(), which ignores
-   * the INFO severity, which results in those messages not being displayed.
-   *
-   * @param $requirements
-   *   An array of requirements, in the same format as is returned by
-   *   hook_requirements().
-   *
-   * @return
-   *   The highest severity in the array.
-   *
-   *
-   */
-  protected function getHighestSeverity(&$requirements) {
-    $severity = REQUIREMENT_INFO;
-    foreach ($requirements as $requirement) {
-      if (isset($requirement['severity'])) {
-        $severity = max($severity, $requirement['severity']);
-      }
-    }
-    return $severity;
   }
 }
