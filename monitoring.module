@@ -21,7 +21,11 @@ use Drupal\monitoring\SensorRunner;
  *   Sensor info.
  */
 function monitoring_sensor_info($sensor_name = NULL, $reset = FALSE) {
-  $info = &drupal_static(__FUNCTION__, array(), $reset);
+  $info = &drupal_static(__FUNCTION__, array());
+
+  if ($reset) {
+    $info = array();
+  }
 
   if (empty($info)) {
 
@@ -41,14 +45,14 @@ function monitoring_sensor_info($sensor_name = NULL, $reset = FALSE) {
       // Favor custom implementation.
       if (in_array($module, $custom_implementations)) {
         $result = module_invoke($module, 'monitoring_sensor_info');
-        $info = array_merge_recursive($info, $result);
+        $info = drupal_array_merge_deep($info, $result);
       }
       // If there is no custom implementation try to find local integration.
       elseif (function_exists('monitoring_' . $module . '_monitoring_sensor_info')) {
         $function = 'monitoring_' . $module . '_monitoring_sensor_info';
         $result = $function();
         if (is_array($result)) {
-          $info = array_merge_recursive($info, $result);
+          $info = drupal_array_merge_deep($info, $result);
         }
       }
     }
@@ -73,6 +77,11 @@ function monitoring_sensor_info($sensor_name = NULL, $reset = FALSE) {
       );
       $value['settings'] = monitoring_sensor_settings_merge($key, $value['settings']);
     }
+
+    // Support variable overrides.
+    debug(variable_get('monitoring_sensor', array()));
+    $info = drupal_array_merge_deep($info, variable_get('monitoring_sensor', array()));
+    debug($info);
   }
 
   if (!empty($sensor_name)) {
@@ -116,7 +125,10 @@ function monitoring_sensor_info_by_categories($enabled = TRUE) {
  *   A populated SensorInfo object.
  */
 function monitoring_sensor_info_instance($sensor_name = NULL, $reset = FALSE) {
-  $instances = &drupal_static(__FUNCTION__, array(), $reset);
+  $instances = &drupal_static(__FUNCTION__, array());
+  if ($reset) {
+    $instances = array();
+  }
 
   if (empty($instances)) {
     foreach (monitoring_sensor_info(NULL, $reset) as $key => $value) {

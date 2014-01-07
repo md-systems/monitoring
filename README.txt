@@ -80,3 +80,15 @@
 
     Lastly, all status messages are added, resulting in a message like "Value 5,
     expected 10, an explanation as a status message".
+
+ Sensor Info overrides
+ --------------
+
+ It is possible to override sensors settings defined in
+ hook_monitoring_sensor_info() using the monitoring_sensor variable, for example
+ in settings.php. This allows to enforce environment specific settings, like
+ disabling a certain sensor.
+
+ $conf['monitoring_sensor']['name_of_the_sensor']['settings']['enabled'] = FALSE;
+
+ Anything defined through the hook can be overridden.
