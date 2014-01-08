@@ -79,9 +79,7 @@ function monitoring_sensor_info($sensor_name = NULL, $reset = FALSE) {
     }
 
     // Support variable overrides.
-    debug(variable_get('monitoring_sensor', array()));
     $info = drupal_array_merge_deep($info, variable_get('monitoring_sensor', array()));
-    debug($info);
   }
 
   if (!empty($sensor_name)) {
