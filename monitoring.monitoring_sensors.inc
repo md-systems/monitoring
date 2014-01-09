@@ -34,9 +34,9 @@ function monitoring_monitoring_sensor_info() {
 function monitoring_node_monitoring_sensor_info() {
   $info = array();
 
-  $info['new_nodes'] = array(
-    'label' => 'New nodes',
-    'description' => 'New nodes added in last 24 hours',
+  $info['node_new_all'] = array(
+    'label' => 'All new nodes',
+    'description' => 'All new nodes added in last 24 hours',
     'sensor class' => 'Drupal\monitoring\Sensor\Sensors\SensorDatabaseAggregator',
     'settings' => array(
       'category' => 'Content',
@@ -51,6 +51,32 @@ function monitoring_node_monitoring_sensor_info() {
       ),
     ),
   );
+
+  foreach (node_type_get_types() as $node_type) {
+    $info['node_new_' . $node_type->type] = array(
+      'label' => format_string('New @type nodes', array('@type' => $node_type->name)),
+      'description' => format_string('New nodes of type @type created in last 24 hours', array('@type' => $node_type->name)),
+      'sensor class' => 'Drupal\monitoring\Sensor\Sensors\SensorDatabaseAggregator',
+      'settings' => array(
+        'category' => 'Content',
+        'units_label' => format_string('@type nodes', array('@type' => $node_type->name)),
+        'enabled' => FALSE,
+        // Cache for 10 minutes.
+        'caching time' => 600,
+        'thresholds' => array(
+          'type' => 'falls',
+        ),
+        'table' => 'node',
+        'conditions' => array(
+          array('field' => 'type', 'value' => $node_type->type),
+        ),
+        'time_period' => array(
+          'field' => 'created',
+          'value' => 24 * 60 * 60,
+        ),
+      ),
+    );
+  }
 
   return $info;
 }

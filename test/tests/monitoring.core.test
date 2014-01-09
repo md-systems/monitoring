@@ -4,6 +4,8 @@
  * Contains \MonitoringCoreTest.
  */
 
+use Drupal\monitoring\Result\SensorResultInterface;
+
 /**
  * Cron sensor tests.
  */
@@ -217,6 +219,21 @@ class MonitoringCoreTest extends MonitoringTestBase {
     // The message should say that it is ok.
     $this->assertTrue(strpos($result->getSensorMessage(), 'Git repository clean') !== FALSE);
 
+    // ======= node sensors tests ======= //
+
+    $type1 = $this->drupalCreateContentType();
+    $type2 = $this->drupalCreateContentType();
+    $this->drupalCreateNode(array('type' => $type1->type));
+    $this->drupalCreateNode(array('type' => $type1->type));
+    $this->drupalCreateNode(array('type' => $type2->type));
+
+    $result = $this->runSensor('node_new_' . $type1->type);
+    $this->assertEqual($result->getSensorValue(), 2);
+    $this->assertEqual($result->getSensorMessage(), '2 ' . $type1->type . ' nodes');
+
+    $result = $this->runSensor('node_new_all');
+    $this->assertEqual($result->getSensorValue(), 3);
+    $this->assertEqual($result->getSensorMessage(), '3 nodes');
   }
 
   /**
