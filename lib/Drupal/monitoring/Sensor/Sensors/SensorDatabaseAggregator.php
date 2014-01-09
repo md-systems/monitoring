@@ -18,13 +18,15 @@ use Drupal\monitoring\Sensor\SensorThresholds;
  * Provides basic query build logic and generic verbosity.
  *
  * Settings:
- * - conditions:
- *  - field
- *  - value
- *  - operator
- * - time_period:
- *  - field - timestamp field name
- *  - value - number of seconds defining the period
+ * - table: Name of the table to query on.
+ * - conditions: A list of conditions to apply to the query.
+ *   - field: Name of the field to filter on. Configurable fields are supported
+ *     using the field_name.column_name syntax.
+ *   - value: The value to limit by, either an array or a scalar value.
+ *   - operator: Any of the supported operators.
+ * - time_period: Configure the time period the query should apply to.
+ *   - field Timestamp field name
+ *   - value: Number of seconds defining the period
  */
 class SensorDatabaseAggregator extends SensorThresholds implements SensorExtendedInfoInterface {
 
@@ -127,7 +129,7 @@ class SensorDatabaseAggregator extends SensorThresholds implements SensorExtende
 
     if ($conditions = $this->info->getSetting('conditions')) {
       foreach ($conditions as $condition) {
-        $query->condition($condition['field'], $condition['value'], isset($condition['operator']) ? $condition['operator'] : NULL);
+        $query->condition($this->getFieldName($query, $condition), $condition['value'], isset($condition['operator']) ? $condition['operator'] : NULL);
       }
     }
 
@@ -139,6 +141,37 @@ class SensorDatabaseAggregator extends SensorThresholds implements SensorExtende
     }
 
     return $query;
+  }
+
+  /**
+   * Returns the field name to use for a condition and ensures necessary joins.
+   *
+   * @param \SelectQueryInterface $query
+   *   Select query instance.
+   * @param array $condition
+   *   A query condition array, containing at least the field.
+   *
+   * @return string
+   *   The field name to use for conditions for that condition definition, can
+   *   contain a table name alias if the field is part of a joined table.
+   */
+  protected function getFieldName(\SelectQueryInterface $query, array $condition) {
+    if (strpos($condition['field'], '.') !== FALSE) {
+      // Configurable field conditions are only supported if this is an entity
+      // table.
+      $entity_type = $this->getEntityTypeFromTable($this->info->getSetting('table'));
+      list($field_name, $column) = explode('.', $condition['field']);
+
+      // Add a join to the field table.
+      $alias = $this->joinFieldTable($query, $entity_type, $field_name);
+
+      // Return the combination of alias table name and field column.
+      return $alias . '.' . _field_sql_storage_columnname($field_name, $column);
+    }
+    else {
+      // A simple base table field.
+      return $condition['field'];
+    }
   }
 
   /**
@@ -167,4 +200,61 @@ class SensorDatabaseAggregator extends SensorThresholds implements SensorExtende
 
     $result->setSensorValue($records_count);
   }
+
+  /**
+   * Returns the entity type for a given base table.
+   *
+   * @param string $base_table
+   *   The name of base table.
+   *
+   * @return string
+   *   The entity type that is stored in the given base table.
+   *
+   * @throws \InvalidArgumentException
+   *   Thrown if the table does not belong to any entity type.
+   */
+  protected function getEntityTypeFromTable($base_table) {
+    foreach (entity_get_info() as $entity_type => $entity_info) {
+      if (isset($entity_info['base table']) && $entity_info['base table'] == $base_table) {
+        return $entity_type;
+      }
+    }
+
+    // If we failed to find the entity type, abort.
+    throw new \InvalidArgumentException(format_string('No entity type found for table @table', array('@table' => $this->info->getSetting('table'))));
+  }
+
+  /**
+   * Joins the field data table for a given field.
+   *
+   * @param \SelectQueryInterface $query
+   *   The select query which should be joined.
+   * @param string $entity_type
+   *   The entity type this field belongs to.
+   * @param string $field_name
+   *   Name of the field.
+   *
+   * @return string
+   *   Alias of the joined table name.
+   *
+   * @throws \InvalidArgumentException
+   *   Thrown if the given field does not use the SQL storage.
+   */
+  protected function joinFieldTable(\SelectQueryInterface $query, $entity_type, $field_name) {
+    // Build the entity table and id column name.
+    $entity_info = entity_get_info($entity_type);
+    $entity_table_id = $this->info->getSetting('table') . '.' . $entity_info['entity keys']['id'];
+
+    // Check the storage type.
+    $field = field_info_field($field_name);
+    if ($field['storage']['type'] != 'field_sql_storage') {
+      throw new \InvalidArgumentException('Only configurable fields that use the sql storage are supported.');
+    }
+
+    // Add the join to the field data table.
+    $table_name = _field_sql_storage_tablename($field);
+    $alias = $query->join($table_name, $field_name, '%alias.entity_type = :entity_type AND %alias.entity_id = ' . $entity_table_id, array(':entity_type' => $entity_type));
+    return $alias;
+  }
+
 }
