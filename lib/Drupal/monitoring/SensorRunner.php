@@ -222,14 +222,44 @@ class SensorRunner implements \IteratorAggregate {
       }
 
       $old_status = NULL;
+      // Try to load the previous log result for this sensor.
       if ($last_result = monitoring_sensor_result_last($result->getSensorName())) {
         $old_status = $last_result->sensor_status;
       }
 
-      if ($result->getSensorInfo()->logResults($this->loggingMode, $old_status, $result->getSensorStatus())) {
+      // Check if we need to log the result.
+      if ($this->needsLogging($result, $old_status, $result->getSensorStatus())) {
         monitoring_sensor_result_save($result);
       }
     }
+  }
+
+  /**
+   * Checks if sensor results should be logged.
+   *
+   * @param \Drupal\monitoring\Result\SensorResultInterface $result
+   *   The sensor result.
+   * @param string $old_status
+   *   The old sensor status.
+   * @param string $new_status
+   *   Thew new sensor status.
+   *
+   * @return bool
+   *   TRUE if the result should be logged, FALSE if not.
+   */
+  protected function needsLogging($result, $old_status = NULL, $new_status = NULL) {
+    $log_activity = $result->getSensorInfo()->getSetting('log_calls', FALSE);
+
+    // We log if requested or on status change.
+    if ($this->loggingMode == 'on_request') {
+      return $log_activity || ($old_status != $new_status);
+    }
+
+    // We are logging all.
+    if ($this->loggingMode == 'all') {
+      return TRUE;
+    }
+    return FALSE;
   }
 
   /**

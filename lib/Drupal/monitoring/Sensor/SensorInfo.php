@@ -208,31 +208,4 @@ class SensorInfo {
     return in_array('Drupal\monitoring\Sensor\SensorThresholdsInterface', class_implements($this->getSensorClass()));
   }
 
-  /**
-   * Checks if sensor results should be logged.
-   *
-   * @param string $logging_mode
-   *   Global logging mode setting value.
-   * @param string $old_status
-   *   The old sensor status.
-   * @param string $new_status
-   *   Thew new sensor status.
-   *
-   * @return bool
-   */
-  public function logResults($logging_mode, $old_status = NULL, $new_status = NULL) {
-    $log_activity = $this->getSetting('log_calls', FALSE);
-
-    // We log if requested or on status change.
-    if ($logging_mode == 'on_request') {
-      return $log_activity || ($old_status != $new_status);
-    }
-
-    // We are logging all.
-    if ($logging_mode == 'all') {
-      return TRUE;
-    }
-
-    return FALSE;
-  }
 }
