@@ -227,6 +227,8 @@ class MonitoringCoreTest extends MonitoringTestBase {
     $this->drupalCreateNode(array('type' => $type1->type));
     $this->drupalCreateNode(array('type' => $type2->type));
 
+    // Make sure that sensors for the new node types are available.
+    $this->sensorManager->resetCache();
     $result = $this->runSensor('node_new_' . $type1->type);
     $this->assertEqual($result->getSensorValue(), 2);
     $this->assertEqual($result->getSensorMessage(), '2 ' . $type1->type . ' nodes');
@@ -246,7 +248,7 @@ class MonitoringCoreTest extends MonitoringTestBase {
 
     // Enable the comment module and the new_comments sensor.
     module_enable(array('comment'));
-    monitoring_sensor_enable('new_comments');
+    $this->sensorManager->enableSensor('new_comments');
 
     // Run the disappeared sensor - it should not report any problems.
     $result = $this->runSensor('disappeared_sensors');
@@ -254,9 +256,6 @@ class MonitoringCoreTest extends MonitoringTestBase {
 
     // Disable the comment module so that the new_comments sensor goes away.
     module_disable(array('comment'));
-    // Call the sensor info callback with rebuild flag to TRUE so that the local
-    // static cache is rebuild to reflect the sensor info update.
-    monitoring_sensor_info(NULL, TRUE);
 
     // The new_comments sensor has gone away and therefore we should have the
     // critical status.
@@ -267,7 +266,6 @@ class MonitoringCoreTest extends MonitoringTestBase {
     // Enable the comment module to test the correct procedure of removing
     // sensors.
     module_enable(array('comment'));
-    monitoring_sensor_info(NULL, TRUE);
 
     // Now we should be back to normal.
     $result = $this->runSensor('disappeared_sensors');
@@ -275,9 +273,8 @@ class MonitoringCoreTest extends MonitoringTestBase {
 
     // Do the correct procedure to remove a sensor - first disable the sensor
     // and then disable the comment module.
-    monitoring_sensor_disable('new_comments');
+    $this->sensorManager->disableSensor('new_comments');
     module_disable(array('comment'));
-    monitoring_sensor_info(NULL, TRUE);
 
     // The sensor should not report any problem this time.
     $result = $this->runSensor('disappeared_sensors');
@@ -288,7 +285,7 @@ class MonitoringCoreTest extends MonitoringTestBase {
     $this->drupalLogin($account);
     // Enable comment module and the new_comments sensor.
     module_enable(array('comment'));
-    monitoring_sensor_enable('new_comments');
+    $this->sensorManager->enableSensor('new_comments');
 
     // We should have the message that no sensors are missing.
     $this->drupalGet('admin/config/system/monitoring/sensors/disappeared_sensors');
@@ -296,14 +293,13 @@ class MonitoringCoreTest extends MonitoringTestBase {
 
     // Disable sensor and the comment module. This is the correct procedure and
     // therefore there should be no missing sensors.
-    monitoring_sensor_disable('new_comments');
-    module_disable(array('comment'));
+    $this->sensorManager->disableSensor('new_comments');
     $this->drupalGet('admin/config/system/monitoring/sensors/disappeared_sensors');
     $this->assertText(t('There are no missing sensors.'));
 
     // Enable comment module and the new_comments sensor.
     module_enable(array('comment'));
-    monitoring_sensor_enable('new_comments');
+    $this->sensorManager->enableSensor('new_comments');
     // Now disable the comment module to have the new_comments sensor disappear.
     module_disable(array('comment'));
     // Run the disappeared_sensors sensor to get the status message that should
@@ -410,7 +406,7 @@ class MonitoringCoreTest extends MonitoringTestBase {
     $this->assertEqual($result->getSensorValue(), 2);
 
     // Test with different db table.
-    $info = monitoring_sensor_info_instance('db_aggregate_test');
+    $info = monitoring_sensor_info('db_aggregate_test');
     $time_period = $info->getSetting('time_period');
     $this->drupalCreateNode(array('promote' => '1'));
     $this->drupalCreateNode(array('promote' => '0'));

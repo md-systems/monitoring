@@ -63,16 +63,17 @@ class MonitoringApiTest extends MonitoringTestBase {
 
     // == Test disabled sensor. == //
 
-    $sensor_info = monitoring_sensor_info('test_sensor');
-    $sensor_info['settings']['enabled'] = FALSE;
-    variable_set('test_sensor_info', $sensor_info);
+    // Disable a sensor.
+    $this->sensorManager->disableSensor('test_sensor');
 
     // Running a disabled sensor must return a NULL result.
     $result = monitoring_sensor_run('test_sensor');
-    $this->assertTrue(empty($result));
+    $this->assertTrue($result === NULL);
 
-    // Null the info so it will not affect other assertions.
-    variable_set('test_sensor_info', NULL);
+    // Enable the sensor again.
+    $this->sensorManager->enableSensor('test_sensor');
+    $result = monitoring_sensor_run('test_sensor');
+    $this->assertTrue($result instanceof SensorResultInterface);
 
     // == Test settings. == //
 
@@ -240,19 +241,20 @@ class MonitoringApiTest extends MonitoringTestBase {
       'sensor_status' => SensorResultInterface::STATUS_CRITICAL,
     );
     variable_set('test_sensor_result_data', $test_sensor_result_data);
-    $result = monitoring_sensor_run('test_sensor', TRUE);
+    $result = $this->runSensor('test_sensor');
     $this->assertNull($result->getSensorValue());
 
     // Test variable-based overrides.
     global $conf;
-    $conf['monitoring_sensor']['test_sensor'] = array(
+    $conf['monitoring_sensor_info']['test_sensor'] = array(
       'label' => 'Overridden sensor',
       'settings' => array(
         'caching time' => 1,
         'new setting' => 'example value',
       ),
     );
-    $info = monitoring_sensor_info_instance('test_sensor', TRUE);
+    monitoring_sensor_manager()->resetCache();
+    $info = monitoring_sensor_info('test_sensor');
     $this->assertEqual('Overridden sensor', $info->getLabel());
     $this->assertEqual(1, $info->getSetting('caching time'));
     $this->assertEqual('example value', $info->getSetting('new setting'));
@@ -370,9 +372,12 @@ class MonitoringApiTest extends MonitoringTestBase {
 
     // Include file with custom hook implementation.
     require_once drupal_get_path('module', 'monitoring_test') . '/monitoring_test.custom_hook.inc';
-    $sensor_info = monitoring_sensor_info(NULL, TRUE);
+    monitoring_sensor_manager()->resetCache();
+    // Reset the module implements cache.
+    module_implements(NULL, NULL, TRUE);
+    $sensor_info = monitoring_sensor_info();
     // The custom hook must take precedence.
-    $this->assertTrue(isset($sensor_info['test_sensor_integration']));
+    $this->assertFalse(isset($sensor_info['test_sensor_integration']));
   }
 
   protected function loadSensorData($sensor_name) {

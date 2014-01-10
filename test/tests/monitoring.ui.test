@@ -34,10 +34,9 @@ class MonitoringUITest extends MonitoringTestBase {
     $account = $this->drupalCreateUser(array('administer monitoring'));
     $this->drupalLogin($account);
 
-    $info = monitoring_sensor_info_instance();
+    $info = monitoring_sensor_info();
 
     // Test sensor exceeds.
-    /** @var SensorInfo $sensor_info */
     $sensor_info = $info['test_sensor_exceeds'];
     $data = array();
     foreach ($sensor_info->getThresholdsIntervals() as $status => $threshold) {
@@ -118,7 +117,7 @@ class MonitoringUITest extends MonitoringTestBase {
       $this->assertEqual($category, $tr->td->h3);
 
       foreach ($category_sensor_info as $sensor_name => $info) {
-        $sensor_info = monitoring_sensor_info_instance($sensor_name);
+        $sensor_info = monitoring_sensor_info($sensor_name);
         if (!$sensor_info->isEnabled()) {
           continue;
         }
@@ -130,7 +129,7 @@ class MonitoringUITest extends MonitoringTestBase {
       $i++;
     }
 
-    $sensor_info = monitoring_sensor_info_instance('test_sensor');
+    $sensor_info = monitoring_sensor_info('test_sensor');
     $this->drupalGet('admin/reports/monitoring/sensors/test_sensor');
     $this->assertTitle(t('@label (@category) | Drupal', array('@label' => $sensor_info->getLabel(), '@category' => $sensor_info->getCategory())));
   }

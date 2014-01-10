@@ -17,6 +17,13 @@ abstract class MonitoringTestBase extends DrupalWebTestCase {
   protected $profile = 'testing';
 
   /**
+   * Sensor manager.
+   *
+   * @var \Drupal\monitoring\Sensor\SensorManager
+   */
+  protected $sensorManager;
+
+  /**
    * {@inheritdoc}
    */
   function setUp() {
@@ -26,6 +33,8 @@ abstract class MonitoringTestBase extends DrupalWebTestCase {
     }
     $modules = array_merge(array('monitoring', 'monitoring_test'), $modules);
     parent::setUp($modules);
+
+    $this->sensorManager = monitoring_sensor_manager();
   }
 
   /**
@@ -39,7 +48,7 @@ abstract class MonitoringTestBase extends DrupalWebTestCase {
    */
   protected function runSensor($sensor_name) {
     // Make sure the sensor is enabled.
-    monitoring_sensor_enable($sensor_name);
+    monitoring_sensor_manager()->enableSensor($sensor_name);
     return monitoring_sensor_run($sensor_name, TRUE);
   }
 

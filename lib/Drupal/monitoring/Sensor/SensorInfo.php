@@ -158,6 +158,16 @@ class SensorInfo {
   }
 
   /**
+   * Returns all settings.
+   *
+   * @return array
+   *   Settings as an array.
+   */
+  public function getSettings() {
+    return $this->sensorInfo['settings'];
+  }
+
+  /**
    * Gets setting.
    *
    * @param string $key

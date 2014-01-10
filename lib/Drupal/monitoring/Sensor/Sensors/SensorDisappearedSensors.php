@@ -69,7 +69,7 @@ class SensorDisappearedSensors extends SensorConfigurable {
    *
    * @param array $available_sensors
    *   The available sensors list.
-   * @param array $sensor_info
+   * @param \Drupal\monitoring\Sensor\SensorInfo[] $sensor_info
    *   The current sensor info.
    *
    * @return array
@@ -85,13 +85,13 @@ class SensorDisappearedSensors extends SensorConfigurable {
       if (!in_array($key, $available_sensors)) {
         $new_sensors[$key] = array(
           'name' => $key,
-          'enabled' => !empty($info['settings']['enabled']),
+          'enabled' => $info->isEnabled(),
         );
       }
       // Check for sensor status changes that were not updated via
       // monitoring_sensor_enable/disable callbacks.
-      elseif ($available_sensors[$key]['enabled'] != $info['settings']['enabled']) {
-        $available_sensors[$key]['enabled'] = $info['settings']['enabled'];
+      elseif ($available_sensors[$key]['enabled'] != $info->isEnabled()) {
+        $available_sensors[$key]['enabled'] = $info->isEnabled();
       }
     }
 
@@ -112,7 +112,7 @@ class SensorDisappearedSensors extends SensorConfigurable {
    *   The current sensor result object.
    * @param array $available_sensors
    *   The available sensors list.
-   * @param array $sensor_info
+   * @param \Drupal\monitoring\Sensor\SensorInfo[] $sensor_info
    *   The current sensor info.
    */
   protected function checkForMissingSensors(SensorResultInterface $result, $available_sensors, $sensor_info) {

@@ -67,7 +67,7 @@ class SensorRunner implements \IteratorAggregate {
   public function __construct(array $sensors = array()) {
     $this->sensors = $sensors;
     if (empty($sensors)) {
-      $this->sensors = monitoring_sensor_info_instance();
+      $this->sensors = monitoring_sensor_info();
     }
     // @todo LOW Cleanly variable based installation should go into a factory.
     $this->loggingMode = variable_get('monitoring_sensor_call_logging', 'on_request');

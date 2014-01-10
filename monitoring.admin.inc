@@ -17,7 +17,7 @@ function monitoring_config_sensors_overview_form($form, &$form_state) {
   $options = array();
   $default_value = array();
 
-  foreach (monitoring_sensor_info_instance() as $sensor_name => $sensor_info) {
+  foreach (monitoring_sensor_info() as $sensor_name => $sensor_info) {
     $row = array(
       'category' => $sensor_info->getCategory(),
       'label' => $sensor_info->getLabel(),
@@ -72,7 +72,12 @@ function monitoring_config_sensors_overview_form($form, &$form_state) {
  */
 function monitoring_config_sensors_overview_form_submit($form, &$form_state) {
   foreach ($form_state['values']['sensors'] as $sensor_name => $enabled) {
-    monitoring_sensor_disable($sensor_name);
+    if ($enabled) {
+      monitoring_sensor_manager()->enableSensor($sensor_name);
+    }
+    else {
+      monitoring_sensor_manager()->disableSensor($sensor_name);
+    }
   }
 }
 
@@ -121,7 +126,7 @@ function monitoring_reports_sensors_overview() {
       }
       $sensor_result = $results[$sensor_name];
 
-      $sensor_info = monitoring_sensor_info_instance($sensor_name);
+      $sensor_info = monitoring_sensor_info($sensor_name);
 
       $row['data']['label'] = '<span title="' . $sensor_info->getDescription() . '">' . $sensor_info->getLabel() . '</span>';
 
@@ -233,7 +238,7 @@ function monitoring_reports_sensors_overview() {
  */
 function monitoring_sensor_settings_form($form, &$form_state, $sensor_name) {
 
-  $sensor_info = monitoring_sensor_info_instance($sensor_name);
+  $sensor_info = monitoring_sensor_info($sensor_name);
   if (!$sensor_info->isConfigurable()) {
     return $form;
   }
@@ -263,7 +268,7 @@ function monitoring_sensor_settings_form($form, &$form_state, $sensor_name) {
 
 function monitoring_sensor_settings_form_validate($form, &$form_state) {
   /** @var SensorConfigurableInterface $sensor */
-  $sensor_info = monitoring_sensor_info_instance($form_state['sensor_name']);
+  $sensor_info = monitoring_sensor_info($form_state['sensor_name']);
   $sensor_class = $sensor_info->getSensorClass();
   $sensor = new $sensor_class($sensor_info);
   $sensor->settingsFormValidate($form, $form_state);
@@ -277,7 +282,7 @@ function monitoring_sensor_settings_form_submit($form, &$form_state) {
 
 function monitoring_sensor_details($form, &$form_state, $sensor_name) {
   $form_state['sensor_name'] = $sensor_name;
-  $sensor_info = monitoring_sensor_info_instance($sensor_name);
+  $sensor_info = monitoring_sensor_info($sensor_name);
 
   $verbose = array();
   $result = monitoring_sensor_run($sensor_name, FALSE, $verbose);

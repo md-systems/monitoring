@@ -22,7 +22,7 @@ class SensorName extends \views_handler_field_entity {
      * @var SensorResultEntity $result
      */
     $result = $this->get_value($values);
-    $sensor_info = monitoring_sensor_info_instance($result->sensor_name);
+    $sensor_info = monitoring_sensor_info($result->sensor_name);
 
     return l($sensor_info->getLabel(), 'admin/reports/monitoring/sensors/' . $result->sensor_name);
   }

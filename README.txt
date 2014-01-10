@@ -89,6 +89,6 @@
  in settings.php. This allows to enforce environment specific settings, like
  disabling a certain sensor.
 
- $conf['monitoring_sensor']['name_of_the_sensor']['settings']['enabled'] = FALSE;
+ $conf['monitoring_sensor_info']['name_of_the_sensor']['settings']['enabled'] = FALSE;
 
  Anything defined through the hook can be overridden.

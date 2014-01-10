@@ -52,7 +52,7 @@ class MonitoringSearchAPITest extends MonitoringTestBase {
     $this->clickLink(t('enable'));
     // Reset sensor info so that sensor for newly created search api index
     // gets picked up.
-    monitoring_sensor_info_instance(NULL, TRUE);
+    monitoring_sensor_info(NULL, TRUE);
     // Load indexes.
     $indexes = search_api_index_load_multiple(FALSE);
 

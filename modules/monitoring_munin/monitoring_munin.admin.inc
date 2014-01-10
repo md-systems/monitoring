@@ -51,8 +51,7 @@ function monitoring_munin_graph_settings($form, &$form_state) {
     $options[$multigraph['title']] = $multigraph['title'];
   }
 
-  /** @var \Drupal\monitoring\Sensor\SensorInfo $sensor_info */
-  foreach (monitoring_sensor_info_instance() as $sensor_name => $sensor_info) {
+  foreach (monitoring_sensor_info() as $sensor_name => $sensor_info) {
     if (!$sensor_info->isEnabled()) {
       continue;
     }
@@ -107,7 +106,7 @@ function monitoring_munin_graph_settings($form, &$form_state) {
  * Munin graph settings submit callback.
  */
 function monitoring_munin_graph_settings_submit($form, &$form_state) {
-  foreach (monitoring_sensor_info_instance() as $sensor_name => $sensor_info) {
+  foreach (monitoring_sensor_info() as $sensor_name => $sensor_info) {
     if ($sensor_info->isEnabled() && !empty($form_state['values'][$sensor_name])) {
       $settings = monitoring_sensor_settings_get($sensor_name);
       $settings['munin'] = $form_state['values'][$sensor_name];

@@ -47,7 +47,8 @@ class MonitoringMuninTest extends DrupalWebTestCase {
 
     // Deleting the multigraph must remove it form sensors settings as well.
     monitoring_munin_multigraph_delete('test multigraph');
-    $info = monitoring_sensor_info_instance('404_in_last_24_hours', TRUE);
+    monitoring_sensor_manager()->resetCache();
+    $info = monitoring_sensor_info('404_in_last_24_hours');
     $munin_settings = $info->getSetting('munin');
     $this->assertTrue(!in_array('test multigraph', $munin_settings['multigraphs']));
   }

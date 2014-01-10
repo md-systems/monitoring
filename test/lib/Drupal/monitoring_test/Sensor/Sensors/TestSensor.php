@@ -23,13 +23,6 @@ class TestSensor extends SensorThresholds implements SensorExtendedInfoInterface
   protected $testSensorResultData;
 
   function __construct(SensorInfo $info) {
-
-    // If we have testing sensor info, override the one provided by the info
-    // hook.
-    if ($_sensor_info = variable_get('test_sensor_info')) {
-      $info = new SensorInfo($info->getName(), $_sensor_info);
-    }
-
     parent::__construct($info);
 
     // Load test sensor data which will be used in the runSensor() logic.

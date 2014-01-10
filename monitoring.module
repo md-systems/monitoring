@@ -7,86 +7,37 @@
 
 use Drupal\monitoring\Sensor\SensorInfo;
 use Drupal\monitoring\Result\SensorResultInterface;
+use Drupal\monitoring\Sensor\SensorManager;
 use Drupal\monitoring\SensorRunner;
+
+/**
+ * Returns an instance of the sensor manager.
+ *
+ * @return \Drupal\monitoring\Sensor\SensorManager
+ *   The sensor manager.
+ */
+function monitoring_sensor_manager() {
+  $sensor_manager = &drupal_static(__FUNCTION__);
+  if (!$sensor_manager) {
+    $sensor_manager = new SensorManager();
+  }
+  return $sensor_manager;
+}
 
 /**
  * Returns monitoring sensor info.
  *
  * @param string $sensor_name
  *   Sensor id.
- * @param bool $reset
- *   Static cache reset flag.
  *
- * @return array
- *   Sensor info.
+ * @return \Drupal\monitoring\Sensor\SensorInfo[]
+ *   List of SensorInfo instances.
  */
-function monitoring_sensor_info($sensor_name = NULL, $reset = FALSE) {
-  $info = &drupal_static(__FUNCTION__, array());
-
-  if ($reset) {
-    $info = array();
+function monitoring_sensor_info($sensor_name = NULL) {
+  if ($sensor_name) {
+    return monitoring_sensor_manager()->getSensorInfoByName($sensor_name);
   }
-
-  if (empty($info)) {
-
-    // A module might provide a separate file with sensor definitions. Try to
-    // include it prior to checking if a hook exists.
-    foreach (module_list() as $module) {
-      $sensors_file = drupal_get_path('module', $module) . '/' . $module . '.monitoring_sensors.inc';
-      if (file_exists($sensors_file)) {
-        require_once $sensors_file;
-      }
-    }
-
-    // Collect sensors info.
-    $custom_implementations = module_implements('monitoring_sensor_info');
-    foreach (module_list() as $module) {
-
-      // Favor custom implementation.
-      if (in_array($module, $custom_implementations)) {
-        $result = module_invoke($module, 'monitoring_sensor_info');
-        $info = drupal_array_merge_deep($info, $result);
-      }
-      // If there is no custom implementation try to find local integration.
-      elseif (function_exists('monitoring_' . $module . '_monitoring_sensor_info')) {
-        $function = 'monitoring_' . $module . '_monitoring_sensor_info';
-        $result = $function();
-        if (is_array($result)) {
-          $info = drupal_array_merge_deep($info, $result);
-        }
-      }
-    }
-
-    // Allow to alter the collected sensors info.
-    drupal_alter('monitoring_sensor_info', $info);
-
-    // Merge in saved sensor settings.
-    foreach ($info as $key => &$value) {
-      // Set default values.
-      $value += array(
-        'description' => '',
-        'result class' => 'Drupal\monitoring\Result\SensorResult',
-        'type' => 'numeric',
-        'settings' => array(),
-      );
-      $value['settings'] += array(
-        'enabled' => TRUE,
-        'caching time' => 0,
-        'category' => 'Other',
-        'units_label' => NULL,
-      );
-      $value['settings'] = monitoring_sensor_settings_merge($key, $value['settings']);
-    }
-
-    // Support variable overrides.
-    $info = drupal_array_merge_deep($info, variable_get('monitoring_sensor', array()));
-  }
-
-  if (!empty($sensor_name)) {
-    return $info[$sensor_name];
-  }
-
-  return $info;
+  return monitoring_sensor_manager()->getSensorInfo();
 }
 
 /**
@@ -99,46 +50,7 @@ function monitoring_sensor_info($sensor_name = NULL, $reset = FALSE) {
  *   Sensor info.
  */
 function monitoring_sensor_info_by_categories($enabled = TRUE) {
-  $info_by_categories = array();
-  foreach (monitoring_sensor_info_instance() as $sensor_name => $sensor_info) {
-    if ($sensor_info->isEnabled() != $enabled) {
-      continue;
-    }
-
-    $info_by_categories[$sensor_info->getCategory()][$sensor_name] = $sensor_info;
-  }
-
-  return $info_by_categories;
-}
-
-/**
- * Helper class to get instance/s of SensorInfo.
- *
- * @param string $sensor_name
- *   Sensor name.
- * @param bool $reset
- *   Flag to reset internal static cache.
- *
- * @return \Drupal\monitoring\Sensor\SensorInfo[]
- *   A populated SensorInfo object.
- */
-function monitoring_sensor_info_instance($sensor_name = NULL, $reset = FALSE) {
-  $instances = &drupal_static(__FUNCTION__, array());
-  if ($reset) {
-    $instances = array();
-  }
-
-  if (empty($instances)) {
-    foreach (monitoring_sensor_info(NULL, $reset) as $key => $value) {
-      $instances[$key] = new SensorInfo($key, $value);
-    }
-  }
-
-  if (!empty($sensor_name)) {
-    return isset($instances[$sensor_name]) ? $instances[$sensor_name] : NULL;
-  }
-
-  return $instances;
+  return monitoring_sensor_manager()->getSensorInfoByCategories($enabled);
 }
 
 /**
@@ -155,12 +67,12 @@ function monitoring_sensor_info_instance($sensor_name = NULL, $reset = FALSE) {
  *   If an empty array is provided it will be filled with verbose output keyed
  *   by sensor names.
  *
- * @return SensorResultInterface
+ * @return SensorResultInterface|null
  *   A single result object.
  */
 function monitoring_sensor_run($sensor_name, $force_run = FALSE, &$verbose = NULL) {
   $results = monitoring_sensor_run_multiple(array($sensor_name), $force_run, $verbose);
-  return reset($results);
+  return $results ? reset($results) : NULL;
 }
 
 /**
@@ -182,11 +94,11 @@ function monitoring_sensor_run_multiple($sensor_names = array(), $force_run = FA
   $get_verbose_output = $verbose !== NULL;
 
   if (empty($sensor_names)) {
-    $sensors_info = monitoring_sensor_info_instance();
+    $sensors_info = monitoring_sensor_info();
   }
   else {
     $sensors_info = array();
-    foreach (monitoring_sensor_info_instance() as $sensor_name => $info) {
+    foreach (monitoring_sensor_info() as $sensor_name => $info) {
       if (in_array($sensor_name, $sensor_names)) {
         $sensors_info[$sensor_name] = $info;
       }
@@ -353,7 +265,7 @@ function monitoring_menu() {
  */
 function monitoring_sensor_action_title($action, $sensor_name) {
   $sensor_info = monitoring_sensor_info($sensor_name);
-  $placeholders = array('@category' => $sensor_info['settings']['category'], '@label' => $sensor_info['label']);
+  $placeholders = array('@category' => $sensor_info->getCategory(), '@label' => $sensor_info->getLabel());
   switch ($action) {
     case 'settings':
       return t('@label settings (@category)', $placeholders);
@@ -387,23 +299,6 @@ function monitoring_permission() {
 }
 
 /**
- * Merges provided sensor settings with saved settings.
- *
- * @param string $sensor_name
- *   Sensor name.
- * @param array $default_settings
- *   Default sensor settings.
- *
- * @return array
- *   Merged settings.
- */
-function monitoring_sensor_settings_merge($sensor_name, array $default_settings) {
-  $saved_settings = monitoring_sensor_settings_get($sensor_name);
-  $default_settings = array_merge($default_settings, $saved_settings);
-  return $default_settings;
-}
-
-/**
  * Saves sensor settings.
  *
  * @param string $sensor_name
@@ -413,8 +308,8 @@ function monitoring_sensor_settings_merge($sensor_name, array $default_settings)
  */
 function monitoring_sensor_settings_save($sensor_name, $values) {
   variable_set(monitoring_sensor_settings_key($sensor_name), $values);
-  // After settings save reset the static cache.
-  monitoring_sensor_info_instance(NULL, TRUE);
+  // After settings save reset the cache.
+  monitoring_sensor_manager()->resetCache();
 }
 
 /**
@@ -615,55 +510,6 @@ function monitoring_host_key() {
 }
 
 /**
- * Enable a sensor.
- *
- * Checks if the sensor is enabled and enables it if not.
- *
- * @todo - We should move all the settings actions to the Sensor API/interface.
- *
- * @param string $sensor_name
- *   Sensor name to be enabled.
- */
-function monitoring_sensor_enable($sensor_name) {
-  $settings = monitoring_sensor_settings_get($sensor_name);
-  if (empty($settings['enabled'])) {
-    $settings['enabled'] = TRUE;
-    monitoring_sensor_settings_save($sensor_name, $settings);
-    // @todo - the following part is SensorDisappearedSensors specific. We need
-    // to move it into the sensor somehow.
-    $available_sensors = variable_get('monitoring_available_sensors', array());
-    $available_sensors[$sensor_name]['enabled'] = TRUE;
-    $available_sensors[$sensor_name]['name'] = $sensor_name;
-    variable_set('monitoring_available_sensors', $available_sensors);
-  }
-}
-
-/**
- * Disable a sensor.
- *
- * Checks if the sensor is enabled and if so it will disable it and remove from
- * the active sensor list.
- *
- * @todo - We should move all the settings actions to the Sensor API/interface.
- *
- * @param string $sensor_name
- *   Sensor name to be disabled.
- */
-function monitoring_sensor_disable($sensor_name) {
-  $settings = monitoring_sensor_settings_get($sensor_name);
-  if (!empty($settings['enabled'])) {
-    $settings['enabled'] = FALSE;
-    monitoring_sensor_settings_save($sensor_name, $settings);
-    // @todo - the following part is SensorDisappearedSensors specific. We need
-    // to move it into the sensor somehow.
-    $available_sensors = variable_get('monitoring_available_sensors', array());
-    $available_sensors[$sensor_name]['enabled'] = FALSE;
-    $available_sensors[$sensor_name]['name'] = $sensor_name;
-    variable_set('monitoring_available_sensors', $available_sensors);
-  }
-}
-
-/**
  * Submit callback to clear the disappeared sensors list.
  *
  * @see SensorDisappearedSensors::settingsForm()
@@ -673,10 +519,28 @@ function monitoring_clear_missing_sensor_submit($form, &$form_state) {
   foreach (monitoring_sensor_info() as $key => $info) {
     $available_sensors[$key] = array(
       'name' => $key,
-      'label' => $info['label'],
-      'enabled' => !empty($info['settings']['enabled']),
+      'label' => $info->getLabel(),
+      'enabled' => $info->isEnabled(),
     );
   }
   variable_set('monitoring_available_sensors', $available_sensors);
   drupal_set_message(t('All missing sensors have been cleared.'));
+}
+
+/**
+ * Implements hook_modules_enabled().
+ */
+function monitoring_modules_enabled($modules) {
+  // Enabling modules can change the available sensors, reset the cache to make
+  // sure that the list is up to date.
+  monitoring_sensor_manager()->resetCache();
+}
+
+/**
+ * Implements hook_modules_enabled().
+ */
+function monitoring_modules_disabled($modules) {
+  // Disabling modules can change the available sensors, reset the cache to make
+  // sure that the list is up to date.
+  monitoring_sensor_manager()->resetCache();
 }
