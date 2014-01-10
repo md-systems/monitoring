@@ -46,7 +46,7 @@ function monitoring_schema() {
         'default' => 0,
       ),
       'execution_time' => array(
-        'description' => 'Sensor execution time duration value',
+        'description' => 'Sensor execution time duration value in milliseconds',
         'type' => 'numeric',
         'not null' => TRUE,
         'precision' => 10,

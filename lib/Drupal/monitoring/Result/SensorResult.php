@@ -236,7 +236,7 @@ class SensorResult implements SensorResultInterface {
    * {@inheritdoc}
    */
   public function getSensorExecutionTime() {
-    return $this->getResultData('execution_time');
+    return round($this->getResultData('execution_time'), 2);
   }
 
   /**
