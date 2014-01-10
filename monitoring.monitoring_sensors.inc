@@ -22,6 +22,14 @@ function monitoring_monitoring_sensor_info() {
       'cmd' => 'git status --porcelain',
     ),
   );
+  $info['disappeared_sensors'] = array(
+    'label' => 'Disappeared sensors',
+    'description' => 'Keeps track of active sensors and reports if a sensor disappears',
+    'sensor class' => 'Drupal\monitoring\Sensor\Sensors\SensorDisappearedSensors',
+    'settings' => array(
+      'category' => 'System',
+    ),
+  );
 
   return $info;
 }

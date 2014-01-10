@@ -10,6 +10,9 @@ use Drupal\monitoring\Sensor\SensorConfigurableInterface;
 use Drupal\monitoring\Result\SensorResultInterface;
 use Drupal\monitoring\Sensor\SensorInfo;
 
+/**
+ * Sensors overview settings form.
+ */
 function monitoring_config_sensors_overview_form($form, &$form_state) {
   $options = array();
   $default_value = array();
@@ -64,11 +67,12 @@ function monitoring_config_sensors_overview_form($form, &$form_state) {
   return $form;
 }
 
+/**
+ * Sensors overview settings form submit callback.
+ */
 function monitoring_config_sensors_overview_form_submit($form, &$form_state) {
   foreach ($form_state['values']['sensors'] as $sensor_name => $enabled) {
-    $settings = monitoring_sensor_settings_get($sensor_name);
-    $settings['enabled'] = (boolean) $enabled;
-    monitoring_sensor_settings_save($sensor_name, $settings);
+    monitoring_sensor_disable($sensor_name);
   }
 }
 

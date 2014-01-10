@@ -237,6 +237,89 @@ class MonitoringCoreTest extends MonitoringTestBase {
   }
 
   /**
+   * Tests for SensorDisappearedSensors.
+   *
+   * We provide a separate test method for the SensorDisappearedSensors as we
+   * need to enable and disable additional modules.
+   */
+  function testSensorDisappearedSensors() {
+
+    // Enable the comment module and the new_comments sensor.
+    module_enable(array('comment'));
+    monitoring_sensor_enable('new_comments');
+
+    // Run the disappeared sensor - it should not report any problems.
+    $result = $this->runSensor('disappeared_sensors');
+    $this->assertTrue($result->isOk());
+
+    // Disable the comment module so that the new_comments sensor goes away.
+    module_disable(array('comment'));
+    // Call the sensor info callback with rebuild flag to TRUE so that the local
+    // static cache is rebuild to reflect the sensor info update.
+    monitoring_sensor_info(NULL, TRUE);
+
+    // The new_comments sensor has gone away and therefore we should have the
+    // critical status.
+    $result = $this->runSensor('disappeared_sensors');
+    $this->assertTrue($result->isCritical());
+    $this->assertEqual($result->getSensorMessage(), 'Missing sensor new_comments');
+
+    // Enable the comment module to test the correct procedure of removing
+    // sensors.
+    module_enable(array('comment'));
+    monitoring_sensor_info(NULL, TRUE);
+
+    // Now we should be back to normal.
+    $result = $this->runSensor('disappeared_sensors');
+    $this->assertTrue($result->isOk());
+
+    // Do the correct procedure to remove a sensor - first disable the sensor
+    // and then disable the comment module.
+    monitoring_sensor_disable('new_comments');
+    module_disable(array('comment'));
+    monitoring_sensor_info(NULL, TRUE);
+
+    // The sensor should not report any problem this time.
+    $result = $this->runSensor('disappeared_sensors');
+    $this->assertTrue($result->isOk());
+
+    // === Test the UI === //
+    $account = $this->drupalCreateUser(array('administer monitoring'));
+    $this->drupalLogin($account);
+    // Enable comment module and the new_comments sensor.
+    module_enable(array('comment'));
+    monitoring_sensor_enable('new_comments');
+
+    // We should have the message that no sensors are missing.
+    $this->drupalGet('admin/config/system/monitoring/sensors/disappeared_sensors');
+    $this->assertText(t('There are no missing sensors.'));
+
+    // Disable sensor and the comment module. This is the correct procedure and
+    // therefore there should be no missing sensors.
+    monitoring_sensor_disable('new_comments');
+    module_disable(array('comment'));
+    $this->drupalGet('admin/config/system/monitoring/sensors/disappeared_sensors');
+    $this->assertText(t('There are no missing sensors.'));
+
+    // Enable comment module and the new_comments sensor.
+    module_enable(array('comment'));
+    monitoring_sensor_enable('new_comments');
+    // Now disable the comment module to have the new_comments sensor disappear.
+    module_disable(array('comment'));
+    // Run the disappeared_sensors sensor to get the status message that should
+    // be found in the settings form.
+    $this->drupalGet('admin/config/system/monitoring/sensors/disappeared_sensors');
+    $this->assertText('Missing sensor new_comments');
+
+    // Now reset the sensor list - we should get the "no missing sensors"
+    // message.
+    $this->drupalPost(NULL, array(), t('Clear missing sensors'));
+    $this->assertText(t('All missing sensors have been cleared.'));
+    $this->drupalGet('admin/config/system/monitoring/sensors/disappeared_sensors');
+    $this->assertText(t('There are no missing sensors.'));
+  }
+
+  /**
    * Tests the watchdog entries aggregator.
    */
   function testGenericDBAggregate() {

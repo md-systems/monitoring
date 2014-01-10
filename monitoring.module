@@ -629,5 +629,54 @@ function monitoring_sensor_enable($sensor_name) {
   if (empty($settings['enabled'])) {
     $settings['enabled'] = TRUE;
     monitoring_sensor_settings_save($sensor_name, $settings);
+    // @todo - the following part is SensorDisappearedSensors specific. We need
+    // to move it into the sensor somehow.
+    $available_sensors = variable_get('monitoring_available_sensors', array());
+    $available_sensors[$sensor_name]['enabled'] = TRUE;
+    $available_sensors[$sensor_name]['name'] = $sensor_name;
+    variable_set('monitoring_available_sensors', $available_sensors);
   }
+}
+
+/**
+ * Disable a sensor.
+ *
+ * Checks if the sensor is enabled and if so it will disable it and remove from
+ * the active sensor list.
+ *
+ * @todo - We should move all the settings actions to the Sensor API/interface.
+ *
+ * @param string $sensor_name
+ *   Sensor name to be disabled.
+ */
+function monitoring_sensor_disable($sensor_name) {
+  $settings = monitoring_sensor_settings_get($sensor_name);
+  if (!empty($settings['enabled'])) {
+    $settings['enabled'] = FALSE;
+    monitoring_sensor_settings_save($sensor_name, $settings);
+    // @todo - the following part is SensorDisappearedSensors specific. We need
+    // to move it into the sensor somehow.
+    $available_sensors = variable_get('monitoring_available_sensors', array());
+    $available_sensors[$sensor_name]['enabled'] = FALSE;
+    $available_sensors[$sensor_name]['name'] = $sensor_name;
+    variable_set('monitoring_available_sensors', $available_sensors);
+  }
+}
+
+/**
+ * Submit callback to clear the disappeared sensors list.
+ *
+ * @see SensorDisappearedSensors::settingsForm()
+ */
+function monitoring_clear_missing_sensor_submit($form, &$form_state) {
+  $available_sensors = array();
+  foreach (monitoring_sensor_info() as $key => $info) {
+    $available_sensors[$key] = array(
+      'name' => $key,
+      'label' => $info['label'],
+      'enabled' => !empty($info['settings']['enabled']),
+    );
+  }
+  variable_set('monitoring_available_sensors', $available_sensors);
+  drupal_set_message(t('All missing sensors have been cleared.'));
 }
