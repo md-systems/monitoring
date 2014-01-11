@@ -170,6 +170,7 @@ function monitoring_user_monitoring_sensor_info() {
  * Module: image
  */
 function monitoring_image_monitoring_sensor_info() {
+  $info = array();
   // Sensor requires the {watchdog} table from the dblog module.
   // @todo: Provide an alternative for past_db.
   if (module_exists('dblog')) {

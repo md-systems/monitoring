@@ -5,6 +5,7 @@
  */
 
 use Drupal\monitoring\Result\SensorResultInterface;
+use Drupal\monitoring\Sensor\SensorInfo;
 
 /**
  * Cron sensor tests.
@@ -313,6 +314,100 @@ class MonitoringCoreTest extends MonitoringTestBase {
     $this->assertText(t('All missing sensors have been cleared.'));
     $this->drupalGet('admin/config/system/monitoring/sensors/disappeared_sensors');
     $this->assertText(t('There are no missing sensors.'));
+  }
+
+  /**
+   * Tests the UI/settings of the enabled modules sensor.
+   */
+  function testSensorEnabledModulesUI() {
+    $account = $this->drupalCreateUser(array('administer monitoring'));
+    $this->drupalLogin($account);
+    $form_key = monitoring_sensor_settings_key('enabled_modules');
+
+    // Test submitting the defaults and enabling the sensor.
+    $this->drupalPost('admin/config/system/monitoring/sensors/enabled_modules', array(
+      $form_key . '[enabled]' => TRUE,
+    ), t('Save'));
+    // Reset the sensor info so that it reflects changes done via POST.
+    $this->sensorManager->resetCache();
+    // The sensor should now be OK.
+    $result = $this->runSensor('enabled_modules');
+    $this->assertTrue($result->isOk());
+
+    // Expect the contact and book modules to be installed.
+    $this->drupalPost('admin/config/system/monitoring/sensors/enabled_modules', array(
+      $form_key . '[modules][contact]' => TRUE,
+      $form_key . '[modules][book]' => TRUE,
+    ), t('Save'));
+    // Reset the sensor info so that it reflects changes done via POST.
+    $this->sensorManager->resetCache();
+    // The sensor should escalate to CRITICAL.
+    $result = $this->runSensor('enabled_modules');
+    $this->assertTrue($result->isCritical());
+    $this->assertEqual($result->getSensorMessage(), '2 modules delta, expected 0, Following modules are expected to be installed: book, contact');
+    $this->assertEqual($result->getSensorValue(), 2);
+
+    // The default setting is not to allow additional modules. Enable comment
+    // and the sensor should escalate to CRITICAL.
+    $this->drupalPost('admin/config/system/monitoring/sensors/enabled_modules', array(
+      // Do not require contact and book as they are not installed.
+      $form_key . '[modules][contact]' => FALSE,
+      $form_key . '[modules][book]' => FALSE,
+    ), t('Save'));
+    // Reset the sensor info so that it reflects changes done via POST.
+    $this->sensorManager->resetCache();
+    module_enable(array('comment'));
+    $result = $this->runSensor('enabled_modules');
+    $this->assertTrue($result->isCritical());
+    $this->assertEqual($result->getSensorMessage(), '1 modules delta, expected 0, Following modules are NOT expected to be installed: comment');
+    $this->assertEqual($result->getSensorValue(), 1);
+
+    // Allow additional, the sensor should not escalate.
+    $this->drupalPost('admin/config/system/monitoring/sensors/enabled_modules', array(
+      // Do not require contact and book as they are not installed.
+      $form_key . '[allow_additional]' => TRUE,
+    ), t('Save'));
+    $this->sensorManager->resetCache();
+    $result = $this->runSensor('enabled_modules');
+    $this->assertTrue($result->isOk());
+  }
+
+  /**
+   * Test cases for SensorEnabledModules sensor.
+   *
+   * We use separate test method as we need to enable/disable modules.
+   */
+  function testSensorEnabledModulesAPI() {
+    // The initial run of the sensor will acknowledge all installed modules as
+    // expected and so the status should be OK.
+    $result = $this->runSensor('enabled_modules');
+    $this->assertTrue($result->isOk());
+
+    // Install additional module. As the setting "allow_additional" is not
+    // enabled by default this should result in sensor escalation to critical.
+    module_enable(array('comment'));
+    $result = $this->runSensor('enabled_modules');
+    $this->assertTrue($result->isCritical());
+    $this->assertEqual($result->getSensorMessage(), '1 modules delta, expected 0, Following modules are NOT expected to be installed: comment');
+    $this->assertEqual($result->getSensorValue(), 1);
+
+    // Allow additional modules and run the sensor - it should not escalate now.
+    $settings = monitoring_sensor_settings_get('enabled_modules');
+    $settings['allow_additional'] = TRUE;
+    monitoring_sensor_settings_save('enabled_modules', $settings);
+    $result = $this->runSensor('enabled_modules');
+    $this->assertTrue($result->isOk());
+
+    // Add comment module to be expected and disable the module. The sensor
+    // should escalate to critical.
+    $settings = monitoring_sensor_settings_get('enabled_modules');
+    $settings['modules']['comment'] = 'comment';
+    monitoring_sensor_settings_save('enabled_modules', $settings);
+    module_disable(array('comment'));
+    $result = $this->runSensor('enabled_modules');
+    $this->assertTrue($result->isCritical());
+    $this->assertEqual($result->getSensorMessage(), '1 modules delta, expected 0, Following modules are expected to be installed: comment');
+    $this->assertEqual($result->getSensorValue(), 1);
   }
 
   /**
