@@ -342,7 +342,7 @@ class SensorRunner implements \IteratorAggregate {
     }
     else {
       foreach ($sensor_names as $sensor_name) {
-        cache_clear_all('monitoring_sensor_result:' . self::getSensorCid($sensor_name), 'cache');
+        cache_clear_all(self::getSensorCid($sensor_name), 'cache');
       }
     }
   }

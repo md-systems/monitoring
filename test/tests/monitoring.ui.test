@@ -102,6 +102,54 @@ class MonitoringUITest extends MonitoringTestBase {
     }
   }
 
+  /**
+   * Tests the time interval settings UI of the database aggregator sensor.
+   */
+  function testAggregateSensorTimeIntervalConfig() {
+    $account = $this->drupalCreateUser(array('administer monitoring', 'monitoring reports'));
+    $this->drupalLogin($account);
+
+    // Visit the overview and make sure the sensor is displayed.
+    $this->drupalGet('admin/reports/monitoring');
+    $this->assertText('0 druplicons in 1 day');
+
+    $form_key = monitoring_sensor_settings_key('db_aggregate_test');
+    $sensor_info = $this->sensorManager->getSensorInfoByName('db_aggregate_test');
+    $this->drupalGet('admin/config/system/monitoring/sensors/db_aggregate_test');
+    // Test for the default value.
+    $this->assertFieldByName($form_key . '[time_interval_value]', $sensor_info->getTimeIntervalValue());
+
+    // Update the time interval and test for the updated value.
+    $time_interval = 10800;
+    $this->drupalPost('admin/config/system/monitoring/sensors/db_aggregate_test', array(
+      $form_key . '[time_interval_value]' => $time_interval,
+    ), t('Save'));
+
+    $this->sensorManager->resetCache();
+    $sensor_info = $this->sensorManager->getSensorInfoByName('db_aggregate_test');
+    $this->assertEqual($sensor_info->getTimeIntervalValue(), $time_interval);
+
+    // Check the sensor overview to verify that the sensor result is
+    // recalculated and the new sensor message is displayed.
+    $this->drupalGet('admin/reports/monitoring');
+    $this->assertText('0 druplicons in 3 hours');
+
+    // Update the time interval and set it to no restriction.
+    $time_interval = 0;
+    $this->drupalPost('admin/config/system/monitoring/sensors/db_aggregate_test', array(
+      $form_key . '[time_interval_value]' => $time_interval,
+    ), t('Save'));
+
+    $this->sensorManager->resetCache();
+    $sensor_info = $this->sensorManager->getSensorInfoByName('db_aggregate_test');
+    $this->assertEqual($sensor_info->getTimeIntervalValue(), $time_interval);
+
+    // Visit the overview and make sure that no time interval is displayed.
+    $this->drupalGet('admin/reports/monitoring');
+    $this->assertText('0 druplicons');
+    $this->assertNoText('0 druplicons in');
+  }
+
   function testSensorOverviewPage() {
     $account = $this->drupalCreateUser(array('monitoring reports'));
     $this->drupalLogin($account);

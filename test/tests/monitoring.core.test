@@ -4,9 +4,6 @@
  * Contains \MonitoringCoreTest.
  */
 
-use Drupal\monitoring\Result\SensorResultInterface;
-use Drupal\monitoring\Sensor\SensorInfo;
-
 /**
  * Cron sensor tests.
  */
@@ -136,7 +133,7 @@ class MonitoringCoreTest extends MonitoringTestBase {
     watchdog('page not found', 'not/found');
     $result = $this->runSensor('404_in_last_24_hours');
     $this->assertTrue($result->isOk());
-    $this->assertEqual($result->getSensorMessage(), '1 watchdog events, not/found');
+    $this->assertEqual($result->getSensorMessage(), '1 watchdog events in 1 day, not/found');
     $this->assertEqual($result->getSensorValue(), 1);
 
     for ($i = 1; $i < 20; $i++) {
@@ -232,11 +229,15 @@ class MonitoringCoreTest extends MonitoringTestBase {
     $this->sensorManager->resetCache();
     $result = $this->runSensor('node_new_' . $type1->type);
     $this->assertEqual($result->getSensorValue(), 2);
-    $this->assertEqual($result->getSensorMessage(), '2 ' . $type1->type . ' nodes');
+    // Test for the SensorDatabaseAggregator custom message.
+    $this->assertEqual($result->getSensorMessage(), format_string('@count @unit in @time_interval', array(
+      '@count' => $result->getSensorValue(),
+      '@unit' => strtolower($result->getSensorInfo()->getUnitsLabel()),
+      '@time_interval' => format_interval($result->getSensorInfo()->getTimeIntervalValue()),
+    )));
 
     $result = $this->runSensor('node_new_all');
     $this->assertEqual($result->getSensorValue(), 3);
-    $this->assertEqual($result->getSensorMessage(), '3 nodes');
   }
 
   /**
@@ -468,7 +469,8 @@ class MonitoringCoreTest extends MonitoringTestBase {
 
     // Filter for time period.
     monitoring_sensor_settings_save('watchdog_aggregate_test', array(
-      'time_period' => array('field' => 'timestamp', 'value' => 10),
+      'time_interval_value' => 10,
+      'time_interval_field' => 'timestamp',
     ));
 
     // Make all system watchdog messages older than the configured time period.
@@ -502,14 +504,13 @@ class MonitoringCoreTest extends MonitoringTestBase {
 
     // Test with different db table.
     $info = monitoring_sensor_info('db_aggregate_test');
-    $time_period = $info->getSetting('time_period');
     $this->drupalCreateNode(array('promote' => '1'));
     $this->drupalCreateNode(array('promote' => '0'));
     $this->drupalCreateNode(array('promote' => '0'));
-    // Create one node that should not meet the time_period condition.
+    // Create one node that should not meet the time_interval condition.
     $node = $this->drupalCreateNode(array('promote' => '0'));
     db_update('node')
-      ->fields(array('created' => REQUEST_TIME - ($time_period['value'] + 10)))
+      ->fields(array('created' => REQUEST_TIME - ($info->getTimeIntervalValue() + 10)))
       ->condition('nid', $node->nid)
       ->execute();
 

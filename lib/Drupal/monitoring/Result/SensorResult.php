@@ -143,6 +143,7 @@ class SensorResult implements SensorResultInterface {
       '@value' => $msg_value,
       '@time' => $this->getTimestamp(),
       '@expected' => $msg_expected,
+      '@time_interval' => format_interval($this->getSensorInfo()->getTimeIntervalValue()),
       // @todo This assumption will no longer work when non-english messages
       //   supported.
       '@units_label' => drupal_strtolower($this->getSensorInfo()->getSetting('units_label')),
@@ -156,14 +157,26 @@ class SensorResult implements SensorResultInterface {
 
       // Set the sensor message.
       if ($this->getSensorValue() !== NULL) {
+        // @todo This should be refactored as soon as we have all
+        // components in.
         // If there is sensor value and this numeric sensor, display the sensor
         // value with the configured units label, if there is one.
         if ($this->getSensorInfo()->getSetting('units_label') && $this->getSensorInfo()->getValueType() == 'numeric') {
-          $messages[] = format_string('@value @units_label', $default_variables);
+          if ($this->getSensorInfo()->getTimeIntervalValue()) {
+            $messages[] = format_string('@value @units_label in @time_interval', $default_variables);
+          }
+          else {
+            $messages[] = format_string('@value @units_label', $default_variables);
+          }
         }
         else {
           // Use Value for state sensors and those without a units label.
-          $messages[] = format_string('Value @value', $default_variables);
+          if ($this->getSensorInfo()->getTimeIntervalValue()) {
+            $messages[] = format_string('Value @value in @time_interval', $default_variables);
+          }
+          else {
+            $messages[] = format_string('Value @value', $default_variables);
+          }
         }
       }
       // Avoid an empty sensor message.

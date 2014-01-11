@@ -310,6 +310,8 @@ function monitoring_sensor_settings_save($sensor_name, $values) {
   variable_set(monitoring_sensor_settings_key($sensor_name), $values);
   // After settings save reset the cache.
   monitoring_sensor_manager()->resetCache();
+  // Changed settings might affect the sensor result.
+  SensorRunner::resetCache(array($sensor_name));
 }
 
 /**

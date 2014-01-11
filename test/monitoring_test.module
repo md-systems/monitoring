@@ -71,13 +71,12 @@ function monitoring_monitoring_test_monitoring_sensor_info() {
       'settings' => array(
         'category' => 'Test',
         'table' => 'node',
+        'units_label' => 'Druplicons',
         'conditions' => array(
           array('field' => 'promote', 'value' => '1'),
         ),
-        'time_period' => array(
-          'field' => 'created',
-          'value' => 24 * 60 * 60,
-        ),
+        'time_interval_field' => 'created',
+        'time_interval_value' => 24 * 60 * 60,
         'thresholds' => array(
           'type' => 'falls',
           'intervals' => array(

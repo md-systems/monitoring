@@ -13,6 +13,11 @@ namespace Drupal\monitoring\Sensor;
  */
 abstract class Sensor implements SensorInterface {
 
+  /**
+   * Current sensor info object.
+   *
+   * @var SensorInfo
+   */
   protected $info;
 
   /**

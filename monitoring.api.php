@@ -41,6 +41,9 @@ function hook_monitoring_sensor_info() {
       'enabled' => TRUE,
       // Time in seconds during which the sensor result should be cached.
       'caching time' => 0,
+      // A sensor may define a time interval. This will be added to the default
+      // message automatically.
+      'time_interval_value' => 900,
       // Define sensor value thresholds.
       // Threshold can be warning or critical.
       // Threshold is defined by an array with two values which represents a sharp

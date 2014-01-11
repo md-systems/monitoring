@@ -24,9 +24,8 @@ use Drupal\monitoring\Sensor\SensorThresholds;
  *     using the field_name.column_name syntax.
  *   - value: The value to limit by, either an array or a scalar value.
  *   - operator: Any of the supported operators.
- * - time_period: Configure the time period the query should apply to.
- *   - field Timestamp field name
- *   - value: Number of seconds defining the period
+ * - time_interval_field: Timestamp field name
+ * - time_interval_value: Number of seconds defining the period
  */
 class SensorDatabaseAggregator extends SensorThresholds implements SensorExtendedInfoInterface {
 
@@ -51,14 +50,25 @@ class SensorDatabaseAggregator extends SensorThresholds implements SensorExtende
    */
   protected $queryArguments;
 
-
   /**
-   * During instantiation the query is build and executed.
-   *
-   * @param SensorInfo $info
+   * {@inheritdoc}
    */
-  public function __construct(SensorInfo $info) {
-    parent::__construct($info);
+  public function settingsForm($form, &$form_state) {
+    $form = parent::settingsForm($form, $form_state);
+
+    // Allow to configure the time interval if a time interval field is
+    // configured.
+    if ($this->info->getSetting('time_interval_field')) {
+      $form['time_interval_value'] = array(
+        '#type' => 'select',
+        '#title' => t('Aggregate time interval'),
+        '#options' => $this->getTimeIntervalOptions(),
+        '#description' => t('Select the time interval for which the results will be aggregated.'),
+        '#default_value' => $this->info->getTimeIntervalValue(),
+      );
+    }
+
+    return $form;
   }
 
   /**
@@ -133,10 +143,11 @@ class SensorDatabaseAggregator extends SensorThresholds implements SensorExtende
       }
     }
 
-    if ($time_period = $this->info->getSetting('time_period')) {
-      $query->where(db_escape_field($time_period['field']) . ' > :timestamp_value',
+    $time_interval_field = $this->info->getSetting('time_interval_field');
+    if (!empty($time_interval_field) && $this->info->getTimeIntervalValue()) {
+      $query->where(db_escape_field($time_interval_field) . ' > :timestamp_value',
         array(
-          ':timestamp_value' => REQUEST_TIME - $time_period['value'],
+          ':timestamp_value' => REQUEST_TIME - $this->info->getTimeIntervalValue(),
         ));
     }
 
@@ -255,6 +266,33 @@ class SensorDatabaseAggregator extends SensorThresholds implements SensorExtende
     $table_name = _field_sql_storage_tablename($field);
     $alias = $query->join($table_name, $field_name, '%alias.entity_type = :entity_type AND %alias.entity_id = ' . $entity_table_id, array(':entity_type' => $entity_type));
     return $alias;
+  }
+
+  /**
+   * Returns time interval options.
+   *
+   * @return array
+   *   Array with time interval options, keyed by time interval in seconds.
+   */
+  protected function getTimeIntervalOptions() {
+    return drupal_map_assoc(array(
+      600,
+      900,
+      1800,
+      3600,
+      7200,
+      10800,
+      21600,
+      32400,
+      43200,
+      64800,
+      86400,
+      172800,
+      259200,
+      604800,
+      1209600,
+      2419200
+    ), 'format_interval') + array(0 => t('No restriction'));
   }
 
 }

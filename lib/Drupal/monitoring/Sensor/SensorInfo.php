@@ -168,6 +168,17 @@ class SensorInfo {
   }
 
   /**
+   * Gets time interval value.
+   *
+   * @return int
+   *   Number of seconds of the time interval.
+   *   NULL in case the sensor does not define the time interval.
+   */
+  public function getTimeIntervalValue() {
+    return $this->getSetting('time_interval_value', NULL);
+  }
+
+  /**
    * Gets setting.
    *
    * @param string $key

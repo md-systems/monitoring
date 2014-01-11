@@ -44,7 +44,7 @@ function monitoring_node_monitoring_sensor_info() {
 
   $info['node_new_all'] = array(
     'label' => 'All new nodes',
-    'description' => 'All new nodes added in last 24 hours',
+    'description' => 'All new nodes',
     'sensor class' => 'Drupal\monitoring\Sensor\Sensors\SensorDatabaseAggregator',
     'settings' => array(
       'category' => 'Content',
@@ -53,17 +53,15 @@ function monitoring_node_monitoring_sensor_info() {
       // Cache for one hour.
       'caching time' => 3600,
       'table' => 'node',
-      'time_period' => array(
-        'field' => 'created',
-        'value' => 24 * 60 * 60,
-      ),
+      'time_interval_field' => 'created',
+      'time_interval_value' => 60 * 60 * 24,
     ),
   );
 
   foreach (node_type_get_types() as $node_type) {
     $info['node_new_' . $node_type->type] = array(
       'label' => format_string('New @type nodes', array('@type' => $node_type->name)),
-      'description' => format_string('New nodes of type @type created in last 24 hours', array('@type' => $node_type->name)),
+      'description' => format_string('New nodes of type @type', array('@type' => $node_type->name)),
       'sensor class' => 'Drupal\monitoring\Sensor\Sensors\SensorDatabaseAggregator',
       'settings' => array(
         'category' => 'Content',
@@ -78,10 +76,8 @@ function monitoring_node_monitoring_sensor_info() {
         'conditions' => array(
           array('field' => 'type', 'value' => $node_type->type),
         ),
-        'time_period' => array(
-          'field' => 'created',
-          'value' => 24 * 60 * 60,
-        ),
+        'time_interval_field' => 'created',
+        'time_interval_value' => 60 * 60 * 24,
       ),
     );
   }
@@ -99,7 +95,6 @@ function monitoring_comment_monitoring_sensor_info() {
 
   $info['new_comments'] = array(
     'label' => 'New comments',
-    'description' => 'New comments added in last 24 hours',
     'sensor class' => 'Drupal\monitoring\Sensor\Sensors\SensorDatabaseAggregator',
     'settings' => array(
       'category' => 'Content',
@@ -108,10 +103,8 @@ function monitoring_comment_monitoring_sensor_info() {
       // Cache for one hour.
       'caching time' => 3600,
       'table' => 'comment',
-      'time_period' => array(
-        'field' => 'created',
-        'value' => 24 * 60 * 60,
-      ),
+      'time_interval_field' => 'created',
+      'time_interval_value' => 60 * 60 * 24,
     ),
   );
 
@@ -128,7 +121,6 @@ function monitoring_user_monitoring_sensor_info() {
 
   $info['new_users'] = array(
     'label' => 'New users',
-    'description' => 'New users registered in last 24 hours',
     'sensor class' => 'Drupal\monitoring\Sensor\Sensors\SensorDatabaseAggregator',
     'settings' => array(
       'category' => 'User activity',
@@ -137,15 +129,13 @@ function monitoring_user_monitoring_sensor_info() {
       // Cache for one hour.
       'caching time' => 3600,
       'table' => 'users',
-      'time_period' => array(
-        'field' => 'created',
-        'value' => 24 * 60 * 60,
-      ),
+      'time_interval_field' => 'created',
+      'time_interval_value' => 60 * 60 * 24,
     ),
   );
+
   $info['active_users'] = array(
     'label' => 'Active users',
-    'description' => 'Active users in last 24 hours',
     'sensor class' => 'Drupal\monitoring\Sensor\Sensors\SensorDatabaseAggregator',
     'settings' => array(
       'category' => 'User activity',
@@ -154,10 +144,8 @@ function monitoring_user_monitoring_sensor_info() {
       // Cache for one hour.
       'caching time' => 3600,
       'table' => 'users',
-      'time_period' => array(
-        'field' => 'access',
-        'value' => 24 * 60 * 60,
-      ),
+      'time_interval_field' => 'created',
+      'time_interval_value' => 60 * 60 * 24,
     ),
   );
 
@@ -176,7 +164,7 @@ function monitoring_image_monitoring_sensor_info() {
   if (module_exists('dblog')) {
     $info['image_style_missing_count'] = array(
       'label' => 'Image derivative creation fail',
-      'description' => 'Image derivative creation fails in last 24 hours',
+      'description' => 'Image derivative creation fails',
       'sensor class' => 'Drupal\monitoring\Sensor\Sensors\SensorWatchdogMissingImageStyle',
       'settings' => array(
         'category' => 'Watchdog',
@@ -195,10 +183,8 @@ function monitoring_image_monitoring_sensor_info() {
           array('field' => 'type', 'value' => 'image'),
           array('field' => 'message', 'value' => 'Source image at %source_image_path not found while trying to generate derivative image at %derivative_path.'),
         ),
-        'time_period' => array(
-          'field' => 'timestamp',
-          'value' => 24 * 60 * 60,
-        ),
+        'time_interval_field' => 'timestamp',
+        'time_interval_value' => 60 * 60 * 24,
       ),
     );
   }
@@ -211,9 +197,10 @@ function monitoring_image_monitoring_sensor_info() {
  * Module: dblog
  */
 function monitoring_dblog_monitoring_sensor_info() {
+
   $info['404_in_last_24_hours'] = array(
     'label' => 'Page not found errors',
-    'description' => 'Page not found errors logged by watchdog of the last 24 hours',
+    'description' => 'Page not found errors logged by watchdog',
     'sensor class' => 'Drupal\monitoring\Sensor\Sensors\SensorWatchdog404',
     'settings' => array(
       'category' => 'Watchdog',
@@ -231,10 +218,8 @@ function monitoring_dblog_monitoring_sensor_info() {
       'conditions' => array(
         array('field' => 'type', 'value' => 'page not found'),
       ),
-      'time_period' => array(
-        'field' => 'timestamp',
-        'value' => 24 * 60 * 60,
-      ),
+      'time_interval_field' => 'timestamp',
+      'time_interval_value' => 60 * 60 * 24,
     ),
   );
 
@@ -251,9 +236,10 @@ function monitoring_dblog_monitoring_sensor_info() {
       $critical_threshold = 50;
       $warning_threshold = 20;
     }
+
     $info['watchdog_severity_' . $level] = array(
       'label' => format_string('Severity @severity', array('@severity' => $name)),
-      'description' => format_string('Watchdog entries of severity @severity of the last 24 hours', array('@severity' => $name)),
+      'description' => format_string('Watchdog entries of severity @severity', array('@severity' => $name)),
       'sensor class' => 'Drupal\monitoring\Sensor\Sensors\SensorDatabaseAggregator',
       'settings' => array(
         'category' => 'Watchdog',
@@ -270,17 +256,15 @@ function monitoring_dblog_monitoring_sensor_info() {
           // This is to exclude monitoring records.
           array('field' => 'type', 'value' => 'monitoring', 'operator' => '!='),
         ),
-        'time_period' => array(
-          'field' => 'timestamp',
-          'value' => 24 * 60 * 60,
-        ),
+        'time_interval_field' => 'timestamp',
+        'time_interval_value' => 24 * 60 * 60,
       ),
     );
   }
 
   $info['successful_user_logins'] = array(
     'label' => 'Successful user logins',
-    'description' => 'Successful user logins by Watchdog of the last 24 hours',
+    'description' => 'Successful user logins by Watchdog',
     'sensor class' => 'Drupal\monitoring\Sensor\Sensors\SensorDatabaseAggregator',
     'settings' => array(
       'category' => 'User activity',
@@ -292,15 +276,14 @@ function monitoring_dblog_monitoring_sensor_info() {
         array('field' => 'type', 'value' => 'user'),
         array('field' => 'message', 'value' => 'Session opened for %name.'),
       ),
-      'time_period' => array(
-        'field' => 'timestamp',
-        'value' => 24 * 60 * 60,
-      ),
+      'time_interval_field' => 'timestamp',
+      'time_interval_value' => 60 * 60 * 24,
     ),
   );
+
   $info['failed_user_logins'] = array(
     'label' => 'Failed user logins',
-    'description' => 'Failed user logins by Watchdog of the last 24 hours',
+    'description' => 'Failed user logins by Watchdog',
     'sensor class' => 'Drupal\monitoring\Sensor\Sensors\SensorFailedUserLogins',
     'settings' => array(
       'category' => 'User activity',
@@ -321,10 +304,8 @@ function monitoring_dblog_monitoring_sensor_info() {
         array('field' => 'type', 'value' => 'user'),
         array('field' => 'message', 'value' => 'Login attempt failed for %user.'),
       ),
-      'time_period' => array(
-        'field' => 'timestamp',
-        'value' => 24 * 60 * 60,
-      ),
+      'time_interval_field' => 'timestamp',
+      'time_interval_value' => 60 * 60 * 24,
     ),
   );
 
@@ -342,7 +323,7 @@ function monitoring_past_db_monitoring_sensor_info() {
   foreach (past_event_severities() as $severity => $name) {
     $info['past_severity_' . $severity] = array(
       'label' => format_string('Severity @severity', array('@severity' => $name)),
-      'description' => format_string('Past events with severity @severity of the last 24 hours', array('@severity' => $name)),
+      'description' => format_string('Past events with severity @severity', array('@severity' => $name)),
       'sensor class' => 'Drupal\monitoring\Sensor\Sensors\SensorDatabaseAggregator',
       'settings' => array(
         'category' => 'Past',
@@ -355,10 +336,8 @@ function monitoring_past_db_monitoring_sensor_info() {
           // This is to exclude monitoring records.
           array('field' => 'type', 'value' => 'monitoring', 'operator' => '!='),
         ),
-        'time_period' => array(
-          'field' => 'timestamp',
-          'value' => 24 * 60 * 60,
-        ),
+        'time_interval_field' => 'timestamp',
+        'time_interval_value' => 24 * 60 * 60,
       ),
     );
   }
@@ -382,7 +361,7 @@ function monitoring_past_db_monitoring_sensor_info() {
 function monitoring_past_form_monitoring_sensor_info() {
   $info['past_form'] = array(
     'label' => 'Logged form submissions',
-    'description' => 'Past events logging form submissions',
+    'description' => 'Past event logging form submissions',
     'sensor class' => 'Drupal\monitoring\Sensor\Sensors\SensorDatabaseAggregator',
     'settings' => array(
       'category' => 'Past',
@@ -393,10 +372,8 @@ function monitoring_past_form_monitoring_sensor_info() {
       'conditions' => array(
         array('field' => 'module', 'value' => 'past_form'),
       ),
-      'time_period' => array(
-        'field' => 'timestamp',
-        'value' => 24 * 60 * 60,
-      ),
+      'time_interval_field' => 'timestamp',
+      'time_interval_value' => 24 * 60 * 60,
     ),
   );
 
@@ -664,15 +641,12 @@ function monitoring_elysia_cron_monitoring_sensor_info() {
 function monitoring_maillog_monitoring_sensor_info() {
   $info['maillog_records_count'] = array(
     'label' => 'Maillog records count',
-    'description' => 'Maillog records in last 24 hours.',
     'sensor class' => 'Drupal\monitoring\Sensor\Sensors\SensorDatabaseAggregator',
     'settings' => array(
       'units_label' => 'Mail records',
       'table' => 'maillog',
-      'time_period' => array(
-        'field' => 'sent_date',
-        'value' => 24 * 60 * 60,
-      ),
+      'time_interval_field' => 'sent_date',
+      'time_interval_value' => 60 * 60 * 24,
     ),
   );
 
