@@ -57,10 +57,6 @@ class TestSensor extends SensorThresholds implements SensorExtendedInfoInterface
     }
   }
 
-  function sensorVerbose() {
-    return t('This is testing sensor that does return same values as you set into test_sensor_data variable.');
-  }
-
   function resultVerbose(SensorResultInterface $result) {
     return 'call debug';
   }

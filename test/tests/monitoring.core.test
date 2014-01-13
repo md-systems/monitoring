@@ -199,11 +199,10 @@ class MonitoringCoreTest extends MonitoringTestBase {
       'enabled' => TRUE,
       'cmd' => 'echo "dummy output\nanother dummy output"',
     ));
-    $verbose = array();
-    $result = monitoring_sensor_run('git_dirty_tree', TRUE, $verbose);
+    $result = monitoring_sensor_run('git_dirty_tree', TRUE, TRUE);
     $this->assertTrue($result->isCritical());
     // The verbose output should contain the cmd output.
-    $this->assertTrue(strpos(serialize($verbose), 'dummy output') !== FALSE);
+    $this->assertTrue(strpos($result->getVerboseOutput(), 'dummy output') !== FALSE);
     // Two lines of cmd output.
     $this->assertEqual($result->getSensorValue(), 2);
 

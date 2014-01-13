@@ -101,15 +101,8 @@ class SensorDatabaseAggregator extends SensorThresholds implements SensorExtende
   /**
    * {@inheritdoc}
    */
-  public function sensorVerbose() {
-    return "Query:\n{$this->getQueryResult()->getQueryString()}\n\nArguments:\n" . var_export($this->getQueryArguments(), TRUE);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   public function resultVerbose(SensorResultInterface $result) {
-    return $this->sensorVerbose();
+    return "Query:\n{$this->getQueryResult()->getQueryString()}\n\nArguments:\n" . var_export($this->getQueryArguments(), TRUE);
   }
 
   /**

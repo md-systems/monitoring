@@ -85,9 +85,8 @@ function monitoring_sensor_info_by_categories($enabled = TRUE) {
  *   The name of the sensor that is to be run.
  * @param bool $force_run
  *   Set to TRUE to force the run. Defaults to FALSE.
- * @param array|null $verbose
- *   If an empty array is provided it will be filled with verbose output keyed
- *   by sensor names.
+ * @param bool $verbose
+ *   (optional) Set to TRUE to enable verbose execution, defaults to FALSE.
  *
  * @return SensorResultInterface
  *   A single result object.
@@ -97,7 +96,7 @@ function monitoring_sensor_info_by_categories($enabled = TRUE) {
  * @throws \Drupal\monitoring\Sensor\DisabledSensorException
  *   Thrown if any of the passed sensor names is not enabled.
  */
-function monitoring_sensor_run($sensor_name, $force_run = FALSE, &$verbose = NULL) {
+function monitoring_sensor_run($sensor_name, $force_run = FALSE, $verbose = FALSE) {
   $results = monitoring_sensor_run_multiple(array($sensor_name), $force_run, $verbose);
   return reset($results);
 }
@@ -109,9 +108,8 @@ function monitoring_sensor_run($sensor_name, $force_run = FALSE, &$verbose = NUL
  *   Sensor names to run.
  * @param bool $force_run
  *   Flag to force run.
- * @param array $verbose
- *   If empty array provided it will be filled with verbose output keyed by
- *   sensor names.
+ * @param bool $verbose
+ *   (optional) Set to TRUE to enable verbose execution, defaults to FALSE.
  *
  * @return \Drupal\monitoring\Result\SensorResultInterface[]
  *   List of result objects.
@@ -121,10 +119,7 @@ function monitoring_sensor_run($sensor_name, $force_run = FALSE, &$verbose = NUL
  * @throws \Drupal\monitoring\Sensor\DisabledSensorException
  *   Thrown if any of the passed sensor names is not enabled.
  */
-function monitoring_sensor_run_multiple($sensor_names = array(), $force_run = FALSE, &$verbose = NULL) {
-  // @todo Just quick solution - we need better way to request verbose output.
-  $get_verbose_output = $verbose !== NULL;
-
+function monitoring_sensor_run_multiple($sensor_names = array(), $force_run = FALSE, $verbose = NULL) {
   if (empty($sensor_names)) {
     $sensors_info = monitoring_sensor_info();
   }
@@ -142,12 +137,9 @@ function monitoring_sensor_run_multiple($sensor_names = array(), $force_run = FA
   }
 
   $runner = new SensorRunner($sensors_info);
-  $runner->verbose($get_verbose_output);
+  $runner->verbose($verbose);
   $runner->forceRun($force_run);
   $results = $runner->runSensors();
-  if ($get_verbose_output) {
-    $verbose = $runner->verboseOutput();
-  }
   return $results;
 }
 

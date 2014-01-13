@@ -39,15 +39,8 @@ class SensorGitDirtyTree extends SensorConfigurable implements SensorExtendedInf
   /**
    * {@inheritdoc}
    */
-  public function sensorVerbose() {
-    return 'CMD: ' . $this->buildCMD();
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   public function resultVerbose(SensorResultInterface $result) {
-    $output = $this->sensorVerbose();
+    $output = 'CMD: ' . $this->buildCMD();;
     $output .= "\n\n" . $this->cmdOutput;
     return $output;
   }

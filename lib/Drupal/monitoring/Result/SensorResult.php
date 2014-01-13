@@ -22,6 +22,13 @@ class SensorResult implements SensorResultInterface {
   protected $sensorMessage = array();
 
   /**
+   * The verbose output of the sensor execution.
+   *
+   * @var string
+   */
+  protected $verboseOutput;
+
+  /**
    * Instantiates a sensor result object.
    *
    * @param SensorInfo $sensor_info
@@ -360,25 +367,6 @@ class SensorResult implements SensorResultInterface {
   /**
    * {@inheritdoc}
    */
-  public function verbose($as_array = FALSE) {
-    if ($as_array) {
-      return array(
-        'status' => $this->getSensorStatus(),
-        'message' => $this->getSensorMessage(),
-        'value' => $this->getSensorValue(),
-        'execution time' => $this->getSensorExecutionTime(),
-      );
-    }
-    return
-      'status: ' . $this->getSensorStatus() . "\n" .
-      'message: ' . $this->getSensorMessage() . "\n" .
-      'value: ' . $this->getSensorValue() . "\n" .
-      'execution time: ' . $this->getSensorExecutionTime() . "\n";
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   function getSensorName() {
     return $this->sensorInfo->getName();
   }
@@ -388,6 +376,20 @@ class SensorResult implements SensorResultInterface {
    */
   function getSensorInfo() {
     return $this->sensorInfo;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setVerboseOutput($verbose_output) {
+    $this->verboseOutput = $verbose_output;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getVerboseOutput() {
+    return $this->verboseOutput;
   }
 
 

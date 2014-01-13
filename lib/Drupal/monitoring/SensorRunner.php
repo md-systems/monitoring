@@ -51,13 +51,6 @@ class SensorRunner implements \IteratorAggregate {
   protected $verbose = FALSE;
 
   /**
-   * Captured verbose output.
-   *
-   * @var string
-   */
-  protected $verboseOutput = '';
-
-  /**
    * Result logging mode.
    *
    * Possible values: none, on_request, all
@@ -202,13 +195,15 @@ class SensorRunner implements \IteratorAggregate {
 
       $timer = timer_stop($sensor_info->getName());
       $result->setSensorExecutionTime($timer['time']);
+
+      // Capture verbose output if requested and if we are able to do so.
+      if ($this->verbose && $sensor_info->isExtendedInfo()) {
+        $result->setVerboseOutput($sensor->resultVerbose($result));
+      }
+
       $result->compile();
     }
 
-    // Capture verbose output if requested and if we are able to do so.
-    if ($this->verbose && $sensor_info->isExtendedInfo()) {
-      $this->verboseOutput[$sensor_info->getName()] = $sensor->resultVerbose($result);
-    }
 
     return $result;
   }
@@ -361,16 +356,6 @@ class SensorRunner implements \IteratorAggregate {
         cache_clear_all(self::getSensorCid($sensor_name), 'cache');
       }
     }
-  }
-
-  /**
-   * Gets verbose output after sensors run.
-   *
-   * @return string
-   *   Verbose output.
-   */
-  public function verboseOutput() {
-    return $this->verboseOutput;
   }
 
 }

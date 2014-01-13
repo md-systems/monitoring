@@ -14,14 +14,6 @@ use Drupal\monitoring\Result\SensorResultInterface;
 interface SensorExtendedInfoInterface {
 
   /**
-   * Provide additional sensor info.
-   *
-   * @return string
-   *   Sensor verbose info.
-   */
-  function sensorVerbose();
-
-  /**
    * Provide additional info about sensor call.
    *
    * @param SensorResultInterface $result

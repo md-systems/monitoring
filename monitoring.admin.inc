@@ -281,10 +281,9 @@ function monitoring_sensor_settings_form_submit($form, &$form_state) {
 
 function monitoring_sensor_details($form, &$form_state, SensorInfo $sensor_info) {
   $form_state['sensor_name'] = $sensor_info->getName();
-  $verbose = array();
 
   try {
-    $result = monitoring_sensor_run($sensor_info->getName(), FALSE, $verbose);
+    $result = monitoring_sensor_run($sensor_info->getName(), FALSE, TRUE);
   }
   catch (InvalidArgumentException $e) {
     // Exception is thrown if the sensor is not enabled.
@@ -337,16 +336,30 @@ function monitoring_sensor_details($form, &$form_state, SensorInfo $sensor_info)
     '#markup' => $result->getSensorMessage(),
   );
 
-  if (isset($verbose[$sensor_info->getName()])) {
+  if ($sensor_info->isExtendedInfo()) {
     $form['verbose'] = array(
       '#type' => 'fieldset',
       '#title' => t('Verbose'),
       '#access' => user_access('monitoring verbose'),
     );
-    $form['verbose'][$sensor_info->getName()] = array(
-      '#type' => 'markup',
-      '#markup' => '<pre>' . $verbose[$sensor_info->getName()] . '</pre>',
-    );
+    if ($result->isCached()) {
+      $form['verbose']['output'] = array(
+        '#type' => 'markup',
+        '#markup' => '<p>' . t('Verbose output is not available for cached sensor results. Click force run to see verbose output.') . '</p>',
+      );
+    }
+    elseif ($verbose_output = $result->getVerboseOutput()) {
+      $form['verbose']['output'] = array(
+        '#type' => 'markup',
+        '#markup' => '<pre>' . $verbose_output . '</pre>',
+      );
+    }
+    else {
+      $form['verbose']['output'] = array(
+        '#type' => 'markup',
+        '#markup' => '<p>' . t('No verbose output available for this sensor execution.') . '</p>',
+      );
+    }
   }
 
   $form['sensor_info'] = array(

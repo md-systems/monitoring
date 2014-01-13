@@ -84,9 +84,8 @@ function monitoring_drush_info() {
  *   Sensor name to run.
  */
 function monitoring_drush_run($sensor_name) {
-  $verbose = drush_get_option('verbose') ? array() : NULL;
   try {
-    $result = monitoring_sensor_run($sensor_name, TRUE, $verbose);
+    $result = monitoring_sensor_run($sensor_name, TRUE, drush_get_option('verbose'));
   }
   catch (NonExistingSensorException $e) {
     drush_set_error('MONITORING_SENSOR_INVALID_NAME', dt('Sensor "@name" does not exist.', array('@name' => $sensor_name)));
@@ -106,8 +105,8 @@ function monitoring_drush_run($sensor_name) {
   );
 
   // Add the verbose output if requested.
-  if (!empty($verbose[$sensor_name])) {
-    $rows[] = array(dt('Verbose output'), $verbose[$sensor_name]);
+  if ($result->getVerboseOutput()) {
+    $rows[] = array(dt('Verbose output'), $result->getVerboseOutput());
   }
   drush_print_table($rows);
 

@@ -157,17 +157,6 @@ interface SensorResultInterface {
   function getEntityValues();
 
   /**
-   * Provides verbose info about the sensor result.
-   *
-   * @param bool $as_array
-   *   Flag if to output the verbose result as array.
-   *
-   * @return string
-   *   Verbose info.
-   */
-  function verbose($as_array = FALSE);
-
-  /**
    * Gets sensor name.
    *
    * @return string
@@ -208,4 +197,24 @@ interface SensorResultInterface {
    * @return boolean
    */
   public function isOk();
+
+  /**
+   * Set the verbose output.
+   *
+   * @param string $verbose_output
+   *   The verbose output as a string.
+   */
+  public function setVerboseOutput($verbose_output);
+
+  /**
+   * Returns the verbose output.
+   *
+   * Verbose output is not persisted and is only available if the sensor result
+   * is not cached.
+   *
+   * @return string
+   *   The verbose output as a string.
+   */
+  public function getVerboseOutput();
+
 }
