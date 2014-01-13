@@ -4,6 +4,7 @@
  * Admin page/form callbacks.
  */
 
+use Drupal\monitoring\Sensor\NonExistingSensorException;
 use Drupal\monitoring\SensorRunner;
 use Drupal\monitoring\Sensor\Sensor;
 use Drupal\monitoring\Sensor\SensorConfigurableInterface;
@@ -236,9 +237,7 @@ function monitoring_reports_sensors_overview() {
 /**
  * Service sensors setting form.
  */
-function monitoring_sensor_settings_form($form, &$form_state, $sensor_name) {
-
-  $sensor_info = monitoring_sensor_info($sensor_name);
+function monitoring_sensor_settings_form($form, &$form_state, SensorInfo $sensor_info) {
   if (!$sensor_info->isConfigurable()) {
     return $form;
   }
@@ -248,9 +247,9 @@ function monitoring_sensor_settings_form($form, &$form_state, $sensor_name) {
   $sensor = new $sensor_class($sensor_info);
   // Note that here we cannot set the sensor object as some sensor objects may
   // carry with itself PDOStatements that cannot be serialised.
-  $form_state['sensor_name'] = $sensor_name;
+  $form_state['sensor_name'] = $sensor_info->getName();
 
-  $form_key = monitoring_sensor_settings_key($sensor_name);
+  $form_key = monitoring_sensor_settings_key($sensor_info->getName());
 
   $form[$form_key] = array(
     '#tree' => TRUE,
@@ -280,12 +279,19 @@ function monitoring_sensor_settings_form_submit($form, &$form_state) {
   drupal_set_message(t('Sensor settings saved.'));
 }
 
-function monitoring_sensor_details($form, &$form_state, $sensor_name) {
-  $form_state['sensor_name'] = $sensor_name;
-  $sensor_info = monitoring_sensor_info($sensor_name);
-
+function monitoring_sensor_details($form, &$form_state, SensorInfo $sensor_info) {
+  $form_state['sensor_name'] = $sensor_info->getName();
   $verbose = array();
-  $result = monitoring_sensor_run($sensor_name, FALSE, $verbose);
+
+  try {
+    $result = monitoring_sensor_run($sensor_info->getName(), FALSE, $verbose);
+  }
+  catch (InvalidArgumentException $e) {
+    // Exception is thrown if the sensor is not enabled.
+    // Display a page not found in that case.
+    drupal_not_found();
+    drupal_exit();
+  }
 
   $form['force_run'] = array(
     '#type' => 'submit',
@@ -331,15 +337,15 @@ function monitoring_sensor_details($form, &$form_state, $sensor_name) {
     '#markup' => $result->getSensorMessage(),
   );
 
-  if (isset($verbose[$sensor_name])) {
+  if (isset($verbose[$sensor_info->getName()])) {
     $form['verbose'] = array(
       '#type' => 'fieldset',
       '#title' => t('Verbose'),
       '#access' => user_access('monitoring verbose'),
     );
-    $form['verbose'][$sensor_name] = array(
+    $form['verbose'][$sensor_info->getName()] = array(
       '#type' => 'markup',
-      '#markup' => '<pre>' . $verbose[$sensor_name] . '</pre>',
+      '#markup' => '<pre>' . $verbose[$sensor_info->getName()] . '</pre>',
     );
   }
 
@@ -349,7 +355,7 @@ function monitoring_sensor_details($form, &$form_state, $sensor_name) {
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
   );
-  $form['sensor_info'][$sensor_name] = array(
+  $form['sensor_info'][$sensor_info->getName()] = array(
     '#type' => 'markup',
     '#markup' => '<pre>' . var_export($sensor_info, TRUE) . '</pre>',
   );

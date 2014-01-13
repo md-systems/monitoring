@@ -34,19 +34,39 @@ class SensorManager {
   }
 
   /**
+   * Returns monitoring sensor info for enabled sensors.
+   *
+   * @return \Drupal\monitoring\Sensor\SensorInfo[]
+   *   List of SensorInfo instances.
+   */
+  public function getEnabledSensorInfo() {
+    $enabled_sensors = array();
+    foreach ($this->getSensorInfo() as $sensor_info) {
+      if ($sensor_info->isEnabled()) {
+        $enabled_sensors[$sensor_info->getName()] = $sensor_info;
+      }
+    }
+    return $enabled_sensors;
+  }
+
+  /**
    * Returns monitoring sensor info for a given sensor.
    *
    * @param string $sensor_name
    *   Sensor id.
-   * @param bool $reset
-   *   Static cache reset flag.
    *
    * @return \Drupal\monitoring\Sensor\SensorInfo|null
    *   A single SensorInfo instance or NULL if the sensor does not exist.
+   *
+   * @throws \Drupal\monitoring\Sensor\NonExistingSensorException
+   *   Thrown if the requested sensor does not exist.
    */
   public function getSensorInfoByName($sensor_name) {
     $info = $this->getSensorInfo();
-    return isset($info[$sensor_name]) ? $info[$sensor_name] : NULL;
+    if (isset($info[$sensor_name])) {
+      return $info[$sensor_name];
+    }
+    throw new NonExistingSensorException(format_string('Sensor @sensor_name does not exist', array('@sensor_name' => $sensor_name)));
   }
 
   /**

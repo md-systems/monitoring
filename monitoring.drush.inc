@@ -4,6 +4,9 @@
  * Monitoring base drush file.
  */
 
+use Drupal\monitoring\Sensor\DisabledSensorException;
+use Drupal\monitoring\Sensor\NonExistingSensorException;
+
 /**
  * Implements hook_drush_command().
  */
@@ -82,37 +85,40 @@ function monitoring_drush_info() {
  */
 function monitoring_drush_run($sensor_name) {
   $verbose = drush_get_option('verbose') ? array() : NULL;
-  $result = monitoring_sensor_run($sensor_name, TRUE, $verbose);
-
-  // The sensor might be disabled or not exist.
-  if ($result) {
-    $rows = array(
-      array(dt('Name'), $result->getSensorName()),
-      array(dt('Status'), $result->getSensorStatus()),
-      array(dt('Value'), $result->getSensorValue()),
-      array(dt('Message'), $result->getSensorMessage()),
-      array(dt('Execution time'), $result->getSensorExecutionTime() . 'ms'),
-    );
-
-    // Add the verbose output if requested.
-    if (!empty($verbose[$sensor_name])) {
-      $rows[] = array(dt('Verbose output'), $verbose[$sensor_name]);
-    }
-    drush_print_table($rows);
-
-    // Set the exit status based on the sensor status.
-    if ($result->isOk()) {
-      return 0;
-    }
-    elseif ($result->isWarning()) {
-      return 1;
-    }
-    elseif ($result->isCritical()) {
-      return 2;
-    }
+  try {
+    $result = monitoring_sensor_run($sensor_name, TRUE, $verbose);
   }
-  else {
-    drush_set_error(dt('Sensor "@name" does not exist or is not enabled.', array('@name' => $sensor_name)));
+  catch (NonExistingSensorException $e) {
+    drush_set_error('MONITORING_SENSOR_INVALID_NAME', dt('Sensor "@name" does not exist.', array('@name' => $sensor_name)));
+    return 2;
+  }
+  catch (DisabledSensorException $e) {
+    drush_set_error('MONITORING_SENSOR_DISABLED', dt('Sensor "@name" is not enabled.', array('@name' => $sensor_name)));
+    return 2;
+  }
+
+  $rows = array(
+    array(dt('Name'), $result->getSensorName()),
+    array(dt('Status'), $result->getSensorStatus()),
+    array(dt('Value'), $result->getSensorValue()),
+    array(dt('Message'), $result->getSensorMessage()),
+    array(dt('Execution time'), $result->getSensorExecutionTime() . 'ms'),
+  );
+
+  // Add the verbose output if requested.
+  if (!empty($verbose[$sensor_name])) {
+    $rows[] = array(dt('Verbose output'), $verbose[$sensor_name]);
+  }
+  drush_print_table($rows);
+
+  // Set the exit status based on the sensor status.
+  if ($result->isOk()) {
+    return 0;
+  }
+  elseif ($result->isWarning()) {
+    return 1;
+  }
+  elseif ($result->isCritical()) {
     return 2;
   }
 }

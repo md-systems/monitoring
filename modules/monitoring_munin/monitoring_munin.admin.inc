@@ -51,11 +51,7 @@ function monitoring_munin_graph_settings($form, &$form_state) {
     $options[$multigraph['title']] = $multigraph['title'];
   }
 
-  foreach (monitoring_sensor_info() as $sensor_name => $sensor_info) {
-    if (!$sensor_info->isEnabled()) {
-      continue;
-    }
-
+  foreach (monitoring_sensor_manager()->getEnabledSensorInfo() as $sensor_name => $sensor_info) {
     $munin_settings = $sensor_info->getSetting('munin', array(
       'multigraphs' => array(),
       'munin_enabled' => FALSE,
@@ -106,8 +102,8 @@ function monitoring_munin_graph_settings($form, &$form_state) {
  * Munin graph settings submit callback.
  */
 function monitoring_munin_graph_settings_submit($form, &$form_state) {
-  foreach (monitoring_sensor_info() as $sensor_name => $sensor_info) {
-    if ($sensor_info->isEnabled() && !empty($form_state['values'][$sensor_name])) {
+  foreach (monitoring_sensor_manager()->getEnabledSensorInfo() as $sensor_name => $sensor_info) {
+    if (!empty($form_state['values'][$sensor_name])) {
       $settings = monitoring_sensor_settings_get($sensor_name);
       $settings['munin'] = $form_state['values'][$sensor_name];
       monitoring_sensor_settings_save($sensor_name, $settings);

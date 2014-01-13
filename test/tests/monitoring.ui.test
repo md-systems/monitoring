@@ -100,6 +100,11 @@ class MonitoringUITest extends MonitoringTestBase {
       $this->assertFieldByName($key . '[0]', $threshold[0] + 1);
       $this->assertFieldByName($key . '[1]', $threshold[1] + 1);
     }
+
+    // Test that trying to access the sensors settings page of a non-existing
+    // sensor results in a page not found response.
+    $this->drupalGet('admin/config/system/monitoring/sensors/non_existing_sensor');
+    $this->assertResponse(404);
   }
 
   /**
@@ -164,11 +169,7 @@ class MonitoringUITest extends MonitoringTestBase {
       $tr = $rows->tr[$i];
       $this->assertEqual($category, $tr->td->h3);
 
-      foreach ($category_sensor_info as $sensor_name => $info) {
-        $sensor_info = monitoring_sensor_info($sensor_name);
-        if (!$sensor_info->isEnabled()) {
-          continue;
-        }
+      foreach ($category_sensor_info as $sensor_info) {
         $i++;
         $tr = $rows->tr[$i];
         $this->assertEqual($tr->td[0]->span, $sensor_info->getLabel());
@@ -180,6 +181,15 @@ class MonitoringUITest extends MonitoringTestBase {
     $sensor_info = monitoring_sensor_info('test_sensor');
     $this->drupalGet('admin/reports/monitoring/sensors/test_sensor');
     $this->assertTitle(t('@label (@category) | Drupal', array('@label' => $sensor_info->getLabel(), '@category' => $sensor_info->getCategory())));
+
+    // Test that accessing a disabled or not-existing sensor results in a page
+    // not found response.
+    $this->sensorManager->disableSensor('test_sensor');
+    $this->drupalGet('admin/reports/monitoring/sensors/test_sensor');
+    $this->assertResponse(404);
+
+    $this->drupalGet('admin/reports/monitoring/sensors/non_existing_sensor');
+    $this->assertResponse(404);
   }
 
   /**

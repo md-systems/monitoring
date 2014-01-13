@@ -5,10 +5,12 @@
  * Monitoring bootstrap file.
  */
 
+use Drupal\monitoring\Sensor\NonExistingSensorException;
 use Drupal\monitoring\Sensor\SensorInfo;
 use Drupal\monitoring\Result\SensorResultInterface;
 use Drupal\monitoring\Sensor\SensorManager;
 use Drupal\monitoring\SensorRunner;
+use Symfony\Component\DependencyInjection\Exception\InvalidArgumentException;
 
 /**
  * Returns an instance of the sensor manager.
@@ -41,6 +43,26 @@ function monitoring_sensor_info($sensor_name = NULL) {
 }
 
 /**
+ * Menu load function to load a sensor info object.
+ *
+ * @param string $sensor_name
+ *   Sensor name.
+ *
+ * @return \Drupal\monitoring\Sensor\SensorInfo
+ *   A SensorInfo instance.
+ */
+function monitoring_sensor_info_load($sensor_name) {
+  try {
+    return monitoring_sensor_manager()->getSensorInfoByName($sensor_name);
+  }
+  catch (NonExistingSensorException $e) {
+    // Return FALSE if a sensor does not exist, this will lead to a page not
+    // found response.
+    return FALSE;
+  }
+}
+
+/**
  * Gets sensor info grouped by categories.
  *
  * @param bool $enabled
@@ -67,12 +89,17 @@ function monitoring_sensor_info_by_categories($enabled = TRUE) {
  *   If an empty array is provided it will be filled with verbose output keyed
  *   by sensor names.
  *
- * @return SensorResultInterface|null
+ * @return SensorResultInterface
  *   A single result object.
+ *
+ * @throws \Drupal\monitoring\Sensor\NonExistingSensorException
+ *   Thrown if the requested sensor does not exist.
+ * @throws \Drupal\monitoring\Sensor\DisabledSensorException
+ *   Thrown if any of the passed sensor names is not enabled.
  */
 function monitoring_sensor_run($sensor_name, $force_run = FALSE, &$verbose = NULL) {
   $results = monitoring_sensor_run_multiple(array($sensor_name), $force_run, $verbose);
-  return $results ? reset($results) : NULL;
+  return reset($results);
 }
 
 /**
@@ -88,6 +115,11 @@ function monitoring_sensor_run($sensor_name, $force_run = FALSE, &$verbose = NUL
  *
  * @return \Drupal\monitoring\Result\SensorResultInterface[]
  *   List of result objects.
+ *
+ * @throws \Drupal\monitoring\Sensor\NonExistingSensorException
+ *   Thrown if the requested sensor does not exist.
+ * @throws \Drupal\monitoring\Sensor\DisabledSensorException
+ *   Thrown if any of the passed sensor names is not enabled.
  */
 function monitoring_sensor_run_multiple($sensor_names = array(), $force_run = FALSE, &$verbose = NULL) {
   // @todo Just quick solution - we need better way to request verbose output.
@@ -98,10 +130,8 @@ function monitoring_sensor_run_multiple($sensor_names = array(), $force_run = FA
   }
   else {
     $sensors_info = array();
-    foreach (monitoring_sensor_info() as $sensor_name => $info) {
-      if (in_array($sensor_name, $sensor_names)) {
-        $sensors_info[$sensor_name] = $info;
-      }
+    foreach ($sensor_names as $sensor_name) {
+      $sensors_info[$sensor_name] = monitoring_sensor_info($sensor_name);
     }
   }
 
@@ -202,7 +232,7 @@ function monitoring_menu() {
     'weight' => -9,
     'type' => MENU_LOCAL_TASK,
   );
-  $items['admin/config/system/monitoring/sensors/%'] = array(
+  $items['admin/config/system/monitoring/sensors/%monitoring_sensor_info'] = array(
     'title callback' => 'monitoring_sensor_action_title',
     'title arguments' => array('settings', 5),
     'description' => 'Monitoring sensor configuration',
@@ -227,7 +257,7 @@ function monitoring_menu() {
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'weight' => -10,
   );
-  $items['admin/reports/monitoring/sensors/%'] = array(
+  $items['admin/reports/monitoring/sensors/%monitoring_sensor_info'] = array(
     'title callback' => 'monitoring_sensor_action_title',
     'title arguments' => array('details', 4),
     'description' => 'Details',
@@ -236,7 +266,7 @@ function monitoring_menu() {
     'access arguments' => array('monitoring reports'),
     'file' => 'monitoring.admin.inc',
   );
-  $items['admin/reports/monitoring/sensors/%/details'] = array(
+  $items['admin/reports/monitoring/sensors/%monitoring_sensor_info/details'] = array(
     'title' => 'Details',
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'weight' => -16,
@@ -257,14 +287,13 @@ function monitoring_menu() {
  *
  * @param string $action
  *   View/page action.
- * @param string $sensor_name
- *   Sensor name.
+ * @param \Drupal\monitoring\Sensor\SensorInfo $sensor_info
+ *   Sensor info.
  *
  * @return string
  *   Title.
  */
-function monitoring_sensor_action_title($action, $sensor_name) {
-  $sensor_info = monitoring_sensor_info($sensor_name);
+function monitoring_sensor_action_title($action, SensorInfo $sensor_info) {
   $placeholders = array('@category' => $sensor_info->getCategory(), '@label' => $sensor_info->getLabel());
   switch ($action) {
     case 'settings':
@@ -389,7 +418,7 @@ function monitoring_sensor_result_last($sensor_name) {
  */
 function monitoring_views_pre_render(View &$view) {
   if ($view->name == 'monitoring_sensor_results' && !empty($view->args)) {
-    $view->build_info['title'] = monitoring_sensor_action_title('log', $view->args[0]);
+    $view->build_info['title'] = monitoring_sensor_action_title('log', monitoring_sensor_info_load($view->args[0]));
   }
 }
 

@@ -7,12 +7,20 @@
 namespace Drupal\monitoring;
 
 use Drupal\monitoring\Result\SensorResultInterface;
+use Drupal\monitoring\Sensor\DisabledSensorException;
 use Drupal\monitoring\Sensor\SensorInfo;
 
 /**
  * Sensor runner helper class to instantiate and run requested sensors.
  */
 class SensorRunner implements \IteratorAggregate {
+
+  /**
+   * Sensor manager.
+   *
+   * @var \Drupal\monitoring\Sensor\SensorManager
+   */
+  protected $sensorManager;
 
   /**
    * Internal sensor result cache.
@@ -62,12 +70,14 @@ class SensorRunner implements \IteratorAggregate {
    * Constructs a SensorRunner.
    *
    * @param \Drupal\monitoring\Sensor\SensorInfo[] $sensors
-   *   Associative array of sensor names => sensor info.
+   *   Associative array of sensor names => sensor info. Only enabled sensors
+   *   may be passed.
    */
   public function __construct(array $sensors = array()) {
     $this->sensors = $sensors;
+    $this->sensorManager = monitoring_sensor_manager();
     if (empty($sensors)) {
-      $this->sensors = monitoring_sensor_info();
+      $this->sensors = $this->sensorManager->getEnabledSensorInfo();
     }
     // @todo LOW Cleanly variable based installation should go into a factory.
     $this->loggingMode = variable_get('monitoring_sensor_call_logging', 'on_request');
@@ -136,6 +146,9 @@ class SensorRunner implements \IteratorAggregate {
    *
    * @return \Drupal\monitoring\Result\SensorResultInterface[]
    *   Array of sensor results.
+   *
+   * @throws \Drupal\monitoring\Sensor\DisabledSensorException
+   *   Thrown if any of the passed sensors is not enabled.
    */
   public function runSensors() {
     $results = array();
@@ -157,12 +170,15 @@ class SensorRunner implements \IteratorAggregate {
    *
    * @return SensorResultInterface
    *   Sensor result.
+   *
+   * @throws \InvalidArgumentException
+   *   Thrown if the passed sensor is not enabled.
    */
   protected function runSensor(SensorInfo $sensor_info) {
     $sensor = $this->getSensorObject($sensor_info);
     // Check if sensor is enabled.
     if (!$sensor->isEnabled()) {
-      return NULL;
+      throw new DisabledSensorException(format_string('Sensor @sensor_name is not enabled and must not be run.', array('@sensor_name' => $sensor_info->getName())));
     }
 
     $result = $this->getResultObject($sensor_info);

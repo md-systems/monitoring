@@ -5,6 +5,8 @@
  */
 
 use Drupal\monitoring\Result\SensorResultInterface;
+use Drupal\monitoring\Sensor\DisabledSensorException;
+use Drupal\monitoring\Sensor\NonExistingSensorException;
 
 /**
  * Monitoring API tests.
@@ -61,14 +63,39 @@ class MonitoringApiTest extends MonitoringTestBase {
     $result_cached->setSensorValue(5);
     $this->assertFalse($result_cached->isCached());
 
+    // == Non-existing sensor error handling == //
+
+    // Trying to fetch information for a non-existing sensor or trying to
+    // execute such a sensor must throw an exception.
+    try {
+      $this->sensorManager->getSensorInfoByName('non_existing_sensor');
+      $this->fail('Expected exception for non-existing sensor not thrown.');
+    }
+    catch (NonExistingSensorException $e) {
+      $this->pass('Expected exception for non-existing sensor thrown.');
+    }
+
+    try {
+      monitoring_sensor_run('non_existing_sensor');
+      $this->fail('Expected exception for non-existing sensor not thrown.');
+    }
+    catch (NonExistingSensorException $e) {
+      $this->pass('Expected exception for non-existing sensor thrown.');
+    }
+
     // == Test disabled sensor. == //
 
     // Disable a sensor.
     $this->sensorManager->disableSensor('test_sensor');
 
-    // Running a disabled sensor must return a NULL result.
-    $result = monitoring_sensor_run('test_sensor');
-    $this->assertTrue($result === NULL);
+    // Running a disabled sensor must throw an exception.
+    try {
+      monitoring_sensor_run('test_sensor');
+      $this->fail('Expected exception for disabled sensor not thrown.');
+    }
+    catch (DisabledSensorException $e) {
+      $this->pass('Expected exception for disabled sensor thrown.');
+    }
 
     // Enable the sensor again.
     $this->sensorManager->enableSensor('test_sensor');

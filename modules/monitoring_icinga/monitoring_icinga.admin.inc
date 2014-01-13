@@ -170,11 +170,7 @@ function monitoring_icinga_objects_definitions_output($active_checks = TRUE, $ch
 
   $services_def = array();
   $servicegroups = array();
-  foreach (monitoring_sensor_info() as $sensor_name => $sensor_info) {
-
-    if (!$sensor_info->isEnabled()) {
-      continue;
-    }
+  foreach (monitoring_sensor_manager()->getEnabledSensorInfo() as $sensor_name => $sensor_info) {
     $services_def[] = monitoring_config_code('monitoring_icinga', 'service', array(
       '@host' => $host,
       '@service_description' => monitoring_icinga_service_description($sensor_info),

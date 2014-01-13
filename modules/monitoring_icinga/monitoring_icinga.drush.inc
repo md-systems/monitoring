@@ -1,6 +1,13 @@
 <?php
 
+/**
+ * @file
+ * Drush integration for monitoring_icinga.module.
+ */
+
 use Drupal\monitoring\Result\SensorResultInterface;
+use Drupal\monitoring\Sensor\DisabledSensorException;
+use Drupal\monitoring\Sensor\NonExistingSensorException;
 
 /**
  * Implements hook_drush_command().
@@ -66,16 +73,21 @@ function monitoring_icinga_drush_callback($sensor_name = NULL) {
  *   Sensor name to run.
  */
 function monitoring_icinga_active_check($sensor_name) {
-  $result = monitoring_sensor_run($sensor_name);
+  $statuses = monitoring_icinga_status_codes();
 
-  if (empty($result)) {
-    drush_print(format_string('Undefined sensor name @name', array('@name' => $sensor_name)));
+  try {
+    $result = monitoring_sensor_run($sensor_name);
   }
-  else {
-    drush_print(iconv('utf-8', 'ASCII', $result->getSensorMessage()));
+  catch (NonExistingSensorException $e) {
+    drush_set_error('MONITORING_SENSOR_INVALID_NAME', dt('Sensor "@name" does not exist.', array('@name' => $sensor_name)));
+    return $statuses[SensorResultInterface::STATUS_CRITICAL];
+  }
+  catch (DisabledSensorException $e) {
+    drush_set_error('MONITORING_SENSOR_DISABLED', dt('Sensor "@name" is not enabled.', array('@name' => $sensor_name)));
+    return $statuses[SensorResultInterface::STATUS_CRITICAL];
   }
 
-  drush_set_context('DRUSH_EXECUTION_COMPLETED', TRUE);
+  drush_print(iconv('utf-8', 'ASCII', $result->getSensorMessage()));
 
   // Map INFO status to OK.
   $status = $result->getSensorStatus();
@@ -83,6 +95,5 @@ function monitoring_icinga_active_check($sensor_name) {
     $status = SensorResultInterface::STATUS_OK;
   }
 
-  $statuses = monitoring_icinga_status_codes();
-  exit($statuses[$status]);
+  return $statuses[$status];
 }

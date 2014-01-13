@@ -137,7 +137,7 @@ function monitoring_munin_multigraph_save($title, $vlabel) {
  */
 function _monitoring_munin_result() {
 
-  $sensor_info = monitoring_sensor_info();
+  $sensor_info = monitoring_sensor_manager()->getEnabledSensorInfo();
   $munin_enabled = array();
 
   // Select only those sensors that are enabled for munin.
@@ -213,11 +213,11 @@ function monitoring_munin_config() {
     );
   }
 
-  foreach (monitoring_sensor_info() as $sensor_name => $info) {
+  foreach (monitoring_sensor_manager()->getEnabledSensorInfo() as $sensor_name => $info) {
     $munin_settings = $info->getSetting('munin');
 
-    // Skip in case sensor is not enabled either globally or by munin.
-    if (!$info->isEnabled() || empty($munin_settings['munin_enabled'])) {
+    // Skip in case sensor is disabled by munin.
+    if (empty($munin_settings['munin_enabled'])) {
       continue;
     }
 
