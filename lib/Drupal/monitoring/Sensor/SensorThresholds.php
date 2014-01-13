@@ -23,7 +23,7 @@ abstract class SensorThresholds extends SensorConfigurable implements SensorThre
       $form['thresholds'] = array(
         '#type' => 'fieldset',
         '#title' => t('Sensor thresholds'),
-        '#description' => t('Here you can set limit values that switch sensor to a given state. <strong>Note that a sensor having the limit value will result in a state change.</strong>'),
+        '#description' => t('Here you can set limit values that switch sensor to a given state.'),
       );
 
       if (isset($form_state['values'][monitoring_sensor_settings_key($this->getSensorName())]['thresholds']['type'])) {

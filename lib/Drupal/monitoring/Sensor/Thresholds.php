@@ -81,7 +81,7 @@ class Thresholds {
   }
 
   /**
-   * Checks if provided value exceeds or is equal to the given threshold.
+   * Checks if provided value exceeds the given threshold.
    *
    * @param int $value
    * @param int $threshold
@@ -92,11 +92,11 @@ class Thresholds {
     if ($threshold === NULL) {
       return FALSE;
     }
-    return $value >= $threshold;
+    return $value > $threshold;
   }
 
   /**
-   * Checks if provided value falls or is equal to the given threshold.
+   * Checks if provided value falls below the given threshold.
    *
    * @param int $value
    * @param int $threshold
@@ -107,7 +107,7 @@ class Thresholds {
     if ($threshold === NULL) {
       return FALSE;
     }
-    return $value <= $threshold;
+    return $value < $threshold;
   }
 
   /**
@@ -123,7 +123,7 @@ class Thresholds {
     if ($interval[0] === NULL || $interval[1] === NULL) {
       return FALSE;
     }
-    return ($value >= $interval[0] && $value <= $interval[1]);
+    return ($value > $interval[0] && $value < $interval[1]);
   }
 
   /**
@@ -139,7 +139,7 @@ class Thresholds {
     if ($interval[0] === NULL || $interval[1] === NULL) {
       return FALSE;
     }
-    return ($value <= $interval[0] || $value >= $interval[1]);
+    return ($value < $interval[0] || $value > $interval[1]);
   }
 
 }

@@ -150,12 +150,12 @@ class MonitoringApiTest extends MonitoringTestBase {
     $this->assertEqual($result->getSensorMessage(), t('Value 5, violating the interval @expected', array('@expected' => '3 - 6')));
 
     $test_sensor_result_data = array(
-      'sensor_value' => 3,
+      'sensor_value' => 4,
     );
     variable_set('test_sensor_result_data', $test_sensor_result_data);
     $result = monitoring_sensor_run('test_sensor_inner', TRUE);
     $this->assertEqual($result->getSensorStatus(), SensorResultInterface::STATUS_CRITICAL);
-    $this->assertEqual($result->getSensorMessage(), t('Value 3, violating the interval @expected', array('@expected' => '3 - 6')));
+    $this->assertEqual($result->getSensorMessage(), t('Value 4, violating the interval @expected', array('@expected' => '3 - 6')));
 
     // == outer_intervals give error statuses.
 
@@ -178,12 +178,12 @@ class MonitoringApiTest extends MonitoringTestBase {
 
     // Test for warning values.
     $test_sensor_result_data = array(
-      'sensor_value' => 20,
+      'sensor_value' => 19,
     );
     variable_set('test_sensor_result_data', $test_sensor_result_data);
     $result = monitoring_sensor_run('test_sensor_outer', TRUE);
     $this->assertEqual($result->getSensorStatus(), SensorResultInterface::STATUS_WARNING);
-    $this->assertEqual($result->getSensorMessage(), t('Value 20, outside the allowed interval @expected', array('@expected' => '20 - 40')));
+    $this->assertEqual($result->getSensorMessage(), t('Value 19, outside the allowed interval @expected', array('@expected' => '20 - 40')));
 
     $test_sensor_result_data = array(
       'sensor_value' => 42,
@@ -195,12 +195,12 @@ class MonitoringApiTest extends MonitoringTestBase {
 
     // Test for critical values.
     $test_sensor_result_data = array(
-      'sensor_value' => 10,
+      'sensor_value' => 9,
     );
     variable_set('test_sensor_result_data', $test_sensor_result_data);
     $result = monitoring_sensor_run('test_sensor_outer', TRUE);
     $this->assertEqual($result->getSensorStatus(), SensorResultInterface::STATUS_CRITICAL);
-    $this->assertEqual($result->getSensorMessage(), t('Value 10, outside the allowed interval @expected', array('@expected' => '10 - 50')));
+    $this->assertEqual($result->getSensorMessage(), t('Value 9, outside the allowed interval @expected', array('@expected' => '10 - 50')));
 
     $test_sensor_result_data = array(
       'sensor_value' => 60,
@@ -221,12 +221,12 @@ class MonitoringApiTest extends MonitoringTestBase {
     $this->assertEqual($result->getSensorMessage(), 'Value 4');
 
     $test_sensor_result_data = array(
-      'sensor_value' => 5,
+      'sensor_value' => 6,
     );
     variable_set('test_sensor_result_data', $test_sensor_result_data);
     $result = monitoring_sensor_run('test_sensor_exceeds', TRUE);
     $this->assertEqual($result->getSensorStatus(), SensorResultInterface::STATUS_WARNING);
-    $this->assertEqual($result->getSensorMessage(), t('Value 5, exceeds @expected', array('@expected' => '5')));
+    $this->assertEqual($result->getSensorMessage(), t('Value 6, exceeds @expected', array('@expected' => '5')));
 
     $test_sensor_result_data = array(
       'sensor_value' => 14,
@@ -247,12 +247,12 @@ class MonitoringApiTest extends MonitoringTestBase {
     $this->assertEqual($result->getSensorMessage(), 'Value 12');
 
     $test_sensor_result_data = array(
-      'sensor_value' => 10,
+      'sensor_value' => 9,
     );
     variable_set('test_sensor_result_data', $test_sensor_result_data);
     $result = monitoring_sensor_run('test_sensor_falls', TRUE);
     $this->assertEqual($result->getSensorStatus(), SensorResultInterface::STATUS_WARNING);
-    $this->assertEqual($result->getSensorMessage(), t('Value 10, falls below @expected', array('@expected' => '10')));
+    $this->assertEqual($result->getSensorMessage(), t('Value 9, falls below @expected', array('@expected' => '10')));
 
     $test_sensor_result_data = array(
       'sensor_value' => 3,

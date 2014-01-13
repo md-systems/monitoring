@@ -136,25 +136,25 @@ class MonitoringCoreTest extends MonitoringTestBase {
     $this->assertEqual($result->getSensorMessage(), '1 watchdog events in 1 day, not/found');
     $this->assertEqual($result->getSensorValue(), 1);
 
-    for ($i = 1; $i < 20; $i++) {
+    for ($i = 1; $i <= 20; $i++) {
       watchdog('page not found', 'not/found');
     }
 
     $result = monitoring_sensor_run('404_in_last_24_hours', TRUE);
-    $this->assertEqual($result->getSensorValue(), 20);
+    $this->assertEqual($result->getSensorValue(), 21);
     $this->assertTrue($result->isWarning());
 
-    for ($i = 0; $i < 100; $i++) {
+    for ($i = 0; $i <= 100; $i++) {
       watchdog('page not found', 'not/found/another');
     }
 
     $result = monitoring_sensor_run('404_in_last_24_hours', TRUE);
-    $this->assertEqual($result->getSensorValue(), 100);
+    $this->assertEqual($result->getSensorValue(), 101);
     $this->assertTrue($result->isCritical());
 
     // ======= SensorWatchdogMissingImageStyle tests ======= //
 
-    for ($i = 0; $i < 5; $i++) {
+    for ($i = 0; $i <= 5; $i++) {
       watchdog('image', 'Source image at %source_image_path not found while trying to generate derivative image at %derivative_path.',
         array(
           '%source_image_path' => 'public://portrait-pictures/redmouse.jpeg',
@@ -168,7 +168,7 @@ class MonitoringCoreTest extends MonitoringTestBase {
       ));
 
     $result = $this->runSensor('image_style_missing_count');
-    $this->assertEqual(5, $result->getSensorValue());
+    $this->assertEqual(6, $result->getSensorValue());
     $this->assertTrue(strpos($result->getSensorMessage(), 'public://portrait-pictures/redmouse.jpeg') !== FALSE);
     $this->assertTrue($result->isWarning());
 
@@ -493,14 +493,15 @@ class MonitoringCoreTest extends MonitoringTestBase {
     $this->assertEqual($result->getSensorValue(), 0);
 
     watchdog('test_watchdog_aggregate_sensor', 'testing');
+    watchdog('test_watchdog_aggregate_sensor', 'testing');
     $result = $this->runSensor('watchdog_aggregate_test');
     $this->assertTrue($result->isWarning());
-    $this->assertEqual($result->getSensorValue(), 1);
+    $this->assertEqual($result->getSensorValue(), 2);
 
     watchdog('test_watchdog_aggregate_sensor', 'testing');
     $result = $this->runSensor('watchdog_aggregate_test');
     $this->assertTrue($result->isCritical());
-    $this->assertEqual($result->getSensorValue(), 2);
+    $this->assertEqual($result->getSensorValue(), 3);
 
     // Test with different db table.
     $info = monitoring_sensor_info('db_aggregate_test');
