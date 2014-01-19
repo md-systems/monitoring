@@ -55,8 +55,8 @@ class SensorManager {
    * @param string $sensor_name
    *   Sensor id.
    *
-   * @return \Drupal\monitoring\Sensor\SensorInfo|null
-   *   A single SensorInfo instance or NULL if the sensor does not exist.
+   * @return \Drupal\monitoring\Sensor\SensorInfo
+   *   A single SensorInfo instance.
    *
    * @throws \Drupal\monitoring\Sensor\NonExistingSensorException
    *   Thrown if the requested sensor does not exist.
@@ -107,6 +107,9 @@ class SensorManager {
    *
    * @param string $sensor_name
    *   Sensor name to be enabled.
+   *
+   * @throws \Drupal\monitoring\Sensor\NonExistingSensorException
+   *   Thrown if the requested sensor does not exist.
    */
   function enableSensor($sensor_name) {
     $sensor_info = $this->getSensorInfoByName($sensor_name);
@@ -131,6 +134,9 @@ class SensorManager {
    *
    * @param string $sensor_name
    *   Sensor name to be disabled.
+   *
+   * @throws \Drupal\monitoring\Sensor\NonExistingSensorException
+   *   Thrown if the requested sensor does not exist.
    */
   function disableSensor($sensor_name) {
     $sensor_info = $this->getSensorInfoByName($sensor_name);
