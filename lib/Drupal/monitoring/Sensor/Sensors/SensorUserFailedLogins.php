@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Contains Drupal\monitoring\Sensor\Sensors\SensorFailedUserLogins
+ * Contains \Drupal\monitoring\Sensor\Sensors\SensorUserFailedLogins.
  */
 
 namespace Drupal\monitoring\Sensor\Sensors;
@@ -11,7 +11,7 @@ use Drupal\monitoring\Result\SensorResultInterface;
 /**
  * Aggregates user failed login watchdog messages.
  */
-class SensorFailedUserLogins extends SensorDatabaseAggregator {
+class SensorUserFailedLogins extends SensorDatabaseAggregator {
 
   /**
    * {@inheritdoc}

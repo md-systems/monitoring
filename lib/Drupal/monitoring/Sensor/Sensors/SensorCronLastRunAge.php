@@ -2,7 +2,7 @@
 
 /**
  * @file
- * SensorLastCronRun sensor.
+ * Contains \Drupal\monitoring\Sensor\Sensors\SensorCronLastRunAge.
  */
 
 namespace Drupal\monitoring\Sensor\Sensors;
@@ -14,11 +14,11 @@ use Drupal\monitoring\Result\SensorResultInterface;
 
 
 /**
- * Class SensorLastCronRun
+ * Class SensorCronLastRunAge
  *
  * Monitors the last cron run time.
  */
-class SensorLastCronRun extends SensorThresholds {
+class SensorCronLastRunAge extends SensorThresholds {
 
   protected $variable;
 

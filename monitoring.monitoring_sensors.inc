@@ -6,7 +6,7 @@ use Drupal\monitoring\Result\SensorResultInterface;
  * Implements hook_sensor_info().
  */
 function monitoring_monitoring_sensor_info() {
-  $info['git_dirty_tree'] = array(
+  $info['monitoring_git_dirty_tree'] = array(
     'label' => 'Git dirty working tree',
     'description' => 'Repository local file changes',
     'sensor class' => 'Drupal\monitoring\Sensor\Sensors\SensorGitDirtyTree',
@@ -22,7 +22,7 @@ function monitoring_monitoring_sensor_info() {
       'cmd' => 'git status --porcelain',
     ),
   );
-  $info['disappeared_sensors'] = array(
+  $info['monitoring_disappeared_sensors'] = array(
     'label' => 'Disappeared sensors',
     'description' => 'Keeps track of active sensors and reports if a sensor disappears',
     'sensor class' => 'Drupal\monitoring\Sensor\Sensors\SensorDisappearedSensors',
@@ -93,7 +93,7 @@ function monitoring_node_monitoring_sensor_info() {
 function monitoring_comment_monitoring_sensor_info() {
   $info = array();
 
-  $info['new_comments'] = array(
+  $info['comment_new'] = array(
     'label' => 'New comments',
     'sensor class' => 'Drupal\monitoring\Sensor\Sensors\SensorDatabaseAggregator',
     'settings' => array(
@@ -119,7 +119,7 @@ function monitoring_comment_monitoring_sensor_info() {
 function monitoring_user_monitoring_sensor_info() {
   $info = array();
 
-  $info['new_users'] = array(
+  $info['user_new'] = array(
     'label' => 'New users',
     'sensor class' => 'Drupal\monitoring\Sensor\Sensors\SensorDatabaseAggregator',
     'settings' => array(
@@ -134,7 +134,7 @@ function monitoring_user_monitoring_sensor_info() {
     ),
   );
 
-  $info['active_users'] = array(
+  $info['user_active'] = array(
     'label' => 'Active users',
     'sensor class' => 'Drupal\monitoring\Sensor\Sensors\SensorDatabaseAggregator',
     'settings' => array(
@@ -155,53 +155,14 @@ function monitoring_user_monitoring_sensor_info() {
 /**
  * Implements monitoring_MODULE_monitoring_sensor_info().
  *
- * Module: image
- */
-function monitoring_image_monitoring_sensor_info() {
-  $info = array();
-  // Sensor requires the {watchdog} table from the dblog module.
-  // @todo: Provide an alternative for past_db.
-  if (module_exists('dblog')) {
-    $info['image_style_missing_count'] = array(
-      'label' => 'Image derivative creation fail',
-      'description' => 'Image derivative creation fails',
-      'sensor class' => 'Drupal\monitoring\Sensor\Sensors\SensorWatchdogMissingImageStyle',
-      'settings' => array(
-        'category' => 'Watchdog',
-        'units_label' => 'Watchdog entries',
-        // Cache for one hour.
-        'caching time' => 3600,
-        'thresholds' => array(
-          'type' => 'exceeds',
-          'intervals' => array(
-            SensorResultInterface::STATUS_CRITICAL => 20,
-            SensorResultInterface::STATUS_WARNING => 5,
-          ),
-        ),
-        'table' => 'watchdog',
-        'conditions' => array(
-          array('field' => 'type', 'value' => 'image'),
-          array('field' => 'message', 'value' => 'Source image at %source_image_path not found while trying to generate derivative image at %derivative_path.'),
-        ),
-        'time_interval_field' => 'timestamp',
-        'time_interval_value' => 60 * 60 * 24,
-      ),
-    );
-  }
-  return $info;
-}
-
-/**
- * Implements monitoring_MODULE_monitoring_sensor_info().
- *
  * Module: dblog
  */
 function monitoring_dblog_monitoring_sensor_info() {
 
-  $info['404_in_last_24_hours'] = array(
+  $info['dblog_404'] = array(
     'label' => 'Page not found errors',
     'description' => 'Page not found errors logged by watchdog',
-    'sensor class' => 'Drupal\monitoring\Sensor\Sensors\SensorWatchdog404',
+    'sensor class' => 'Drupal\monitoring\Sensor\Sensors\SensorDblog404',
     'settings' => array(
       'category' => 'Watchdog',
       'units_label' => 'Watchdog events',
@@ -223,6 +184,7 @@ function monitoring_dblog_monitoring_sensor_info() {
     ),
   );
 
+  $severities = monitoring_event_severities();
 
   foreach (watchdog_severity_levels() as $level => $name) {
     // Error level and higher cache for 5 minutes, the other 15.
@@ -237,13 +199,13 @@ function monitoring_dblog_monitoring_sensor_info() {
       $warning_threshold = 20;
     }
 
-    $info['watchdog_severity_' . $level] = array(
+    $info['dblog_event_severity_' . $severities[$level]] = array(
       'label' => format_string('Severity @severity', array('@severity' => $name)),
       'description' => format_string('Watchdog entries of severity @severity', array('@severity' => $name)),
       'sensor class' => 'Drupal\monitoring\Sensor\Sensors\SensorDatabaseAggregator',
       'settings' => array(
         'category' => 'Watchdog',
-        'units_label' => 'Watchdog events',
+        'units_label' => 'Events',
         'caching time' => $caching_time,
         'thresholds' => array(
           'type' => 'exceeds',
@@ -264,7 +226,7 @@ function monitoring_dblog_monitoring_sensor_info() {
     );
   }
 
-  $info['successful_user_logins'] = array(
+  $info['user_successful_logins'] = array(
     'label' => 'Successful user logins',
     'description' => 'Successful user logins by Watchdog',
     'sensor class' => 'Drupal\monitoring\Sensor\Sensors\SensorDatabaseAggregator',
@@ -283,10 +245,10 @@ function monitoring_dblog_monitoring_sensor_info() {
     ),
   );
 
-  $info['failed_user_logins'] = array(
+  $info['user_failed_logins'] = array(
     'label' => 'Failed user logins',
     'description' => 'Failed user logins by Watchdog',
-    'sensor class' => 'Drupal\monitoring\Sensor\Sensors\SensorFailedUserLogins',
+    'sensor class' => 'Drupal\monitoring\Sensor\Sensors\SensorUserFailedLogins',
     'settings' => array(
       'category' => 'User activity',
       'units_label' => 'Login attempts',
@@ -311,6 +273,35 @@ function monitoring_dblog_monitoring_sensor_info() {
     ),
   );
 
+  // @todo: Provide an alternative for past_db.
+  if (module_exists('image')) {
+    $info['dblog_image_missing_style'] = array(
+      'label' => 'Image derivative creation fail',
+      'description' => 'Image derivative creation fails',
+      'sensor class' => 'Drupal\monitoring\Sensor\Sensors\SensorImageMissingStyle',
+      'settings' => array(
+        'category' => 'Watchdog',
+        'units_label' => 'Watchdog entries',
+        // Cache for one hour.
+        'caching time' => 3600,
+        'thresholds' => array(
+          'type' => 'exceeds',
+          'intervals' => array(
+            SensorResultInterface::STATUS_CRITICAL => 20,
+            SensorResultInterface::STATUS_WARNING => 5,
+          ),
+        ),
+        'table' => 'watchdog',
+        'conditions' => array(
+          array('field' => 'type', 'value' => 'image'),
+          array('field' => 'message', 'value' => 'Source image at %source_image_path not found while trying to generate derivative image at %derivative_path.'),
+        ),
+        'time_interval_field' => 'timestamp',
+        'time_interval_value' => 60 * 60 * 24,
+      ),
+    );
+  }
+
   return $info;
 }
 
@@ -321,15 +312,16 @@ function monitoring_dblog_monitoring_sensor_info() {
  */
 function monitoring_past_db_monitoring_sensor_info() {
   $info = array();
+  $severities = monitoring_event_severities();
 
   foreach (past_event_severities() as $severity => $name) {
-    $info['past_severity_' . $severity] = array(
+    $info['past_db_event_severity_' . $severities[$severity]] = array(
       'label' => format_string('Severity @severity', array('@severity' => $name)),
       'description' => format_string('Past events with severity @severity', array('@severity' => $name)),
       'sensor class' => 'Drupal\monitoring\Sensor\Sensors\SensorDatabaseAggregator',
       'settings' => array(
         'category' => 'Past',
-        'units_label' => 'Past events',
+        'units_label' => 'Events',
         // Cache for one hour.
         'caching time' => 3600,
         'table' => 'past_event',
@@ -345,7 +337,7 @@ function monitoring_past_db_monitoring_sensor_info() {
   }
 
   // Default thresholds for criticals (fatal errors).
-  $info['past_severity_' . PAST_SEVERITY_CRITICAL]['settings']['thresholds'] = array(
+  $info['past_db_event_severity_' . $severities[PAST_SEVERITY_CRITICAL]]['settings']['thresholds'] = array(
     'type' => 'exceeds',
     'intervals' => array(
       SensorResultInterface::STATUS_CRITICAL => 5,
@@ -391,7 +383,7 @@ function monitoring_system_monitoring_sensor_info() {
 
   // === Variables === //
 
-  $info['maintenance_mode'] = array(
+  $info['core_maintenance_mode'] = array(
     'label' => 'Maintenance mode',
     'description' => 'Site maintenance mode',
     'sensor class' => 'Drupal\monitoring\Sensor\Sensors\SensorVariable',
@@ -406,10 +398,10 @@ function monitoring_system_monitoring_sensor_info() {
 
   // === Cron === //
 
-  $info['last_cron_run'] = array(
-    'label' => 'Last cron run',
+  $info['core_cron_last_run_age'] = array(
+    'label' => 'Last cron run age',
     'description' => 'Time since last cron run',
-    'sensor class' => 'Drupal\monitoring\Sensor\Sensors\SensorLastCronRun',
+    'sensor class' => 'Drupal\monitoring\Sensor\Sensors\SensorCronLastRunAge',
     'settings' => array(
       'category' => 'Cron',
       'units_label' => 'Seconds',
@@ -423,7 +415,7 @@ function monitoring_system_monitoring_sensor_info() {
     ),
   );
 
-  $info['cron_safe_threshold_enabled'] = array(
+  $info['core_cron_safe_threshold'] = array(
     'label' => 'Cron safe threshold enabled',
     'description' => 'Cron safe threshold (Poormanscron) is enabled',
     'sensor class' => 'Drupal\monitoring\Sensor\Sensors\SensorVariable',
@@ -442,7 +434,7 @@ function monitoring_system_monitoring_sensor_info() {
   $queues = array_keys(module_invoke_all('cron_queue_info'));
 
   foreach ($queues as $queue) {
-    $info['queue_' . $queue] = array(
+    $info['core_queue_' . $queue] = array(
       'label' => check_plain($queue),
       'description' => format_string('Size of @queue queue', array('@queue' => $queue)),
       'sensor class' => 'Drupal\monitoring\Sensor\Sensors\SensorQueue',
@@ -456,7 +448,7 @@ function monitoring_system_monitoring_sensor_info() {
 
   // === System === //
 
-  $info['enabled_modules'] = array(
+  $info['monitoring_enabled_modules'] = array(
     'label' => 'Enabled modules',
     'description' => 'Enabled only expected modules',
     'sensor class' => 'Drupal\monitoring\Sensor\Sensors\SensorEnabledModules',
@@ -478,10 +470,10 @@ function monitoring_system_monitoring_sensor_info() {
     if ($module == 'update') {
       continue;
     }
-    $info['drupal_requirements_' . $module] = array(
+    $info['core_requirements_' . $module] = array(
       'label' => format_string('Module @module', array('@module' => $module)),
       'description' => format_string('Requirements of the @module module', array('@module' => $module)),
-      'sensor class' => 'Drupal\monitoring\Sensor\Sensors\SensorDrupalRequirements',
+      'sensor class' => 'Drupal\monitoring\Sensor\Sensors\SensorCoreRequirements',
       'type' => 'state',
       'settings' => array(
         'category' => 'Requirements',
@@ -496,7 +488,7 @@ function monitoring_system_monitoring_sensor_info() {
     // Ignore the cron key for system requirements, as we have a separate
     // sensor for this.
     if ($module == 'system') {
-      $info['drupal_requirements_' . $module]['settings']['exclude keys'][] = 'cron';
+      $info['core_requirements_' . $module]['settings']['exclude keys'][] = 'cron';
     }
   }
 
@@ -606,7 +598,7 @@ function monitoring_elysia_cron_monitoring_sensor_info() {
   foreach($result as $row) {
     // Remove the colon from the name as it breaks munin graphs.
     $name = str_replace(':', '', $row->name);
-    $info['elysia_' . $name . '_last_execution'] = array(
+    $info['elysia_cron_' . $name . '_last_execution'] = array(
       'label' => format_string('Elysia @name execution', array('@name' => $row->name)),
       'description' => format_string('Last execution duration for elysia @name cron', array('@name' => $row->name)),
       'sensor class' => 'Drupal\monitoring\Sensor\Sensors\SensorElysiaCron',
@@ -618,7 +610,7 @@ function monitoring_elysia_cron_monitoring_sensor_info() {
         'metric' => 'last_execution_time',
       ),
     );
-    $info['elysia_' . $name . '_last_run'] = array(
+    $info['elysia_cron_' . $name . '_last_run'] = array(
       'label' => format_string('Elysia @name run', array('@name' => $row->name)),
       'description' => format_string('Time since last elysia @name run', array('@name' => $row->name)),
       'sensor class' => 'Drupal\monitoring\Sensor\Sensors\SensorElysiaCron',
@@ -653,4 +645,23 @@ function monitoring_maillog_monitoring_sensor_info() {
   );
 
   return $info;
+}
+
+/**
+ * Maps severities to their machine names.
+ *
+ * @return array
+ *   Severity names array keyed by WATCHDOG_* constants.
+ */
+function monitoring_event_severities() {
+  return array(
+    WATCHDOG_DEBUG => 'debug',
+    WATCHDOG_INFO => 'info',
+    WATCHDOG_NOTICE => 'notice',
+    WATCHDOG_WARNING => 'notice',
+    WATCHDOG_ERROR => 'error',
+    WATCHDOG_EMERGENCY => 'emergency',
+    WATCHDOG_ALERT => 'alert',
+    WATCHDOG_CRITICAL => 'critical',
+  );
 }

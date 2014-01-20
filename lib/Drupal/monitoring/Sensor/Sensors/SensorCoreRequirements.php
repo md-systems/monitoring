@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Contains Drupal\monitoring\Sensor\Sensors\SensorDrupalRequirements
+ * Contains \Drupal\monitoring\Sensor\Sensors\SensorCoreRequirements.
  */
 
 namespace Drupal\monitoring\Sensor\Sensors;
@@ -15,7 +15,7 @@ use Drupal\monitoring\Sensor\Sensor;
  *
  * @todo Shorten sensor message and add improved verbose output.
  */
-class SensorDrupalRequirements extends Sensor {
+class SensorCoreRequirements extends Sensor {
 
   protected $requirements;
 

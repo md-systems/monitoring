@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Watchdog 404 sensor.
+ * Contains \Drupal\monitoring\Sensor\Sensors\SensorDblog404.
  */
 
 namespace Drupal\monitoring\Sensor\Sensors;
@@ -12,7 +12,7 @@ use Drupal\monitoring\Result\SensorResultInterface;
  * Extends the SensorDatabaseAggregator generic class to capture 404
  * page with highest occurrence.
  */
-class SensorWatchdog404 extends SensorDatabaseAggregator {
+class SensorDblog404 extends SensorDatabaseAggregator {
 
   /**
    * {@inheritdoc}

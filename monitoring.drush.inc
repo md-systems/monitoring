@@ -32,8 +32,8 @@ function monitoring_drush_command() {
       'verbose' => 'Display verbose information'
     ),
     'examples' => array(
-      'drush monitoring-run git_dirty_tree' => 'Runs sensor to monitor the git status',
-      'drush monitoring-run --verbose git_dirty_tree' => 'Runs sensor to monitor the git status and displays verbose information',
+      'drush monitoring-run monitoring_git_dirty_tree' => 'Runs sensor to monitor the git status',
+      'drush monitoring-run --verbose monitoring_git_dirty_tree' => 'Runs sensor to monitor the git status and displays verbose information',
     ),
     'drupal dependencies' => array('monitoring'),
   );
@@ -47,7 +47,7 @@ function monitoring_drush_command() {
       'settings_value' => 'Sensor settings value to set.',
     ),
     'examples' => array(
-      'drush monitoring-set git_dirty_tree enabled 1' => 'Enables git_dirty_tree sensor.',
+      'drush monitoring-set monitoring_git_dirty_tree enabled 1' => 'Enables monitoring_git_dirty_tree sensor.',
     ),
     'drupal dependencies' => array('monitoring'),
   );
@@ -59,7 +59,7 @@ function monitoring_drush_command() {
       'sensor_name' => 'Sensor name for which to purge settings.',
     ),
     'examples' => array(
-      'drush monitoring-purge-settings git_dirty_tree' => 'Enables git_dirty_tree sensor.',
+      'drush monitoring-purge-settings monitoring_git_dirty_tree' => 'Enables monitoring_git_dirty_tree sensor.',
     ),
     'drupal dependencies' => array('monitoring'),
   );

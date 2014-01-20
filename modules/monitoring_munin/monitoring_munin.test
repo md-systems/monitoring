@@ -41,14 +41,14 @@ class MonitoringMuninTest extends DrupalWebTestCase {
     $this->assertEqual($multigraphs['test multigraph']['vlabel'], 'test unit');
 
     // Add multigraph to a sensor.
-    $settings = monitoring_sensor_settings_get('404_in_last_24_hours');
+    $settings = monitoring_sensor_settings_get('dblog_404');
     $settings['munin']['multigraphs'][] = 'test multigraph';
-    monitoring_sensor_settings_save('404_in_last_24_hours', $settings);
+    monitoring_sensor_settings_save('dblog_404', $settings);
 
     // Deleting the multigraph must remove it form sensors settings as well.
     monitoring_munin_multigraph_delete('test multigraph');
     monitoring_sensor_manager()->resetCache();
-    $info = monitoring_sensor_info('404_in_last_24_hours');
+    $info = monitoring_sensor_info('dblog_404');
     $munin_settings = $info->getSetting('munin');
     $this->assertTrue(!in_array('test multigraph', $munin_settings['multigraphs']));
   }

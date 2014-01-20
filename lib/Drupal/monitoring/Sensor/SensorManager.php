@@ -220,6 +220,9 @@ class SensorManager {
       $info[$sensor_name] = new SensorInfo($sensor_name, $sensor_info);
     }
 
+    // Sort the sensors by their name.
+    ksort($info);
+
     return $info;
   }
 

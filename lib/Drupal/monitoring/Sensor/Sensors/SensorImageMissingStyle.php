@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Watchdog missing image style sensor.
+ * Contains \Drupal\monitoring\Sensor\Sensors\SensorImageMissingStyle.
  */
 
 namespace Drupal\monitoring\Sensor\Sensors;
@@ -13,7 +13,7 @@ use Drupal\monitoring\Result\SensorResultInterface;
  * Extends the SensorDatabaseAggregator generic class to capture missing
  * image style error.
  */
-class SensorWatchdogMissingImageStyle extends SensorDatabaseAggregator {
+class SensorImageMissingStyle extends SensorDatabaseAggregator {
 
   protected $sourceImagePath;
 

@@ -43,7 +43,7 @@ function monitoring_demo_enable() {
   $sensor_manager->enableSensor('node_new_all');
   $sensor_manager->enableSensor('node_new_page');
   $sensor_manager->enableSensor('node_new_article');
-  $sensor_manager->enableSensor('new_comments');
+  $sensor_manager->enableSensor('comment_new');
 
   // Generate watchdog entries.
   // Watchdog sensors are enabled by default, no need to enable them here.
