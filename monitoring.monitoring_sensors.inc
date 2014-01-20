@@ -247,8 +247,10 @@ function monitoring_dblog_monitoring_sensor_info() {
         'caching time' => $caching_time,
         'thresholds' => array(
           'type' => 'exceeds',
-          SensorResultInterface::STATUS_CRITICAL => $critical_threshold,
-          SensorResultInterface::STATUS_WARNING => $warning_threshold,
+          'intervals' => array(
+            SensorResultInterface::STATUS_CRITICAL => $critical_threshold,
+            SensorResultInterface::STATUS_WARNING => $warning_threshold,
+          ),
         ),
         'table' => 'watchdog',
         'conditions' => array(

@@ -37,19 +37,8 @@ class MonitoringSearchAPITest extends MonitoringTestBase {
     $this->drupalCreateNode(array('type' => 'article'));
 
     // Configure Search API.
-    _monitoring_test_create_search_index();
-    $account = $this->drupalCreateUser(array('administer search_api'));
-    $this->drupalLogin($account);
-    $this->drupalPostAJAX('admin/config/search/search_api/add_server', array('class' => 'search_api_db_service'), 'class');
-    $this->drupalPost(NULL, array(
-      'name' => 'test_search_server',
-      'machine_name' => 'test_search_server',
-      'class' => 'search_api_db_service',
-    ), t('Create server'));
-    $this->drupalPost('admin/config/search/search_api/index/monitoring_test_index/edit',
-      array('server' => 'test_search_server'), t('Save settings'));
-    // After being configured enable the index from the view page.
-    $this->clickLink(t('enable'));
+    monitoring_setup_search_api();
+
     // Reset sensor info so that sensor for newly created search api index
     // gets picked up.
     monitoring_sensor_info(NULL, TRUE);
@@ -80,101 +69,4 @@ class MonitoringSearchAPITest extends MonitoringTestBase {
 
   }
 
-}
-
-/**
- * We need for testing this default index.
- *
- * This is copied from search_api_install() where the code will not run in case
- * of active batch process which is the case of running tests.
- *
- * @see search_api_install()
- */
-function _monitoring_test_create_search_index() {
-  $name = 'Monitoring test index';
-  $values = array(
-    'name' => $name,
-    'machine_name' => preg_replace('/[^a-z0-9]+/', '_', drupal_strtolower($name)),
-    'description' => 'An automatically created search index for indexing node data. Might be configured to specific needs.',
-    'server' => NULL,
-    'item_type' => 'node',
-    'options' => array(
-      'index_directly' => 1,
-      'cron_limit' => '50',
-      'data_alter_callbacks' => array(
-        'search_api_alter_node_access' => array(
-          'status' => 1,
-          'weight' => '0',
-          'settings' => array(),
-        ),
-      ),
-      'processors' => array(
-        'search_api_case_ignore' => array(
-          'status' => 1,
-          'weight' => '0',
-          'settings' => array(
-            'strings' => 0,
-          ),
-        ),
-        'search_api_html_filter' => array(
-          'status' => 1,
-          'weight' => '10',
-          'settings' => array(
-            'title' => 0,
-            'alt' => 1,
-            'tags' => "h1 = 5\n" .
-            "h2 = 3\n" .
-            "h3 = 2\n" .
-            "strong = 2\n" .
-            "b = 2\n" .
-            "em = 1.5\n" .
-            "u = 1.5",
-          ),
-        ),
-        'search_api_tokenizer' => array(
-          'status' => 1,
-          'weight' => '20',
-          'settings' => array(
-            'spaces' => '[^\\p{L}\\p{N}]',
-            'ignorable' => '[-]',
-          ),
-        ),
-      ),
-      'fields' => array(
-        'type' => array(
-          'type' => 'string',
-        ),
-        'title' => array(
-          'type' => 'text',
-          'boost' => '5.0',
-        ),
-        'promote' => array(
-          'type' => 'boolean',
-        ),
-        'sticky' => array(
-          'type' => 'boolean',
-        ),
-        'created' => array(
-          'type' => 'date',
-        ),
-        'changed' => array(
-          'type' => 'date',
-        ),
-        'author' => array(
-          'type' => 'integer',
-          'entity_type' => 'user',
-        ),
-        'comment_count' => array(
-          'type' => 'integer',
-        ),
-        'search_api_language' => array(
-          'type' => 'string',
-        ),
-        'body:value' => array(
-          'type' => 'text',
-        ),
-      ),
-    ),
-  );
-  search_api_index_insert($values);
 }

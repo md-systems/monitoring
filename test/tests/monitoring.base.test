@@ -35,6 +35,8 @@ abstract class MonitoringTestBase extends DrupalWebTestCase {
     parent::setUp($modules);
 
     $this->sensorManager = monitoring_sensor_manager();
+
+    require_once drupal_get_path('module', 'monitoring') . '/monitoring.setup.inc';
   }
 
   /**

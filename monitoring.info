@@ -13,6 +13,8 @@ test_dependencies[] = search_api_db
 test_dependencies[] = simplenews (1.x)
 test_dependencies[] = elysia_cron
 
+simplytest_dependencies[] = monitoring_demo
+
 files[] = test/tests/monitoring.base.test
 files[] = test/tests/monitoring.api.test
 files[] = test/tests/monitoring.core.test

@@ -1,0 +1,8 @@
+name = Monitoring Demo
+description = Monitoring simplytest.me integration.
+package = Monitoring
+core = 7.x
+hidden = TRUE
+
+dependencies[] = search_api_db
+dependencies[] = monitoring
