@@ -1,0 +1,161 @@
+<?php
+/**
+ * @file
+ * Contains \MonitoringServicesTest.
+ */
+
+use Drupal\monitoring\Sensor\SensorInfo;
+
+/**
+ * Cron sensor tests.
+ */
+class MonitoringServicesTest extends MonitoringTestBase {
+
+  protected $responseData;
+  protected $servicesAccount;
+
+  static function getInfo() {
+    return array(
+      'name' => 'Monitoring services',
+      'description' => 'Monitoring services tests.',
+      'group' => 'Monitoring',
+      'dependencies' => array('services', 'rest_server')
+    );
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  function setUp() {
+    parent::setUp(array('dblog', 'services', 'rest_server'));
+    $this->servicesAccount = $this->drupalCreateUser(array('monitoring reports'));
+  }
+
+  /**
+   * Test sensor info API calls.
+   */
+  function testSensorInfo() {
+    $this->drupalLogin($this->servicesAccount);
+
+    $response_data = $this->doRequest('sensor-info');
+    $this->assertResponse(200);
+
+    foreach (monitoring_sensor_info() as $sensor_name => $sensor_info) {
+      $this->assertEqual($response_data[$sensor_name]['sensor'], $sensor_info->getName());
+      $this->assertEqual($response_data[$sensor_name]['label'], $sensor_info->getLabel());
+      $this->assertEqual($response_data[$sensor_name]['category'], $sensor_info->getCategory());
+      $this->assertEqual($response_data[$sensor_name]['description'], $sensor_info->getDescription());
+      $this->assertEqual($response_data[$sensor_name]['value_type'], $sensor_info->getValueType());
+      $this->assertEqual($response_data[$sensor_name]['units_label'], $sensor_info->getUnitsLabel());
+      $this->assertEqual($response_data[$sensor_name]['caching_time'], $sensor_info->getCachingTime());
+      $this->assertEqual($response_data[$sensor_name]['time_interval'], $sensor_info->getTimeIntervalValue());
+      $this->assertEqual($response_data[$sensor_name]['enabled'], $sensor_info->isEnabled());
+
+      if ($sensor_info->isDefiningThresholds()) {
+        $this->assertEqual($response_data[$sensor_name]['thresholds']['type'], $sensor_info->getThresholdsType());
+        $this->assertEqual($response_data[$sensor_name]['thresholds']['intervals'], $sensor_info->getThresholdsIntervals());
+      }
+    }
+
+    $sensor_name = 'sensor_that_does_not_exist';
+    $this->doRequest('sensor-info/' . $sensor_name);
+    $this->assertResponse(404);
+
+    $sensor_name = 'dblog_event_severity_error';
+    $response_data = $this->doRequest('sensor-info/' . $sensor_name);
+    $this->assertResponse(200);
+    $sensor_info = monitoring_sensor_manager()->getSensorInfoByName($sensor_name);
+    $this->assertEqual($response_data['sensor'], $sensor_info->getName());
+    $this->assertEqual($response_data['label'], $sensor_info->getLabel());
+    $this->assertEqual($response_data['category'], $sensor_info->getCategory());
+    $this->assertEqual($response_data['description'], $sensor_info->getDescription());
+    $this->assertEqual($response_data['value_type'], $sensor_info->getValueType());
+    $this->assertEqual($response_data['units_label'], $sensor_info->getUnitsLabel());
+    $this->assertEqual($response_data['caching_time'], $sensor_info->getCachingTime());
+    $this->assertEqual($response_data['time_interval'], $sensor_info->getTimeIntervalValue());
+    $this->assertEqual($response_data['enabled'], $sensor_info->isEnabled());
+
+    if ($sensor_info->isDefiningThresholds()) {
+      $this->assertEqual($response_data['thresholds']['type'], $sensor_info->getThresholdsType());
+      $this->assertEqual($response_data['thresholds']['intervals'], $sensor_info->getThresholdsIntervals());
+    }
+  }
+
+  /**
+   * Test sensor result API calls.
+   */
+  function testSensorResult() {
+    $this->drupalLogin($this->servicesAccount);
+
+    $response_data = $this->doRequest('sensor-result');
+    $this->assertResponse(200);
+
+    foreach (monitoring_sensor_manager()->getEnabledSensorInfo() as $sensor_name => $sensor_info) {
+      $this->assertSensorResult($response_data[$sensor_name], $sensor_info);
+    }
+
+    // Make sure the response contains expected count of results.
+    $this->assertEqual(count($response_data), count(monitoring_sensor_manager()->getEnabledSensorInfo()));
+
+    // Test non existing sensor.
+    $sensor_name = 'sensor_that_does_not_exist';
+    $this->doRequest('sensor-result/' . $sensor_name);
+    $this->assertResponse(404);
+
+    // Test disabled sensor - note that monitoring_git_dirty_tree is disabled
+    // by default.
+    $sensor_name = 'monitoring_git_dirty_tree';
+    $this->doRequest('sensor-result/' . $sensor_name);
+    $this->assertResponse(404);
+
+    $sensor_name = 'dblog_event_severity_error';
+    $response_data = $this->doRequest('sensor-result/' . $sensor_name);
+    $this->assertResponse(200);
+
+    $this->assertSensorResult($response_data, monitoring_sensor_manager()->getSensorInfoByName($sensor_name));
+  }
+
+  /**
+   * Helper to do sensor result assertions.
+   *
+   * @param array $response_result
+   *   Result received via response.
+   * @param \Drupal\monitoring\Sensor\SensorInfo $sensor_info
+   *   Sensor info for which we have the result.
+   */
+  protected function assertSensorResult($response_result, SensorInfo $sensor_info) {
+    $this->assertEqual($response_result['host'], url('', array('absolute' => TRUE)));
+    $this->assertEqual($response_result['sensor'], $sensor_info->getName());
+    $this->assertEqual($response_result['label'], $sensor_info->getLabel());
+    $this->assertEqual($response_result['units_label'], $sensor_info->getUnitsLabel());
+    $this->assertEqual($response_result['caching_time'], $sensor_info->getCachingTime());
+
+    // If the result is cached test also for the result values. In case of
+    // result which is not cached we might not get the same values.
+    if ($sensor_info->getCachingTime()) {
+      $result = monitoring_sensor_run($sensor_info->getName());
+      $this->assertEqual($response_result['status'], $result->getSensorStatus());
+      $this->assertEqual($response_result['value'], $result->getSensorValue());
+      $this->assertEqual($response_result['expected_value'], $result->getSensorExpectedValue());
+      $this->assertEqual($response_result['metric'], $result->toNumber());
+      $this->assertEqual($response_result['message'], $result->getSensorMessage());
+      $this->assertEqual($response_result['timestamp'], $result->getTimestamp());
+      $this->assertEqual($response_result['execution_time'], $result->getSensorExecutionTime());
+    }
+  }
+
+  /**
+   * Helper to do the request.
+   *
+   * @param string $action
+   *   Action to perform.
+   *
+   * @return array
+   *   Decoded json object.
+   */
+  protected function doRequest($action) {
+    $url = url('monitoring/v1/' . $action, array('absolute' => TRUE));
+    return drupal_json_decode($this->curlExec(array(CURLOPT_HTTPGET => TRUE, CURLOPT_URL => $url, CURLOPT_NOBODY => FALSE, CURLOPT_HTTPHEADER => array("Accept: application/json"))));
+  }
+
+}

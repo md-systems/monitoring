@@ -229,4 +229,33 @@ class SensorInfo {
     return in_array('Drupal\monitoring\Sensor\SensorThresholdsInterface', class_implements($this->getSensorClass()));
   }
 
+  /**
+   * Compiles sensor info values to an associative array.
+   *
+   * @return array
+   *   Sensor info associative array.
+   */
+  public function toArray() {
+    $info_array = array(
+      'sensor' => $this->getName(),
+      'label' => $this->getLabel(),
+      'category' => $this->getCategory(),
+      'description' => $this->getDescription(),
+      'value_type' => $this->getValueType(),
+      'units_label' => $this->getUnitsLabel(),
+      'caching_time' => $this->getCachingTime(),
+      'time_interval' => $this->getTimeIntervalValue(),
+      'enabled' => $this->isEnabled(),
+    );
+
+    if ($this->isDefiningThresholds()) {
+      $info_array['thresholds'] = array(
+        'type' => $this->getThresholdsType(),
+        'intervals' => $this->getThresholdsIntervals(),
+      );
+    }
+
+    return $info_array;
+  }
+
 }

@@ -120,20 +120,16 @@ function monitoring_sensor_run($sensor_name, $force_run = FALSE, $verbose = FALS
  *   Thrown if any of the passed sensor names is not enabled.
  */
 function monitoring_sensor_run_multiple($sensor_names = array(), $force_run = FALSE, $verbose = NULL) {
+  $sensors_info = array();
   if (empty($sensor_names)) {
-    $sensors_info = monitoring_sensor_info();
-  }
-  else {
-    $sensors_info = array();
-    foreach ($sensor_names as $sensor_name) {
-      $sensors_info[$sensor_name] = monitoring_sensor_info($sensor_name);
+    foreach (monitoring_sensor_manager()->getEnabledSensorInfo() as $sensor_name => $sensor_info) {
+      $sensors_info[$sensor_name] = $sensor_info;
     }
   }
-
-  // @todo - here we should throw an exception as returning array isn't explicit
-  // enough to say there has been a problem.
-  if (empty($sensors_info)) {
-    return array();
+  else {
+    foreach ($sensor_names as $sensor_name) {
+      $sensors_info[$sensor_name] = monitoring_sensor_manager()->getSensorInfoByName($sensor_name);
+    }
   }
 
   $runner = new SensorRunner($sensors_info);
@@ -317,6 +313,68 @@ function monitoring_permission() {
       'title' => t('Force run monitoring sensor execution'),
     ),
   );
+}
+
+/**
+ * Implements hook_services_resources().
+ */
+function monitoring_services_resources() {
+
+  $resources = array();
+
+  $resources['sensor-info']['operations'] = array(
+    'index' => array(
+      'file' => array('type' => 'inc', 'module' => 'monitoring', 'name' => 'monitoring.services'),
+      'help' => t('Available sensors info'),
+      'callback' => 'monitoring_services_sensors_info',
+      'access callback' => 'user_access',
+      'access arguments' => array('monitoring reports'),
+    ),
+    'retrieve' => array(
+      'file' => array('type' => 'inc', 'module' => 'monitoring', 'name' => 'monitoring.services'),
+      'help' => t('Specific sensor info'),
+      'callback' => 'monitoring_services_sensor_info',
+      'access callback' => 'user_access',
+      'access arguments' => array('monitoring reports'),
+      'args' => array(
+        array(
+          'name' => 'sensor_name',
+          'optional' => FALSE,
+          'source' => array('path' => 0),
+          'type' => 'string',
+          'description' => 'Sensor name.',
+        ),
+      ),
+    ),
+  );
+
+  $resources['sensor-result']['operations'] = array(
+    'index' => array(
+      'file' => array('type' => 'inc', 'module' => 'monitoring', 'name' => 'monitoring.services'),
+      'help' => t('Available sensor results'),
+      'callback' => 'monitoring_services_sensors_results',
+      'access callback' => 'user_access',
+      'access arguments' => array('monitoring reports'),
+    ),
+    'retrieve' => array(
+      'file' => array('type' => 'inc', 'module' => 'monitoring', 'name' => 'monitoring.services'),
+      'help' => t('Specific sensor result'),
+      'callback' => 'monitoring_services_sensor_result',
+      'access callback' => 'user_access',
+      'access arguments' => array('monitoring reports'),
+      'args' => array(
+        array(
+          'name' => 'sensor_name',
+          'optional' => FALSE,
+          'source' => array('path' => 0),
+          'type' => 'string',
+          'description' => 'Sensor name.',
+        ),
+      ),
+    ),
+  );
+
+  return $resources;
 }
 
 /**

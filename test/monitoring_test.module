@@ -20,6 +20,19 @@ function monitoring_test_menu() {
   return $items;
 }
 
+/**
+ * Implements of hook_ctools_plugin_api().
+ */
+function monitoring_test_ctools_plugin_api($module, $api) {
+  if ($module == 'services' && $api == 'services') {
+    return array(
+      'version' => 3,
+      'file' => 'monitoring_test.default_services.inc',
+      'path' => drupal_get_path('module', 'monitoring_test'),
+    );
+  }
+}
+
 function monitoring_test_cron_queue_info() {
   $queues['monitoring_test'] = array(
     'worker callback' => 'monitoring_test_queue_worker',
