@@ -276,14 +276,14 @@ class MonitoringApiTest extends MonitoringTestBase {
     $conf['monitoring_sensor_info']['test_sensor'] = array(
       'label' => 'Overridden sensor',
       'settings' => array(
-        'caching time' => 1,
+        'caching_time' => 1,
         'new setting' => 'example value',
       ),
     );
     monitoring_sensor_manager()->resetCache();
     $info = monitoring_sensor_info('test_sensor');
     $this->assertEqual('Overridden sensor', $info->getLabel());
-    $this->assertEqual(1, $info->getSetting('caching time'));
+    $this->assertEqual(1, $info->getSetting('caching_time'));
     $this->assertEqual('example value', $info->getSetting('new setting'));
   }
 
@@ -299,7 +299,7 @@ class MonitoringApiTest extends MonitoringTestBase {
     );
     variable_set('test_sensor_result_data', $test_sensor_result_data);
     $settings = monitoring_sensor_settings_get('test_sensor');
-    $settings['log_calls'] = TRUE;
+    $settings['result_logging'] = TRUE;
     monitoring_sensor_settings_save('test_sensor', $settings);
     monitoring_sensor_run('test_sensor', TRUE);
 
@@ -313,7 +313,7 @@ class MonitoringApiTest extends MonitoringTestBase {
 
     // Set log_calls sensor settings to false - that should prevent logging.
     $settings = monitoring_sensor_settings_get('test_sensor');
-    $settings['log_calls'] = FALSE;
+    $settings['result_logging'] = FALSE;
     monitoring_sensor_settings_save('test_sensor', $settings);
     monitoring_sensor_run('test_sensor', TRUE);
     $logs = $this->loadSensorData('test_sensor');
@@ -332,9 +332,9 @@ class MonitoringApiTest extends MonitoringTestBase {
 
     // Set the logging strategy to "Log all events".
     variable_set('monitoring_sensor_call_logging', 'all');
-    // Running the sensor with 'log_calls' settings FALSE must record the call.
+    // Running the sensor with 'result_logging' settings FALSE must record the call.
     $settings = monitoring_sensor_settings_get('test_sensor');
-    $settings['log_calls'] = FALSE;
+    $settings['result_logging'] = FALSE;
     monitoring_sensor_settings_save('test_sensor', $settings);
     monitoring_sensor_run('test_sensor', TRUE);
     $logs = $this->loadSensorData('test_sensor');
@@ -344,7 +344,7 @@ class MonitoringApiTest extends MonitoringTestBase {
     variable_set('monitoring_sensor_call_logging', 'none');
     // Despite log_calls TRUE we should not log any call.
     $settings = monitoring_sensor_settings_get('test_sensor');
-    $settings['log_calls'] = TRUE;
+    $settings['result_logging'] = TRUE;
     monitoring_sensor_settings_save('test_sensor', $settings);
     $logs = $this->loadSensorData('test_sensor');
     monitoring_sensor_run('test_sensor', TRUE);

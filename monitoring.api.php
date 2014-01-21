@@ -23,9 +23,9 @@ function hook_monitoring_sensor_info() {
     // Description to better understand the sensor purpose.
     'description' => 'Monitors cron run',
     // Sensor class that will trigger checks.
-    'sensor class' => 'CronRunMonitoring',
+    'sensor_class' => 'CronRunMonitoring',
     // Result class. Default value is SensorResult.
-    'result class' => 'SensorResult',
+    'result_class' => 'SensorResult',
     // Defines the sensor value type [numeric, state]. Defaults to "numeric".
     'type' => 'numeric',
     // Sensor instance specific settings.
@@ -35,12 +35,12 @@ function hook_monitoring_sensor_info() {
       // The sensor value units name/label.
       'units_label' => t('Seconds'),
       // Flag if to log sensor activity.
-      'log_calls' => FALSE,
+      'result_logging' => FALSE,
       // Default value is set to TRUE. Set this to FALSE to prevent the sensor
       // from being triggered.
       'enabled' => TRUE,
       // Time in seconds during which the sensor result should be cached.
-      'caching time' => 0,
+      'caching_time' => 0,
       // A sensor may define a time interval. This will be added to the default
       // message automatically.
       'time_interval_value' => 900,

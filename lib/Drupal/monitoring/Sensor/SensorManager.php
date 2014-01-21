@@ -198,13 +198,13 @@ class SensorManager {
       // Set default values.
       $value += array(
         'description' => '',
-        'result class' => 'Drupal\monitoring\Result\SensorResult',
+        'result_class' => 'Drupal\monitoring\Result\SensorResult',
         'type' => 'numeric',
         'settings' => array(),
       );
       $value['settings'] += array(
         'enabled' => TRUE,
-        'caching time' => 0,
+        'caching_time' => 0,
         'category' => 'Other',
         'units_label' => NULL,
       );

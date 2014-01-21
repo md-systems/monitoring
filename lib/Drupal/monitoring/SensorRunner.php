@@ -259,7 +259,7 @@ class SensorRunner implements \IteratorAggregate {
    *   TRUE if the result should be logged, FALSE if not.
    */
   protected function needsLogging($result, $old_status = NULL, $new_status = NULL) {
-    $log_activity = $result->getSensorInfo()->getSetting('log_calls', FALSE);
+    $log_activity = $result->getSensorInfo()->getSetting('result_logging', FALSE);
 
     // We log if requested or on status change.
     if ($this->loggingMode == 'on_request') {

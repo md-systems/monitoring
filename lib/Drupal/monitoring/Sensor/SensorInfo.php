@@ -70,7 +70,7 @@ class SensorInfo {
    *   Sensor class
    */
   public function getSensorClass() {
-    return $this->sensorInfo['sensor class'];
+    return $this->sensorInfo['sensor_class'];
   }
 
   /**
@@ -80,7 +80,7 @@ class SensorInfo {
    *   Result class.
    */
   public function getResultClass() {
-    return $this->sensorInfo['result class'];
+    return $this->sensorInfo['result_class'];
   }
 
   /**
@@ -120,7 +120,7 @@ class SensorInfo {
    *   Caching time in seconds.
    */
   public function getCachingTime() {
-    return $this->getSetting('caching time');
+    return $this->getSetting('caching_time');
   }
 
   /**
