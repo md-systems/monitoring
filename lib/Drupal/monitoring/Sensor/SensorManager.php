@@ -199,14 +199,14 @@ class SensorManager {
       $value += array(
         'description' => '',
         'result_class' => 'Drupal\monitoring\Result\SensorResult',
-        'type' => 'numeric',
+        'numeric' => TRUE,
+        'value_label' => NULL,
         'settings' => array(),
       );
       $value['settings'] += array(
         'enabled' => TRUE,
         'caching_time' => 0,
         'category' => 'Other',
-        'units_label' => NULL,
       );
       $value['settings'] = $this->mergeSettings($key, $value['settings']);
     }

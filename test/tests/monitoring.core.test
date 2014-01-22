@@ -232,7 +232,7 @@ class MonitoringCoreTest extends MonitoringTestBase {
     // Test for the SensorDatabaseAggregator custom message.
     $this->assertEqual($result->getSensorMessage(), format_string('@count @unit in @time_interval', array(
       '@count' => $result->getSensorValue(),
-      '@unit' => strtolower($result->getSensorInfo()->getUnitsLabel()),
+      '@unit' => strtolower($result->getSensorInfo()->getValueLabel()),
       '@time_interval' => format_interval($result->getSensorInfo()->getTimeIntervalValue()),
     )));
 

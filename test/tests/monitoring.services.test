@@ -45,8 +45,8 @@ class MonitoringServicesTest extends MonitoringTestBase {
       $this->assertEqual($response_data[$sensor_name]['label'], $sensor_info->getLabel());
       $this->assertEqual($response_data[$sensor_name]['category'], $sensor_info->getCategory());
       $this->assertEqual($response_data[$sensor_name]['description'], $sensor_info->getDescription());
-      $this->assertEqual($response_data[$sensor_name]['value_type'], $sensor_info->getValueType());
-      $this->assertEqual($response_data[$sensor_name]['units_label'], $sensor_info->getUnitsLabel());
+      $this->assertEqual($response_data[$sensor_name]['numeric'], $sensor_info->isNumeric());
+      $this->assertEqual($response_data[$sensor_name]['value_label'], $sensor_info->getValueLabel());
       $this->assertEqual($response_data[$sensor_name]['caching_time'], $sensor_info->getCachingTime());
       $this->assertEqual($response_data[$sensor_name]['time_interval'], $sensor_info->getTimeIntervalValue());
       $this->assertEqual($response_data[$sensor_name]['enabled'], $sensor_info->isEnabled());
@@ -69,8 +69,8 @@ class MonitoringServicesTest extends MonitoringTestBase {
     $this->assertEqual($response_data['label'], $sensor_info->getLabel());
     $this->assertEqual($response_data['category'], $sensor_info->getCategory());
     $this->assertEqual($response_data['description'], $sensor_info->getDescription());
-    $this->assertEqual($response_data['value_type'], $sensor_info->getValueType());
-    $this->assertEqual($response_data['units_label'], $sensor_info->getUnitsLabel());
+    $this->assertEqual($response_data['numeric'], $sensor_info->isNumeric());
+    $this->assertEqual($response_data['value_label'], $sensor_info->getValueLabel());
     $this->assertEqual($response_data['caching_time'], $sensor_info->getCachingTime());
     $this->assertEqual($response_data['time_interval'], $sensor_info->getTimeIntervalValue());
     $this->assertEqual($response_data['enabled'], $sensor_info->isEnabled());
@@ -127,7 +127,7 @@ class MonitoringServicesTest extends MonitoringTestBase {
     $this->assertEqual($response_result['host'], url('', array('absolute' => TRUE)));
     $this->assertEqual($response_result['sensor'], $sensor_info->getName());
     $this->assertEqual($response_result['label'], $sensor_info->getLabel());
-    $this->assertEqual($response_result['units_label'], $sensor_info->getUnitsLabel());
+    $this->assertEqual($response_result['value_label'], $sensor_info->getValueLabel());
     $this->assertEqual($response_result['caching_time'], $sensor_info->getCachingTime());
 
     // If the result is cached test also for the result values. In case of

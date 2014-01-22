@@ -70,6 +70,9 @@ interface SensorResultInterface {
 
   /**
    * Will compile added messages and deal with status.
+   *
+   * @throws \Drupal\monitoring\Sensor\SensorCompilationException
+   *   Thrown if an error occurs during the sensor result compilation.
    */
   function compile();
 

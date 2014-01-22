@@ -625,3 +625,48 @@ function monitoring_modules_disabled($modules) {
   // sure that the list is up to date.
   monitoring_sensor_manager()->resetCache();
 }
+
+/**
+ * Gets available value types definitions.
+ *
+ * @return array
+ *   Value type definitions.
+ */
+function monitoring_value_types() {
+  return array(
+    'time_interval' => array(
+      'label' => 'Seconds',
+      'formatter_callback' => 'monitoring_value_label_callback_interval',
+    ),
+    'bool' => array(
+      'label' => 'Status',
+      'formatter_callback' => 'monitoring_value_label_callback_bool',
+    ),
+  );
+}
+
+/**
+ * Time interval value formatter.
+ *
+ * @param \Drupal\monitoring\Result\SensorResultInterface $result
+ *   Result object for which to get the formatted value.
+ *
+ * @return string
+ *   Formatted time interval.
+ */
+function monitoring_value_label_callback_interval(SensorResultInterface $result) {
+  return format_interval($result->getSensorValue());
+}
+
+/**
+ * Boolean value formatter.
+ *
+ * @param \Drupal\monitoring\Result\SensorResultInterface $result
+ *   Result object for which to get the formatted value.
+ *
+ * @return string
+ *   TRUE or FALSE strings.
+ */
+function monitoring_value_label_callback_bool(SensorResultInterface $result) {
+  return $result->getSensorValue() ? 'TRUE' : 'FALSE';
+}

@@ -94,23 +94,47 @@ class SensorInfo {
   }
 
   /**
-   * Gets sensor units_label.
+   * Gets sensor value label.
    *
-   * @return string
-   *   Sensor units_label.
+   * In case the sensor defines value_type, it will use the label provided for
+   * that type by monitoring_value_types().
+   *
+   * Next it searches for the label within the sensor definition value_label.
+   *
+   * If nothing is defined, it returns NULL.
+   *
+   * @return string|null
+   *   Sensor value label.
    */
-  public function getUnitsLabel() {
-    return $this->getSetting('units_label');
+  public function getValueLabel() {
+    if ($value_type = $this->getValueType()) {
+      $value_types = monitoring_value_types();
+      return $value_types[$value_type]['label'];
+    }
+
+    return isset($this->sensorInfo['value_label']) ? $this->sensorInfo['value_label'] : NULL;
   }
 
   /**
-   * Gets Sensor value type.
+   * Gets sensor value type.
    *
-   * @return string
-   *   Sensor type [numeric, state].
+   * @return string|null
+   *   Sensor value type.
+   *
+   * @see monitoring_value_types().
    */
   public function getValueType() {
-    return $this->sensorInfo['type'];
+    return isset($this->sensorInfo['value_type']) ? $this->sensorInfo['value_type'] : NULL;
+  }
+
+  /**
+   * Determines if the sensor value is numeric.
+   *
+   * @return bool
+   *   TRUE if the sensor value is numeric.
+   */
+  public function isNumeric() {
+    return isset($this->sensorInfo['numeric']) ? $this->sensorInfo['numeric'] : TRUE;
   }
 
   /**
@@ -241,8 +265,8 @@ class SensorInfo {
       'label' => $this->getLabel(),
       'category' => $this->getCategory(),
       'description' => $this->getDescription(),
-      'value_type' => $this->getValueType(),
-      'units_label' => $this->getUnitsLabel(),
+      'numeric' => $this->isNumeric(),
+      'value_label' => $this->getValueLabel(),
       'caching_time' => $this->getCachingTime(),
       'time_interval' => $this->getTimeIntervalValue(),
       'enabled' => $this->isEnabled(),

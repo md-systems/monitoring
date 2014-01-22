@@ -33,6 +33,51 @@ class MonitoringApiTest extends MonitoringTestBase {
    */
   function testAPI() {
 
+    // == Test sensor info. == //
+    // @todo - complete the sensor info tests in followup.
+    $sensor_info_data = array(
+      'label' => 'Test sensor info',
+      'description' => 'To test correct sensor info hook implementation precedence.',
+      'settings' => array(
+      ),
+    );
+    variable_set('monitoring_test_sensor_info', $sensor_info_data);
+    $this->sensorManager->resetCache();
+    $sensor_info = $this->sensorManager->getSensorInfoByName('test_sensor_info');
+
+    $this->assertEqual($sensor_info->getLabel(), $sensor_info_data['label']);
+    $this->assertEqual($sensor_info->getDescription(), $sensor_info_data['description']);
+    // @todo - add tests for compulsory sensor info attributes.
+
+    // Test all defaults.
+    // Flag numeric should default to TRUE.
+    $this->assertEqual($sensor_info->isNumeric(), TRUE);
+    // @todo - add tests for default values of attributes.
+
+    // @todo - override remaining attributes.
+    $sensor_info_data['numeric'] = FALSE;
+    // Define custom value label and NO value type. In this setup the sensor
+    // defined value label must be used.
+    $sensor_info_data['value_label'] = 'Test label';
+    variable_set('monitoring_test_sensor_info', $sensor_info_data);
+    $this->sensorManager->resetCache();
+    $sensor_info = $this->sensorManager->getSensorInfoByName('test_sensor_info');
+
+    // Test all custom defined.
+    // Flag numeric must be false.
+    $this->assertEqual($sensor_info->isNumeric(), FALSE);
+    $this->assertEqual($sensor_info->getValueLabel(), $sensor_info_data['value_label']);
+    // @todo - add tests for overridden values of attributes.
+
+    // Test value label provided by the monitoring_value_types().
+    // Set the value type to one defined by the monitoring_value_types().
+    $sensor_info_data['value_type'] = 'time_interval';
+    variable_set('monitoring_test_sensor_info', $sensor_info_data);
+    $this->sensorManager->resetCache();
+    $sensor_info = $this->sensorManager->getSensorInfoByName('test_sensor_info');
+    $value_types = monitoring_value_types();
+    $this->assertEqual($sensor_info->getValueLabel(), $value_types['time_interval']['label']);
+
     // == Test basic sensor infrastructure - value, status and message. == //
 
     $test_sensor_result_data = array(

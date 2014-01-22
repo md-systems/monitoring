@@ -28,7 +28,7 @@ function monitoring_munin_enable() {
           if (isset($sensor_info_by_categories[$category])) {
             /** @var SensorInfo $sensor_info */
             foreach ($sensor_info_by_categories[$category] as $sensor_info) {
-              if ($sensor_info->getValueType() == 'numeric') {
+              if ($sensor_info->isNumeric()) {
                 $settings = monitoring_sensor_settings_get($sensor_info->getName());
                 $settings['munin']['munin_enabled'] = TRUE;
                 $settings['munin']['multigraphs'][] = $multigraph_title;

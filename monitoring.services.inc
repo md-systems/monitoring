@@ -88,7 +88,7 @@ function monitoring_services_compile_sensor_result(SensorResultInterface $sensor
     'host' => url('', array('absolute' => TRUE)),
     'sensor' => $sensor_result->getSensorInfo()->getName(),
     'label' => $sensor_result->getSensorInfo()->getLabel(),
-    'units_label' => $sensor_result->getSensorInfo()->getUnitsLabel(),
+    'value_label' => $sensor_result->getSensorInfo()->getValueLabel(),
     'status' => $sensor_result->getSensorStatus(),
     'value' => $sensor_result->getSensorValue(),
     'expected_value' => $sensor_result->getSensorExpectedValue(),

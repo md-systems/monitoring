@@ -235,7 +235,7 @@ function monitoring_munin_config() {
     // We have single value graph, build graph info for the sensor.
     else {
       $graph['graph_title'] = $info->getDescription();
-      $graph['graph_vlabel'] = $info->getUnitsLabel();
+      $graph['graph_vlabel'] = ($info->getValueLabel() ? $info->getValueLabel() : $info->getLabel());
       $graph['graph_category'] = $host;
       $graph[$munin_sensor_name . '.label'] = $info->getLabel();
       foreach ($info->getThresholdsIntervals() as $status => $threshold) {

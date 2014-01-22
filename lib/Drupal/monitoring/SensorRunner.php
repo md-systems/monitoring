@@ -201,7 +201,13 @@ class SensorRunner implements \IteratorAggregate {
         $result->setVerboseOutput($sensor->resultVerbose($result));
       }
 
-      $result->compile();
+      try {
+        $result->compile();
+      }
+      catch (\Exception $e) {
+        $result->setSensorStatus(SensorResultInterface::STATUS_CRITICAL);
+        $result->setSensorMessage(get_class($e) . ': ' . $e->getMessage());
+      }
     }
 
 

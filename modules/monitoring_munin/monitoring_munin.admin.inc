@@ -32,8 +32,8 @@ function monitoring_munin_graph_settings($form, &$form_state) {
   );
   $form['multigraphs']['vlabel'] = array(
     '#type' => 'textfield',
-    '#title' => t('units_label'),
-    '#description' => t('Enter common units_label.')
+    '#title' => t('Value label'),
+    '#description' => t('Enter common value label.')
   );
   $form['multigraphs']['actions']['add_multigraph'] = array(
     '#type' => 'submit',

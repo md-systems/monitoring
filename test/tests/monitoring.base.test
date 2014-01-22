@@ -50,7 +50,7 @@ abstract class MonitoringTestBase extends DrupalWebTestCase {
    */
   protected function runSensor($sensor_name) {
     // Make sure the sensor is enabled.
-    monitoring_sensor_manager()->enableSensor($sensor_name);
+    $this->sensorManager->enableSensor($sensor_name);
     return monitoring_sensor_run($sensor_name, TRUE);
   }
 

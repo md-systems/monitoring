@@ -127,7 +127,7 @@ function monitoring_reports_sensors_overview() {
       }
       $sensor_result = $results[$sensor_name];
 
-      $sensor_info = monitoring_sensor_info($sensor_name);
+      $sensor_info = monitoring_sensor_manager()->getSensorInfoByName($sensor_name);
 
       $row['data']['label'] = '<span title="' . $sensor_info->getDescription() . '">' . $sensor_info->getLabel() . '</span>';
 

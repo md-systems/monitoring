@@ -26,14 +26,19 @@ function hook_monitoring_sensor_info() {
     'sensor_class' => 'CronRunMonitoring',
     // Result class. Default value is SensorResult.
     'result_class' => 'SensorResult',
-    // Defines the sensor value type [numeric, state]. Defaults to "numeric".
-    'type' => 'numeric',
+    // Defines the value type and therefore its presentation on UI. The value
+    // type is empty by default and optional. The value type must be one of
+    // those defined by monitoring_value_types().
+    'value_type' => 'time_interval',
+    // May define a value label that will be used in the UI. The value label is
+    // empty by default and optional.
+    'value_label' => 'Druplicons',
+    // Defines if the sensor value is numeric. Defaults to TRUE.
+    'numeric' => FALSE,
     // Sensor instance specific settings.
     'settings' => array(
-      // Category to which the sensor belongs to.
+      // Category to which the sensor belongs to. Defaults to "Other".
       'category' => 'Cron',
-      // The sensor value units name/label.
-      'units_label' => t('Seconds'),
       // Flag if to log sensor activity.
       'result_logging' => FALSE,
       // Default value is set to TRUE. Set this to FALSE to prevent the sensor

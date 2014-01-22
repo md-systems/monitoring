@@ -6,6 +6,7 @@
 
 namespace Drupal\monitoring\Result;
 
+use Drupal\monitoring\Sensor\SensorCompilationException;
 use Drupal\monitoring\Sensor\SensorInfo;
 use Drupal\monitoring\Sensor\Thresholds;
 
@@ -130,14 +131,7 @@ class SensorResult implements SensorResultInterface {
       }
     }
 
-    if (is_bool($this->getSensorValue())) {
-      $msg_value = $this->getSensorValue() ? 'TRUE' : 'FALSE';
-    }
-    else {
-      $msg_value = $this->getSensorValue();
-    }
-
-    if (is_bool($this->getSensorExpectedValue())) {
+    if ($this->getSensorInfo()->getValueType() == 'bool') {
       $msg_expected = $this->getSensorExpectedValue() ? 'TRUE' : 'FALSE';
     }
     else {
@@ -147,13 +141,11 @@ class SensorResult implements SensorResultInterface {
     // Set the default message variables.
     $default_variables = array(
       '@sensor' => $this->getSensorName(),
-      '@value' => $msg_value,
+      '@value' => $this->getSensorValue(),
+      '@formatted_value' => $this->getFormattedValue(),
       '@time' => $this->getTimestamp(),
       '@expected' => $msg_expected,
       '@time_interval' => format_interval($this->getSensorInfo()->getTimeIntervalValue()),
-      // @todo This assumption will no longer work when non-english messages
-      //   supported.
-      '@units_label' => drupal_strtolower($this->getSensorInfo()->getSetting('units_label')),
     );
 
     if (!empty($this->sensorMessage)) {
@@ -164,26 +156,14 @@ class SensorResult implements SensorResultInterface {
 
       // Set the sensor message.
       if ($this->getSensorValue() !== NULL) {
-        // @todo This should be refactored as soon as we have all
-        // components in.
-        // If there is sensor value and this numeric sensor, display the sensor
-        // value with the configured units label, if there is one.
-        if ($this->getSensorInfo()->getSetting('units_label') && $this->getSensorInfo()->getValueType() == 'numeric') {
-          if ($this->getSensorInfo()->getTimeIntervalValue()) {
-            $messages[] = format_string('@value @units_label in @time_interval', $default_variables);
-          }
-          else {
-            $messages[] = format_string('@value @units_label', $default_variables);
-          }
+
+        // If the sensor defines time interval we append the info to the
+        // message.
+        if ($this->getSensorInfo()->getTimeIntervalValue()) {
+          $messages[] = format_string('@formatted_value in @time_interval', $default_variables);
         }
         else {
-          // Use Value for state sensors and those without a units label.
-          if ($this->getSensorInfo()->getTimeIntervalValue()) {
-            $messages[] = format_string('Value @value in @time_interval', $default_variables);
-          }
-          else {
-            $messages[] = format_string('Value @value', $default_variables);
-          }
+          $messages[] = $default_variables['@formatted_value'];
         }
       }
       // Avoid an empty sensor message.
@@ -236,6 +216,45 @@ class SensorResult implements SensorResultInterface {
     // Set sensor status based on matched threshold.
     $this->setSensorStatus($matched_threshold);
     return $thresholds->getStatusMessage();
+  }
+
+  /**
+   * Formats the value to be human readable.
+   *
+   * @return string
+   *   Formatted value.
+   *
+   * @throws \Drupal\monitoring\Sensor\SensorCompilationException
+   */
+  protected function getFormattedValue() {
+    // If the value type is defined we have the formatter that will format the
+    // value to be ready for display.
+    if ($value_type = $this->getSensorInfo()->getValueType()) {
+      $value_types = monitoring_value_types();
+      if (!isset($value_types[$value_type])) {
+        throw new SensorCompilationException(format_string('Invalid value type @type', array('@type' => $value_type)));
+      }
+      elseif (isset($value_types[$value_type]['formatter_callback']) && !function_exists($value_types[$value_type]['formatter_callback'])) {
+        throw new SensorCompilationException(format_string('Formatter callback @callback for @type does not exist',
+          array('@callback' => $value_types[$value_type]['formatter_callback'], '@type' => $value_type)));
+      }
+      else {
+        $callback = $value_types[$value_type]['formatter_callback'];
+        return $callback($this);
+      }
+    }
+
+    // If there is no value formatter we try to provide something human readable
+    // by concatenating the value and label.
+
+    if ($label = $this->getSensorInfo()->getValueLabel()) {
+      // @todo This assumption will no longer work when non-english messages
+      // supported.
+      $label = drupal_strtolower($label);
+      return format_string('@value @label', array('@value' => $this->getSensorValue(), '@label' => $label));
+    }
+
+    return format_string('Value @value', array('@value' => $this->getSensorValue()));
   }
 
   /**

@@ -11,7 +11,6 @@ function monitoring_monitoring_sensor_info() {
     'description' => 'Repository local file changes',
     'sensor_class' => 'Drupal\monitoring\Sensor\Sensors\SensorGitDirtyTree',
     'settings' => array(
-      'units_label' => NULL,
       'category' => 'System',
       // Disabled by default as we cannot know if the sensor is running in a
       // source base managed by git.
@@ -46,9 +45,9 @@ function monitoring_node_monitoring_sensor_info() {
     'label' => 'All new nodes',
     'description' => 'All new nodes',
     'sensor_class' => 'Drupal\monitoring\Sensor\Sensors\SensorDatabaseAggregator',
+    'value_label' => 'Nodes',
     'settings' => array(
       'category' => 'Content',
-      'units_label' => 'Nodes',
       'enabled' => FALSE,
       // Cache for one hour.
       'caching_time' => 3600,
@@ -63,9 +62,9 @@ function monitoring_node_monitoring_sensor_info() {
       'label' => format_string('New @type nodes', array('@type' => $node_type->name)),
       'description' => format_string('New nodes of type @type', array('@type' => $node_type->name)),
       'sensor_class' => 'Drupal\monitoring\Sensor\Sensors\SensorDatabaseAggregator',
+      'value_label' => format_string('@type nodes', array('@type' => $node_type->name)),
       'settings' => array(
         'category' => 'Content',
-        'units_label' => format_string('@type nodes', array('@type' => $node_type->name)),
         'enabled' => FALSE,
         // Cache for 10 minutes.
         'caching_time' => 600,
@@ -96,9 +95,9 @@ function monitoring_comment_monitoring_sensor_info() {
   $info['comment_new'] = array(
     'label' => 'New comments',
     'sensor_class' => 'Drupal\monitoring\Sensor\Sensors\SensorDatabaseAggregator',
+    'value_label' => 'Comments',
     'settings' => array(
       'category' => 'Content',
-      'units_label' => 'Comments',
       'enabled' => FALSE,
       // Cache for one hour.
       'caching_time' => 3600,
@@ -122,9 +121,9 @@ function monitoring_user_monitoring_sensor_info() {
   $info['user_new'] = array(
     'label' => 'New users',
     'sensor_class' => 'Drupal\monitoring\Sensor\Sensors\SensorDatabaseAggregator',
+    'value_label' => 'Users',
     'settings' => array(
       'category' => 'User activity',
-      'units_label' => 'Users',
       'enabled' => FALSE,
       // Cache for one hour.
       'caching_time' => 3600,
@@ -137,9 +136,9 @@ function monitoring_user_monitoring_sensor_info() {
   $info['user_active'] = array(
     'label' => 'Active users',
     'sensor_class' => 'Drupal\monitoring\Sensor\Sensors\SensorDatabaseAggregator',
+    'value_label' => 'Users',
     'settings' => array(
       'category' => 'User activity',
-      'units_label' => 'Users',
       'enabled' => FALSE,
       // Cache for one hour.
       'caching_time' => 3600,
@@ -163,9 +162,9 @@ function monitoring_dblog_monitoring_sensor_info() {
     'label' => 'Page not found errors',
     'description' => 'Page not found errors logged by watchdog',
     'sensor_class' => 'Drupal\monitoring\Sensor\Sensors\SensorDblog404',
+    'value_label' => 'Watchdog events',
     'settings' => array(
       'category' => 'Watchdog',
-      'units_label' => 'Watchdog events',
       // Cache for one hour.
       'caching_time' => 3600,
       'thresholds' => array(
@@ -203,9 +202,9 @@ function monitoring_dblog_monitoring_sensor_info() {
       'label' => format_string('Severity @severity', array('@severity' => $name)),
       'description' => format_string('Watchdog entries of severity @severity', array('@severity' => $name)),
       'sensor_class' => 'Drupal\monitoring\Sensor\Sensors\SensorDatabaseAggregator',
+      'value_label' => 'Events',
       'settings' => array(
         'category' => 'Watchdog',
-        'units_label' => 'Events',
         'caching_time' => $caching_time,
         'thresholds' => array(
           'type' => 'exceeds',
@@ -230,9 +229,9 @@ function monitoring_dblog_monitoring_sensor_info() {
     'label' => 'Successful user logins',
     'description' => 'Successful user logins by Watchdog',
     'sensor_class' => 'Drupal\monitoring\Sensor\Sensors\SensorDatabaseAggregator',
+    'value_label' => 'Login attempts',
     'settings' => array(
       'category' => 'User activity',
-      'units_label' => 'Login attempts',
       // Cache for one hour.
       'caching_time' => 3600,
       'table' => 'watchdog',
@@ -249,9 +248,9 @@ function monitoring_dblog_monitoring_sensor_info() {
     'label' => 'Failed user logins',
     'description' => 'Failed user logins by Watchdog',
     'sensor_class' => 'Drupal\monitoring\Sensor\Sensors\SensorUserFailedLogins',
+    'value_label' => 'Login attempts',
     'settings' => array(
       'category' => 'User activity',
-      'units_label' => 'Login attempts',
       // Cache for one hour.
       'caching_time' => 3600,
       // If failed logins exceed some level we need to escalate. Default value
@@ -279,9 +278,9 @@ function monitoring_dblog_monitoring_sensor_info() {
       'label' => 'Image derivative creation fail',
       'description' => 'Image derivative creation fails',
       'sensor_class' => 'Drupal\monitoring\Sensor\Sensors\SensorImageMissingStyle',
+      'value_label' => 'Watchdog entries',
       'settings' => array(
         'category' => 'Watchdog',
-        'units_label' => 'Watchdog entries',
         // Cache for one hour.
         'caching_time' => 3600,
         'thresholds' => array(
@@ -319,9 +318,9 @@ function monitoring_past_db_monitoring_sensor_info() {
       'label' => format_string('Severity @severity', array('@severity' => $name)),
       'description' => format_string('Past events with severity @severity', array('@severity' => $name)),
       'sensor_class' => 'Drupal\monitoring\Sensor\Sensors\SensorDatabaseAggregator',
+      'value_label' => 'Events',
       'settings' => array(
         'category' => 'Past',
-        'units_label' => 'Events',
         // Cache for one hour.
         'caching_time' => 3600,
         'table' => 'past_event',
@@ -357,9 +356,9 @@ function monitoring_past_form_monitoring_sensor_info() {
     'label' => 'Logged form submissions',
     'description' => 'Past event logging form submissions',
     'sensor_class' => 'Drupal\monitoring\Sensor\Sensors\SensorDatabaseAggregator',
+    'value_label' => 'Past events',
     'settings' => array(
       'category' => 'Past',
-      'units_label' => 'Past events',
       // Cache for one hour.
       'caching_time' => 3600,
       'table' => 'past_event',
@@ -387,9 +386,9 @@ function monitoring_system_monitoring_sensor_info() {
     'label' => 'Maintenance mode',
     'description' => 'Site maintenance mode',
     'sensor_class' => 'Drupal\monitoring\Sensor\Sensors\SensorVariable',
-    'type' => 'state',
+    'numeric' => FALSE,
+    'value_type' => 'bool',
     'settings' => array(
-      'units_label' => 'Status',
       'variable_name' => 'maintenance_mode',
       'variable_value' => FALSE,
       'variable_default_value' => FALSE,
@@ -402,9 +401,9 @@ function monitoring_system_monitoring_sensor_info() {
     'label' => 'Last cron run age',
     'description' => 'Time since last cron run',
     'sensor_class' => 'Drupal\monitoring\Sensor\Sensors\SensorCronLastRunAge',
+    'value_type' => 'time_interval',
     'settings' => array(
       'category' => 'Cron',
-      'units_label' => 'Seconds',
       'thresholds' => array(
         'type' => 'exceeds',
         'intervals' => array(
@@ -419,10 +418,10 @@ function monitoring_system_monitoring_sensor_info() {
     'label' => 'Cron safe threshold enabled',
     'description' => 'Cron safe threshold (Poormanscron) is enabled',
     'sensor_class' => 'Drupal\monitoring\Sensor\Sensors\SensorVariable',
-    'type' => 'state',
+    'numeric' => FALSE,
+    'value_type' => 'bool',
     'settings' => array(
       'category' => 'Cron',
-      'units_label' => 'Status',
       'variable_name' => 'cron_safe_threshold',
       'variable_value' => '0',
       'variable_default_value' => DRUPAL_CRON_DEFAULT_THRESHOLD,
@@ -438,9 +437,9 @@ function monitoring_system_monitoring_sensor_info() {
       'label' => check_plain($queue),
       'description' => format_string('Size of @queue queue', array('@queue' => $queue)),
       'sensor_class' => 'Drupal\monitoring\Sensor\Sensors\SensorQueue',
+      'value_label' => 'Items',
       'settings' => array(
         'category' => 'Queue',
-        'units_label' => 'Items',
         'queue' => $queue,
       ),
     );
@@ -452,9 +451,9 @@ function monitoring_system_monitoring_sensor_info() {
     'label' => 'Enabled modules',
     'description' => 'Enabled only expected modules',
     'sensor_class' => 'Drupal\monitoring\Sensor\Sensors\SensorEnabledModules',
+    'value_label' => 'Modules delta',
     'settings' => array(
       'category' => 'System',
-      'units_label' => 'Modules delta',
       'enabled' => FALSE,
       'allow_additional' => FALSE,
       'modules' => array(),
@@ -474,11 +473,9 @@ function monitoring_system_monitoring_sensor_info() {
       'label' => format_string('Module @module', array('@module' => $module)),
       'description' => format_string('Requirements of the @module module', array('@module' => $module)),
       'sensor_class' => 'Drupal\monitoring\Sensor\Sensors\SensorCoreRequirements',
-      'type' => 'state',
+      'numeric' => FALSE,
       'settings' => array(
         'category' => 'Requirements',
-        // Not really applicable in this case.
-        'units_label' => NULL,
         'caching_time' => 3600,
         'module' => $module,
         // List requirements keys which reports will be suppressed.
@@ -510,9 +507,9 @@ function monitoring_search_api_monitoring_sensor_info() {
       $info['search_api_' . $index->machine_name] = array(
         'label' => format_string('Search index queue size of @index', array('@index' => $index->name)),
         'sensor_class' => 'Drupal\monitoring\Sensor\Sensors\SensorSearchApi',
+        'value_label' => 'Unindexed items',
         'settings' => array(
           'category' => 'Search API',
-          'units_label' => 'Unindexed items',
           // Cache for 15 minutes.
           'caching_time' => 900,
           'index_id' => $index->id,
@@ -537,9 +534,9 @@ function monitoring_simplenews_monitoring_sensor_info() {
     'label' => 'Simplenews spool size',
     'description' => 'Pending items in the simplenews spool.',
     'sensor_class' => 'Drupal\monitoring\Sensor\Sensors\SensorSimplenewsPending',
+    'value_label' => 'Pending items',
     'settings' => array(
       'category' => 'Simplenews',
-      'units_label' => 'Pending items',
       'enabled' => FALSE,
     ),
   );
@@ -559,10 +556,10 @@ function monitoring_update_monitoring_sensor_info() {
     'label' => 'Core',
     'description' => 'Available updates for Drupal core',
     'sensor_class' => 'Drupal\monitoring\Sensor\Sensors\SensorDrupalUpdate',
-    'type' => 'state',
+    'numeric' => FALSE,
+    'value_label' => 'Outdated modules',
     'settings' => array(
       'category' => 'Update',
-      'units_label' => 'Outdated modules',
       // Cache for 1 day.
       'caching_time' => 24 * 3600,
       'type' => 'core',
@@ -572,10 +569,10 @@ function monitoring_update_monitoring_sensor_info() {
     'label' => 'Modules and themes',
     'description' => 'Available updates for contrib modules and themes',
     'sensor_class' => 'Drupal\monitoring\Sensor\Sensors\SensorDrupalUpdate',
-    'type' => 'state',
+    'numeric' => FALSE,
+    'value_label' => 'Outdated modules',
     'settings' => array(
       'category' => 'Update',
-      'units_label' => 'Outdated modules',
       // Cache for 1 day.
       'caching_time' => 24 * 3600,
       'type' => 'contrib',
@@ -602,9 +599,9 @@ function monitoring_elysia_cron_monitoring_sensor_info() {
       'label' => format_string('Elysia @name execution', array('@name' => $row->name)),
       'description' => format_string('Last execution duration for elysia @name cron', array('@name' => $row->name)),
       'sensor_class' => 'Drupal\monitoring\Sensor\Sensors\SensorElysiaCron',
+      'value_type' => 'time_interval',
       'settings' => array(
         'category' => 'Elysia Cron',
-        'units_label' => 'Seconds',
         'enabled' => FALSE,
         'name' => $row->name,
         'metric' => 'last_execution_time',
@@ -614,9 +611,9 @@ function monitoring_elysia_cron_monitoring_sensor_info() {
       'label' => format_string('Elysia @name run', array('@name' => $row->name)),
       'description' => format_string('Time since last elysia @name run', array('@name' => $row->name)),
       'sensor_class' => 'Drupal\monitoring\Sensor\Sensors\SensorElysiaCron',
+      'value_type' => 'time_interval',
       'settings' => array(
         'category' => 'Elysia Cron',
-        'units_label' => 'Seconds',
         'enabled' => FALSE,
         'name' => $row->name,
         'metric' => 'last_run',
@@ -636,8 +633,8 @@ function monitoring_maillog_monitoring_sensor_info() {
   $info['maillog_records_count'] = array(
     'label' => 'Maillog records count',
     'sensor_class' => 'Drupal\monitoring\Sensor\Sensors\SensorDatabaseAggregator',
+    'value_label' => 'Mail records',
     'settings' => array(
-      'units_label' => 'Mail records',
       'table' => 'maillog',
       'time_interval_field' => 'sent_date',
       'time_interval_value' => 60 * 60 * 24,
