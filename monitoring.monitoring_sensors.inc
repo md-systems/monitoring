@@ -148,6 +148,38 @@ function monitoring_user_monitoring_sensor_info() {
     ),
   );
 
+  // If a user logs out, the session is destroyed. This decreases visibility of
+  // previous user sessions within timeframe.
+  // Also this can lead to completely unidentified previous user sessions with
+  // recent activity and a following logout.
+  $info['user_sessions_authenticated'] = array(
+    'label' => 'Authenticated user sessions',
+    'description' => 'Authenticated user sessions without logout',
+    'sensor_class' => 'Drupal\monitoring\Sensor\Sensors\SensorDatabaseAggregator',
+    'value_label' => 'Active sessions',
+    'settings' => array(
+      'category' => 'User activity',
+      'table' => 'sessions',
+      'conditions' => array(
+        array('field' => 'uid', 'value' => '0', 'operator' => '!='),
+      ),
+      'time_interval_field' => 'timestamp',
+      'time_interval_value' => 60 * 60 * 24,
+    ),
+  );
+  $info['user_sessions_all'] = array(
+    'label' => 'All active sessions',
+    'description' => 'All active sessions of logged in and anonymous users without logout',
+    'sensor_class' => 'Drupal\monitoring\Sensor\Sensors\SensorDatabaseAggregator',
+    'value_label' => 'Active sessions',
+    'settings' => array(
+      'category' => 'User activity',
+      'table' => 'sessions',
+      'time_interval_field' => 'timestamp',
+      'time_interval_value' => 60 * 60 * 24,
+    ),
+  );
+
   return $info;
 }
 

@@ -217,6 +217,21 @@ class MonitoringCoreTest extends MonitoringTestBase {
     // The message should say that it is ok.
     $this->assertTrue(strpos($result->getSensorMessage(), 'Git repository clean') !== FALSE);
 
+    // ======= Active sessions count tests ======= //
+    // Create and login a user to have data in the sessions table.
+    $test_user = $this->drupalCreateUser();
+    $this->drupalLogin($test_user);
+    $result = monitoring_sensor_run('user_sessions_authenticated', TRUE);
+    $this->assertEqual($result->getSensorValue(), 1);
+    $result = monitoring_sensor_run('user_sessions_all', TRUE);
+    $this->assertEqual($result->getSensorValue(), 1);
+    // Logout the user to see if sensors responded to the change.
+    $this->drupalLogout();
+    $result = monitoring_sensor_run('user_sessions_authenticated', TRUE);
+    $this->assertEqual($result->getSensorValue(), 0);
+    $result = monitoring_sensor_run('user_sessions_all', TRUE);
+    $this->assertEqual($result->getSensorValue(), 0);
+
     // ======= node sensors tests ======= //
 
     $type1 = $this->drupalCreateContentType();
