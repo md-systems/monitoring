@@ -60,6 +60,6 @@ function monitoring_demo_enable() {
   }
 
   // Enable Enabled modules and Disappeared sensors for the "interactive" demo.
-  $sensor_manager->enableSensor('enabled_modules');
-  $sensor_manager->enableSensor('disappeared_sensors');
+  $sensor_manager->enableSensor('monitoring_enabled_modules');
+  $sensor_manager->enableSensor('monitoring_disappeared_sensors');
 }
