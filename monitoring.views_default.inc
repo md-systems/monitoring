@@ -105,7 +105,8 @@ function monitoring_views_default_views() {
   $handler->display->display_options['fields']['execution_time']['table'] = 'monitoring_sensor_result';
   $handler->display->display_options['fields']['execution_time']['field'] = 'execution_time';
   $handler->display->display_options['fields']['execution_time']['label'] = 'Execution time';
-  $handler->display->display_options['fields']['execution_time']['precision'] = '0';
+  $handler->display->display_options['fields']['execution_time']['set_precision'] = TRUE;
+  $handler->display->display_options['fields']['execution_time']['precision'] = '2';
   /* Field: Monitoring sensor result: Timestamp */
   $handler->display->display_options['fields']['timestamp']['id'] = 'timestamp';
   $handler->display->display_options['fields']['timestamp']['table'] = 'monitoring_sensor_result';
@@ -156,7 +157,8 @@ function monitoring_views_default_views() {
   $handler->display->display_options['fields']['execution_time']['label'] = 'Execution time';
   $handler->display->display_options['fields']['execution_time']['alter']['alter_text'] = TRUE;
   $handler->display->display_options['fields']['execution_time']['alter']['text'] = '[execution_time]ms';
-  $handler->display->display_options['fields']['execution_time']['precision'] = '0';
+  $handler->display->display_options['fields']['execution_time']['set_precision'] = TRUE;
+  $handler->display->display_options['fields']['execution_time']['precision'] = '2';
   /* Field: Monitoring sensor result: Timestamp */
   $handler->display->display_options['fields']['timestamp']['id'] = 'timestamp';
   $handler->display->display_options['fields']['timestamp']['table'] = 'monitoring_sensor_result';
@@ -203,7 +205,8 @@ function monitoring_views_default_views() {
   $handler->display->display_options['fields']['execution_time']['label'] = 'Execution time';
   $handler->display->display_options['fields']['execution_time']['alter']['alter_text'] = TRUE;
   $handler->display->display_options['fields']['execution_time']['alter']['text'] = '[execution_time]ms';
-  $handler->display->display_options['fields']['execution_time']['precision'] = '0';
+  $handler->display->display_options['fields']['execution_time']['set_precision'] = TRUE;
+  $handler->display->display_options['fields']['execution_time']['precision'] = '2';
   /* Field: Monitoring sensor result: Timestamp */
   $handler->display->display_options['fields']['timestamp']['id'] = 'timestamp';
   $handler->display->display_options['fields']['timestamp']['table'] = 'monitoring_sensor_result';
