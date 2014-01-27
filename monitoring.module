@@ -34,6 +34,9 @@ function monitoring_sensor_manager() {
  *
  * @return \Drupal\monitoring\Sensor\SensorInfo[]
  *   List of SensorInfo instances.
+ *
+ * @throws \Drupal\monitoring\Sensor\NonExistingSensorException
+ *   In case a sensor name is provided, which does not exists.
  */
 function monitoring_sensor_info($sensor_name = NULL) {
   if ($sensor_name) {

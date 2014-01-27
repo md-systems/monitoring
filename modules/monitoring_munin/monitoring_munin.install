@@ -4,6 +4,7 @@
  * Monitoring munin install file.
  */
 
+use Drupal\monitoring\Sensor\NonExistingSensorException;
 use Drupal\monitoring\Sensor\SensorInfo;
 
 /**
@@ -44,7 +45,13 @@ function monitoring_munin_enable() {
       // Configure individual sensors to be part of the given multigraph.
       if (isset($multigraph_info['sensors'])) {
         foreach ($multigraph_info['sensors'] as $sensor_name) {
-          $sensor_info = monitoring_sensor_info($sensor_name);
+          try {
+            $sensor_info = monitoring_sensor_info($sensor_name);
+          }
+          catch (NonExistingSensorException $e) {
+            drupal_set_message($e->getMessage(), 'error');
+            watchdog_exception('monitoring_munin', $e);
+          }
           if (!$sensor_info->isEnabled()) {
             continue;
           }

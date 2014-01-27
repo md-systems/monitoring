@@ -164,7 +164,7 @@ class SensorRunner implements \IteratorAggregate {
    * @return SensorResultInterface
    *   Sensor result.
    *
-   * @throws \InvalidArgumentException
+   * @throws \Drupal\monitoring\Sensor\DisabledSensorException
    *   Thrown if the passed sensor is not enabled.
    */
   protected function runSensor(SensorInfo $sensor_info) {
