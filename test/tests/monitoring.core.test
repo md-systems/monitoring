@@ -360,7 +360,7 @@ class MonitoringCoreTest extends MonitoringTestBase {
     // The sensor should escalate to CRITICAL.
     $result = $this->runSensor('monitoring_enabled_modules');
     $this->assertTrue($result->isCritical());
-    $this->assertEqual($result->getSensorMessage(), '2 modules delta, expected 0, Following modules are expected to be installed: book, contact');
+    $this->assertEqual($result->getSensorMessage(), '2 modules delta, expected 0, Following modules are expected to be installed: Book (book), Contact (contact)');
     $this->assertEqual($result->getSensorValue(), 2);
 
     // The default setting is not to allow additional modules. Enable comment
@@ -375,7 +375,7 @@ class MonitoringCoreTest extends MonitoringTestBase {
     module_enable(array('comment'));
     $result = $this->runSensor('monitoring_enabled_modules');
     $this->assertTrue($result->isCritical());
-    $this->assertEqual($result->getSensorMessage(), '1 modules delta, expected 0, Following modules are NOT expected to be installed: comment');
+    $this->assertEqual($result->getSensorMessage(), '1 modules delta, expected 0, Following modules are NOT expected to be installed: Comment (comment)');
     $this->assertEqual($result->getSensorValue(), 1);
 
     // Allow additional, the sensor should not escalate.
@@ -404,7 +404,7 @@ class MonitoringCoreTest extends MonitoringTestBase {
     module_enable(array('comment'));
     $result = $this->runSensor('monitoring_enabled_modules');
     $this->assertTrue($result->isCritical());
-    $this->assertEqual($result->getSensorMessage(), '1 modules delta, expected 0, Following modules are NOT expected to be installed: comment');
+    $this->assertEqual($result->getSensorMessage(), '1 modules delta, expected 0, Following modules are NOT expected to be installed: Comment (comment)');
     $this->assertEqual($result->getSensorValue(), 1);
 
     // Allow additional modules and run the sensor - it should not escalate now.
@@ -422,7 +422,7 @@ class MonitoringCoreTest extends MonitoringTestBase {
     module_disable(array('comment'));
     $result = $this->runSensor('monitoring_enabled_modules');
     $this->assertTrue($result->isCritical());
-    $this->assertEqual($result->getSensorMessage(), '1 modules delta, expected 0, Following modules are expected to be installed: comment');
+    $this->assertEqual($result->getSensorMessage(), '1 modules delta, expected 0, Following modules are expected to be installed: Comment (comment)');
     $this->assertEqual($result->getSensorValue(), 1);
   }
 
