@@ -18,14 +18,12 @@ class SensorSearchApi extends SensorThresholds {
    * {@inheritdoc}
    */
   function runSensor(SensorResultInterface $result) {
-
     $indexes = search_api_index_load_multiple(array($this->info->getSetting('index_id')));
     $index = reset($indexes);
 
     $status = search_api_index_status($index);
 
     $result->setSensorValue($status['total'] - $status['indexed']);
-
   }
 
 }

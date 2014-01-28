@@ -10,16 +10,16 @@ use Drupal\monitoring\Result\SensorResultInterface;
 use Drupal\monitoring\Sensor\SensorConfigurable;
 
 /**
- * Monitors for disappeared sensors.
+ * Checks for sensors that disappeared without prior being disabled.
+ *
+ * It stores the list of available sensors and their enabled/disabled status
+ * and compares it to the current sensor info retrieved via
+ * monitoring_sensor_info() callback.
  */
 class SensorDisappearedSensors extends SensorConfigurable {
 
   /**
-   * Checks for sensors that disappeared without prior being disabled.
-   *
-   * It stores the list of available sensors and their enabled/disabled status
-   * and compares it to the current sensor info retrieved via
-   * monitoring_sensor_info() callback.
+   * {@inheritdoc}
    */
   public function runSensor(SensorResultInterface $result) {
     $available_sensors = variable_get('monitoring_available_sensors', array());

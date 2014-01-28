@@ -641,7 +641,7 @@ function monitoring_elysia_cron_monitoring_sensor_info() {
 
   $result = db_select('elysia_cron', 'e')->fields('e', array('name'))->execute()->fetchAll();
 
-  foreach($result as $row) {
+  foreach ($result as $row) {
     // Remove the colon from the name as it breaks munin graphs.
     $name = str_replace(':', '', $row->name);
     $info['elysia_cron_' . $name . '_last_execution'] = array(

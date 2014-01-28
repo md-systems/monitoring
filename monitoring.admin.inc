@@ -89,7 +89,6 @@ function monitoring_config_sensors_overview_form_submit($form, &$form_state) {
  *   Renderable array.
  */
 function monitoring_reports_sensors_overview() {
-
   $rows = array();
   $runner = new SensorRunner();
   $results = $runner->runSensors();
@@ -127,7 +126,7 @@ function monitoring_reports_sensors_overview() {
       }
       $sensor_result = $results[$sensor_name];
 
-      $sensor_info = monitoring_sensor_manager()->getSensorInfoByName($sensor_name);
+      $sensor_info = $sensor_result->getSensorInfo();
 
       $row['data']['label'] = '<span title="' . $sensor_info->getDescription() . '">' . $sensor_info->getLabel() . '</span>';
 
