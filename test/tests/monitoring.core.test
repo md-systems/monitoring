@@ -193,6 +193,16 @@ class MonitoringCoreTest extends MonitoringTestBase {
     $this->assertTrue(strpos($result->getSensorMessage(), 'user1: 2') !== FALSE);
     $this->assertTrue(strpos($result->getSensorMessage(), 'user2: 1') !== FALSE);
 
+    // ======= Sensor user_session_logouts tests ======= //
+
+    watchdog('user', 'Session closed for %name.', array('%user' => 'user1'), WATCHDOG_NOTICE);
+    watchdog('user', 'Session closed for %name.', array('%user' => 'user1'), WATCHDOG_NOTICE);
+    watchdog('user', 'Session closed for %name.', array('%user' => 'user2'), WATCHDOG_NOTICE);
+
+    $result = $this->runSensor('user_session_logouts');
+    $this->assertEqual($result->getSensorValue(), 3);
+    $this->assertEqual($result->getSensorMessage(), '3 logouts in 1 day');
+
     // ======= SensorGitDirtyTree tests ======= //
 
     // Enable the sensor and set cmd to output something

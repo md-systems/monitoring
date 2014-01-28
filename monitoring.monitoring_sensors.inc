@@ -275,7 +275,24 @@ function monitoring_dblog_monitoring_sensor_info() {
       'time_interval_value' => 60 * 60 * 24,
     ),
   );
-
+  $info['user_session_logouts'] = array(
+    'label' => 'User session logouts',
+    'description' => 'User session logouts by Watchdog',
+    'sensor_class' => 'Drupal\monitoring\Sensor\Sensors\SensorDatabaseAggregator',
+    'value_label' => 'Logouts',
+    'settings' => array(
+      'category' => 'User activity',
+      // Cache for one hour.
+      'caching time' => 3600,
+      'table' => 'watchdog',
+      'conditions' => array(
+        array('field' => 'type', 'value' => 'user'),
+        array('field' => 'message', 'value' => 'Session closed for %name.'),
+      ),
+      'time_interval_field' => 'timestamp',
+      'time_interval_value' => 60 * 60 * 24,
+    ),
+  );
   $info['user_failed_logins'] = array(
     'label' => 'Failed user logins',
     'description' => 'Failed user logins by Watchdog',
