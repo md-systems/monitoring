@@ -155,12 +155,27 @@ class MonitoringUITest extends MonitoringTestBase {
     $this->assertNoText('0 druplicons in');
   }
 
+  /**
+   * Sensor over page tests coverage.
+   */
   function testSensorOverviewPage() {
     $account = $this->drupalCreateUser(array('monitoring reports'));
     $this->drupalLogin($account);
 
-    $this->drupalGet('admin/reports/monitoring');
+    // Run the test_sensor and update the timestamp in the cache to make the
+    // result the oldest.
+    monitoring_sensor_run('test_sensor');
+    $cid = 'monitoring_sensor_result:test_sensor';
+    $cache = cache_get($cid);
+    $cache->data['timestamp'] = $cache->data['timestamp'] - 1000;
+    cache_set($cid, $cache->data, 'cache', REQUEST_TIME + 3600);
 
+    $this->drupalGet('admin/reports/monitoring');
+    // Test if the Test sensor is listed as the oldest cached. We do not test
+    // for the cached time as such test contains a risk of random fail.
+    $this->assertRaw(format_string('Sensor %sensor (%category) cached before', array('%sensor' => 'Test sensor', '%category' => 'Test')));
+
+    // Test the overview table.
     $tbody = $this->xpath('//table[@id="monitoring-sensors-overview"]/tbody');
     $rows = $tbody[0];
 
@@ -178,6 +193,7 @@ class MonitoringUITest extends MonitoringTestBase {
       $i++;
     }
 
+    // Test sensor detail page.
     $sensor_info = monitoring_sensor_info('test_sensor');
     $this->drupalGet('admin/reports/monitoring/sensors/test_sensor');
     $this->assertTitle(t('@label (@category) | Drupal', array('@label' => $sensor_info->getLabel(), '@category' => $sensor_info->getCategory())));

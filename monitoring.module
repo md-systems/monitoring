@@ -493,6 +493,9 @@ function monitoring_theme() {
         'status_overview'           => array(),
         'total_execution_time'      => NULL,
         'non_cached_execution_time' => NULL,
+        'oldest_sensor_label'       => NULL,
+        'oldest_sensor_category'       => NULL,
+        'oldest_sensor_called_before' => NULL,
       ),
     ),
   );
@@ -568,6 +571,12 @@ function theme_monitoring_overview_summary($variables) {
   $output .= '</div>';
   if (user_access('monitoring force run')) {
     $output .= '<div class="monitoring-overview-summary-actions-right">' . l(t('Force execute all'), 'monitoring/sensors/force') . '</div>';
+  }
+  if (!empty($variables['oldest_sensor_label'])) {
+    $output .= '<div class="monitoring-overview-summary-actions-right">' . t('Sensor %sensor (%category) cached before %before.', array('%sensor' => $variables['oldest_sensor_label'], '%before' => $variables['oldest_sensor_called_before'], '%category' => $variables['oldest_sensor_category'])) . '</div>';
+  }
+  else {
+    $output .= '<div class="monitoring-overview-summary-actions-right">' . t('No sensor cached.') . '</div>';
   }
   return $output;
 }

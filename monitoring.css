@@ -76,7 +76,8 @@ table.monitoring-severity-colors tr.monitoring-ok {
 }
 
 .monitoring-overview-summary-actions-right {
-    float: right;
+  float: right;
+  margin-left: 10px;
 }
 
 .monitoring-summary-time {

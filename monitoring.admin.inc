@@ -102,6 +102,10 @@ function monitoring_reports_sensors_overview() {
   );
   $total_execution_time = 0;
   $non_cached_execution_time = 0;
+  // Oldest sensor age in seconds.
+  $oldest_sensor_age = 0;
+  // Oldest sensor info.
+  $oldest_sensor_info = NULL;
 
   // Include views admin styles for the dropbutton.
   module_load_include('inc', 'views', 'includes/admin');
@@ -120,29 +124,33 @@ function monitoring_reports_sensors_overview() {
     );
     $ok_row_count = 0;
 
-    foreach ($category_sensor_info as $sensor_name => $info) {
+    /** @var \Drupal\monitoring\Sensor\SensorExtendedInfoInterface $sensor_info */
+    foreach ($category_sensor_info as $sensor_name => $sensor_info) {
       if (!isset($results[$sensor_name])) {
         continue;
       }
-      $sensor_result = $results[$sensor_name];
 
-      $sensor_info = $sensor_result->getSensorInfo();
+      $sensor_result = $results[$sensor_name];
+      $called_before = REQUEST_TIME - $sensor_result->getTimestamp();
+      if ($called_before > $oldest_sensor_age) {
+        $oldest_sensor_info = $sensor_info;
+        $oldest_sensor_age = $called_before;
+      }
 
       $row['data']['label'] = '<span title="' . $sensor_info->getDescription() . '">' . $sensor_info->getLabel() . '</span>';
-
       $row['data']['sensor_status'] = array(
         'data' => $sensor_result->getSensorStatus(),
         'class' => array('status', 'having-dropbutton'),
       );
 
-      $row['data']['timestamp'] = format_interval(REQUEST_TIME - $sensor_result->getTimestamp());
+      $row['data']['timestamp'] = format_interval($called_before);
       $row['data']['execution_time'] = array(
         'data' => $sensor_result->getSensorExecutionTime() . 'ms',
         'class' => array('execution-time'),
       );
       $row['data']['sensor_status_message'] = truncate_utf8(strip_tags($sensor_result->getSensorMessage()), 200, TRUE, TRUE);
 
-      $row['class'] = array('monitoring-' . strtolower($sensor_result->getSensorStatus()));
+      $row['class'] = array('monitoring-sensor-' . $sensor_name, 'monitoring-' . strtolower($sensor_result->getSensorStatus()));
 
       $links = array();
       $links['details'] = array('title' => t('Details'), 'href' => 'admin/reports/monitoring/sensors/' . $sensor_name);
@@ -190,6 +198,13 @@ function monitoring_reports_sensors_overview() {
     '#total_execution_time' => $total_execution_time,
     '#non_cached_execution_time' => $non_cached_execution_time,
   );
+
+  // We can add the oldest_sensor_* data only if there are sensor results cached.
+  if (!empty($oldest_sensor_info)) {
+    $output['summary']['#oldest_sensor_label'] = $oldest_sensor_info->getLabel();
+    $output['summary']['#oldest_sensor_category'] = $oldest_sensor_info->getCategory();
+    $output['summary']['#oldest_sensor_called_before'] = format_interval($oldest_sensor_age);
+  }
 
   $header = array(
     t('Sensor name'),
