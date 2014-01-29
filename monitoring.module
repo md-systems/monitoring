@@ -358,6 +358,15 @@ function monitoring_services_resources() {
       'callback' => 'monitoring_services_sensors_results',
       'access callback' => 'user_access',
       'access arguments' => array('monitoring reports'),
+      'args' => array(
+        array(
+          'name' => 'expand',
+          'type' => 'string',
+          'description' => t('Additional sensor result data to expand. I.e. expand=sensor_info'),
+          'source' => array('param' => 'expand'),
+          'optional' => TRUE,
+        ),
+      ),
     ),
     'retrieve' => array(
       'file' => array('type' => 'inc', 'module' => 'monitoring', 'name' => 'monitoring.services'),
@@ -372,6 +381,13 @@ function monitoring_services_resources() {
           'source' => array('path' => 0),
           'type' => 'string',
           'description' => 'Sensor name.',
+        ),
+        array(
+          'name' => 'expand',
+          'type' => 'string',
+          'description' => t('Additional sensor result data to expand. I.e. expand=sensor_info'),
+          'source' => array('param' => 'expand'),
+          'optional' => TRUE,
         ),
       ),
     ),
@@ -432,8 +448,14 @@ function monitoring_sensor_settings_key($sensor_name) {
  *   Sensor result entity.
  */
 function monitoring_sensor_result_save(SensorResultInterface $result) {
-  $values = $result->getEntityValues();
-  $values['sensor_name'] = $result->getSensorName();
+  $values = array(
+    'sensor_name' => $result->getSensorName(),
+    'sensor_status' => $result->getSensorStatus(),
+    'sensor_message' => $result->getSensorMessage(),
+    'sensor_value' => $result->getSensorValue(),
+    'timestamp' => $result->getTimestamp(),
+    'execution_time' => $result->getSensorExecutionTime(),
+  );
   $result_entity = entity_create('monitoring_sensor_result', $values);
   entity_save('monitoring_sensor_result', $result_entity);
   return $result_entity;

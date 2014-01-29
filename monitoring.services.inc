@@ -19,7 +19,9 @@ use Drupal\monitoring\Sensor\SensorInfo;
  */
 function monitoring_services_sensor_info($sensor_name) {
   try {
-    return monitoring_sensor_manager()->getSensorInfoByName($sensor_name)->toArray();
+    $response = monitoring_sensor_manager()->getSensorInfoByName($sensor_name)->toArray();
+    $response['uri'] = services_resource_uri(array('sensor-info', $sensor_name));
+    return $response;
   }
   catch (NonExistingSensorException $e) {
     services_error($e->getMessage(), 404);
@@ -33,12 +35,13 @@ function monitoring_services_sensor_info($sensor_name) {
  *   List of all sensors info data.
  */
 function monitoring_services_sensors_info() {
-  $result = array();
+  $response = array();
   foreach (monitoring_sensor_manager()->getSensorInfo() as $sensor_name => $sensor_info) {
-    $result[$sensor_name] = $sensor_info->toArray();
+    $response[$sensor_name] = $sensor_info->toArray();
+    $response[$sensor_name]['uri'] = services_resource_uri(array('sensor-info', $sensor_name));
   }
 
-  return $result;
+  return $response;
 }
 
 /**
@@ -46,13 +49,21 @@ function monitoring_services_sensors_info() {
  *
  * @param string $sensor_name
  *   Specific sensor name.
+ * @param string $expand
+ *   Sensor result data to expand.
  *
  * @return array
  *   Single sensor result data.
  */
-function monitoring_services_sensor_result($sensor_name) {
+function monitoring_services_sensor_result($sensor_name, $expand = NULL) {
   try {
-    return monitoring_services_compile_sensor_result(monitoring_sensor_run($sensor_name));
+    $result = monitoring_sensor_run($sensor_name);
+    $response = $result->toArray();
+    $response['uri'] = services_resource_uri(array('sensor-result', $sensor_name));
+    if ($expand == 'sensor_info') {
+      $response['sensor_info'] = $result->getSensorInfo()->toArray();
+    }
+    return $response;
   }
   catch (InvalidArgumentException $e) {
     return services_error($e->getMessage(), 404);
@@ -62,40 +73,23 @@ function monitoring_services_sensor_result($sensor_name) {
 /**
  * Sensor result resource.
  *
+ * @param string $expand
+ *   Sensor result data to expand.
+ *
+ *
  * @return array
  *   List of all sensors results data.
  */
-function monitoring_services_sensors_results() {
-  $result = array();
+function monitoring_services_sensors_results($expand = NULL) {
+  $response = array();
   foreach (monitoring_sensor_run_multiple() as $sensor_name => $sensor_result) {
-    $result[$sensor_name] = monitoring_services_compile_sensor_result($sensor_result);
+    $response[$sensor_name] = $sensor_result->toArray();
+    $response[$sensor_name]['uri'] = services_resource_uri(array('sensor-result', $sensor_name));
+    if ($expand == 'sensor_info') {
+      $response[$sensor_name]['sensor_info'] = $sensor_result->getSensorInfo()->toArray();
+    }
   }
 
-  return $result;
+  return $response;
 }
 
-/**
- * Compiles the sensor result.
- *
- * @param SensorResultInterface $sensor_result
- *   Sensor result object.
- *
- * @return array
- *   Compiled sensor result.
- */
-function monitoring_services_compile_sensor_result(SensorResultInterface $sensor_result) {
-  return array(
-    'host' => url('', array('absolute' => TRUE)),
-    'sensor' => $sensor_result->getSensorInfo()->getName(),
-    'label' => $sensor_result->getSensorInfo()->getLabel(),
-    'value_label' => $sensor_result->getSensorInfo()->getValueLabel(),
-    'status' => $sensor_result->getSensorStatus(),
-    'value' => $sensor_result->getSensorValue(),
-    'expected_value' => $sensor_result->getSensorExpectedValue(),
-    'metric' => $sensor_result->toNumber(),
-    'message' => $sensor_result->getSensorMessage(),
-    'timestamp' => $sensor_result->getTimestamp(),
-    'execution_time' => $sensor_result->getSensorExecutionTime(),
-    'caching_time' => $sensor_result->getSensorInfo()->getCachingTime(),
-  );
-}

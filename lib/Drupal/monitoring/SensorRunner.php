@@ -290,8 +290,15 @@ class SensorRunner implements \IteratorAggregate {
     foreach ($results as $result) {
       $definition = $result->getSensorInfo();
       if ($definition->getCachingTime() && !$result->isCached()) {
-        $data = $result->getEntityValues();
-        $data['name'] = $result->getSensorName();
+        $data = array(
+          'name' => $result->getSensorName(),
+          'sensor_status' => $result->getSensorStatus(),
+          'sensor_message' => $result->getSensorMessage(),
+          'sensor_expected_value' => $result->getSensorExpectedValue(),
+          'sensor_value' => $result->getSensorValue(),
+          'execution_time' => $result->getSensorExecutionTime(),
+          'timestamp' => $result->getTimestamp(),
+        );
         cache_set($this->getSensorCid($result->getSensorName()), $data, 'cache', REQUEST_TIME + $definition->getCachingTime());
       }
     }

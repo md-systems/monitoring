@@ -152,12 +152,12 @@ interface SensorResultInterface {
   function getTimestamp();
 
   /**
-   * Gets sensor data ready to be used for entity creation.
+   * Gets sensor result data as array.
    *
    * @return array
-   *   Entity values.
+   *   Sensor result data as array.
    */
-  function getEntityValues();
+  function toArray();
 
   /**
    * Gets sensor name.

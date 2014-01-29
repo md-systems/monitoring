@@ -363,10 +363,30 @@ class SensorResult implements SensorResultInterface {
   }
 
   /**
-   * {@inheritdoc}
+   * Returns sensor result data as array.
+   *
+   * @return array
+   *   An array with data having following keys:
+   *   - sensor_name
+   *   - value
+   *   - expected_value
+   *   - numeric_value
+   *   - status
+   *   - message
+   *   - execution_time
+   *   - timestamp
    */
-  public function getEntityValues() {
-    return $this->data;
+  public function toArray() {
+    return array(
+      'sensor_name' => $this->getSensorName(),
+      'value' => $this->getSensorValue(),
+      'expected_value' => $this->getSensorExpectedValue(),
+      'numeric_value' => $this->toNumber(),
+      'status' => $this->getSensorStatus(),
+      'message' => $this->getSensorMessage(),
+      'execution_time' => $this->getSensorExecutionTime(),
+      'timestamp' => $this->getTimestamp(),
+    );
   }
 
   /**
