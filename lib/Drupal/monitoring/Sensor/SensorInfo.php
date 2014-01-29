@@ -166,6 +166,9 @@ class SensorInfo {
   /**
    * Gets thresholds.
    *
+   * This is also used for validation, the status with the highest priority
+   * has to be on top.
+   *
    * @return array
    *   Thresholds definition.
    */

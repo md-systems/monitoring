@@ -3,7 +3,9 @@
  * @file
  * Contains \MonitoringUITest.
  */
-use Drupal\monitoring\Sensor\SensorInfo;
+
+use Drupal\monitoring\Result\SensorResultInterface;
+use Drupal\monitoring\SensorRunner;
 
 /**
  * Tests the Monitoring UI.
@@ -28,78 +30,18 @@ class MonitoringUITest extends MonitoringTestBase {
   }
 
   /**
-   *
+   * Test the sensor settings UI.
    */
   function testSensorSettingsUI() {
     $account = $this->drupalCreateUser(array('administer monitoring'));
     $this->drupalLogin($account);
 
-    $info = monitoring_sensor_info();
-
-    // Test sensor exceeds.
-    $sensor_info = $info['test_sensor_exceeds'];
-    $data = array();
-    foreach ($sensor_info->getThresholdsIntervals() as $status => $threshold) {
-      $key = monitoring_sensor_settings_key('test_sensor_exceeds') . '[thresholds][intervals][' . $status . ']';
-      $data[$key] = $threshold + 1;
-    }
-    $this->drupalPost('admin/config/system/monitoring/sensors/test_sensor_exceeds', $data, t('Save'));
-
-    $this->drupalGet('admin/config/system/monitoring/sensors/test_sensor_exceeds');
-    $this->assertTitle(t('@label settings (@category) | Drupal', array('@label' => $sensor_info->getLabel(), '@category' => $sensor_info->getCategory())));
-    foreach ($sensor_info->getThresholdsIntervals() as $status => $threshold) {
-      $key = monitoring_sensor_settings_key('test_sensor_exceeds') . '[thresholds][intervals][' . $status . ']';
-      $this->assertFieldByName($key, $threshold + 1);
-    }
-
-    // Test sensor falls.
-    $sensor_info = $info['test_sensor_falls'];
-    $data = array();
-    foreach ($sensor_info->getThresholdsIntervals() as $status => $threshold) {
-      $key = monitoring_sensor_settings_key('test_sensor_falls') . '[thresholds][intervals][' . $status . ']';
-      $data[$key] = $threshold + 1;
-    }
-    $this->drupalPost('admin/config/system/monitoring/sensors/test_sensor_falls', $data, t('Save'));
-
-    $this->drupalGet('admin/config/system/monitoring/sensors/test_sensor_falls');
-    foreach ($sensor_info->getThresholdsIntervals() as $status => $threshold) {
-      $key = monitoring_sensor_settings_key('test_sensor_falls') . '[thresholds][intervals][' . $status . ']';
-      $this->assertFieldByName($key, $threshold + 1);
-    }
-
-    // Test sensor inner interval.
-    $sensor_info = $info['test_sensor_inner'];
-    $data = array();
-    foreach ($sensor_info->getThresholdsIntervals() as $status => $threshold_inner) {
-      $key_inner = monitoring_sensor_settings_key('test_sensor_inner') . '[thresholds][intervals][' . $status . ']';
-      $data[$key_inner . '[0]'] = $threshold_inner[0] + 1;
-      $data[$key_inner . '[1]'] = $threshold_inner[1] + 1;
-      $this->drupalPost('admin/config/system/monitoring/sensors/test_sensor_inner', $data, t('Save'));
-    }
-
-    $this->drupalGet('admin/config/system/monitoring/sensors/test_sensor_inner');
-    foreach ($sensor_info->getThresholdsIntervals() as $status => $threshold) {
-      $key = monitoring_sensor_settings_key('test_sensor_inner') . '[thresholds][intervals][' . $status . ']';
-      $this->assertFieldByName($key . '[0]', $threshold[0] + 1);
-      $this->assertFieldByName($key . '[1]', $threshold[1] + 1);
-    }
-
-    // Test sensor outer interval.
-    $sensor_info = $info['test_sensor_outer'];
-    $data = array();
-    foreach ($sensor_info->getThresholdsIntervals() as $status => $threshold_outer) {
-      $key_outer = monitoring_sensor_settings_key('test_sensor_outer') . '[thresholds][intervals][' . $status . ']';
-      $data[$key_outer . '[0]'] = $threshold_outer[0] + 1;
-      $data[$key_outer . '[1]'] = $threshold_outer[1] + 1;
-    }
-    $this->drupalPost('admin/config/system/monitoring/sensors/test_sensor_outer', $data, t('Save'));
-
-    $this->drupalGet('admin/config/system/monitoring/sensors/test_sensor_outer');
-    foreach ($sensor_info->getThresholdsIntervals() as $status => $threshold) {
-      $key = monitoring_sensor_settings_key('test_sensor_outer') . '[thresholds][intervals][' . $status . ']';
-      $this->assertFieldByName($key . '[0]', $threshold[0] + 1);
-      $this->assertFieldByName($key . '[1]', $threshold[1] + 1);
-    }
+    // The separate threshold settings tests have been split into separate
+    // methods for better separation.
+    $this->checkExceedsThresholdSettings();
+    $this->checkFallsThresholdSettings();
+    $this->checkInnerThresholdSettings();
+    $this->checkOuterThresholdSettings();
 
     // Test that trying to access the sensors settings page of a non-existing
     // sensor results in a page not found response.
@@ -237,6 +179,290 @@ class MonitoringUITest extends MonitoringTestBase {
     $this->clickLink(t('Force execute all'));
     $this->assertNoText('First message');
     $this->assertText('Second message');
+  }
+
+  /**
+   * Submits a threshold settings form for a given sensor.
+   *
+   * @param string $sensor_name
+   *   The sensor name for the sensor that should be submitted.
+   * @param array $thresholds
+   *   Array of threshold values, keyed by the status, the value can be an
+   *   integer or an array of integers for threshold types that need multiple
+   *   values.
+   */
+  protected function submitThresholdSettings($sensor_name, array $thresholds) {
+    $data = array();
+    $sensor_info = $this->sensorManager->getSensorInfoByName($sensor_name);
+    foreach ($thresholds as $status => $threshold) {
+      $key_inner = monitoring_sensor_settings_key($sensor_info->getName()) . '[thresholds][intervals][' . $status . ']';
+      if (!is_array($threshold)) {
+        $threshold = array($threshold);
+      }
+      foreach ($threshold as $i => $value) {
+        $data[$key_inner . "[$i]"] = $value;
+      }
+    }
+    $this->drupalPost('admin/config/system/monitoring/sensors/' . $sensor_info->getName(), $data, t('Save'));
+  }
+
+  /**
+   * Asserts that defaults are set correctly in the settings form.
+   *
+   * @param string $sensor_name
+   *   The sensor name for the sensor that should be submitted.
+   * @param array $thresholds
+   *   Array of threshold values, keyed by the status, the value can be an
+   *   integer or an array of integers for threshold types that need multiple
+   *   values.
+   */
+  protected function assertThresholdSettingsUIDefaults($sensor_name, $thresholds) {
+    $sensor_info = $this->sensorManager->getSensorInfoByName($sensor_name);
+    $this->drupalGet('admin/config/system/monitoring/sensors/' . $sensor_name);
+    $this->assertTitle(t('@label settings (@category) | Drupal', array('@label' => $sensor_info->getLabel(), '@category' => $sensor_info->getCategory())));
+    foreach ($thresholds as $status => $threshold) {
+      if (!is_array($threshold)) {
+        $threshold = array($threshold);
+      }
+      $key_inner = monitoring_sensor_settings_key($sensor_name) . '[thresholds][intervals][' . $status . ']';
+      foreach ($threshold as $i => $value) {
+        $this->assertFieldByName($key_inner . "[$i]", $value);
+      }
+    }
+  }
+
+  /**
+   * Tests exceeds threshold settings UI and validation.
+   */
+  protected function checkExceedsThresholdSettings() {
+    // Test with valid values.
+    $thresholds = array(
+      SensorResultInterface::STATUS_CRITICAL => 11,
+      SensorResultInterface::STATUS_WARNING => 6,
+    );
+    $this->submitThresholdSettings('test_sensor_exceeds', $thresholds);
+    $this->assertText(t('Sensor settings saved.'));
+    $this->assertThresholdSettingsUIDefaults('test_sensor_exceeds', $thresholds);
+
+    // Make sure that it is possible to save empty thresholds.
+    $thresholds = array(
+      SensorResultInterface::STATUS_CRITICAL => '',
+      SensorResultInterface::STATUS_WARNING => '',
+    );
+    $this->submitThresholdSettings('test_sensor_exceeds', $thresholds);
+    $this->assertText(t('Sensor settings saved.'));
+    $this->assertThresholdSettingsUIDefaults('test_sensor_exceeds', $thresholds);
+
+    $this->sensorManager->resetCache();
+    SensorRunner::resetCache();
+    $sensor_result = $this->runSensor('test_sensor_exceeds');
+    $this->assertTrue($sensor_result->isOk());
+
+    // Test validation.
+    $thresholds = array(
+      SensorResultInterface::STATUS_CRITICAL => 5,
+      SensorResultInterface::STATUS_WARNING => 10,
+    );
+    $this->submitThresholdSettings('test_sensor_exceeds', $thresholds);
+    $this->assertText('CRITICAL has to be bigger than WARNING.');
+
+    $thresholds = array(
+      SensorResultInterface::STATUS_CRITICAL => 5,
+      SensorResultInterface::STATUS_WARNING => 5,
+    );
+    $this->submitThresholdSettings('test_sensor_exceeds', $thresholds);
+    $this->assertText('CRITICAL has to be bigger than WARNING.');
+
+    $thresholds = array(
+      SensorResultInterface::STATUS_CRITICAL => 'alphanumeric',
+      SensorResultInterface::STATUS_WARNING => 'alphanumeric',
+    );
+    $this->submitThresholdSettings('test_sensor_exceeds', $thresholds);
+    $this->assertText('Status CRITICAL must be a number.', 'Error message for CRITICAL is displayed.');
+    $this->assertText('Status WARNING must be a number.', 'Error message for WARNING is displayed.');
+    return $thresholds;
+  }
+
+  /**
+   * Tests falls threshold settings UI and validation.
+   */
+  protected function checkFallsThresholdSettings() {
+    // Test with valid values.
+    $thresholds = array(
+      SensorResultInterface::STATUS_CRITICAL => 6,
+      SensorResultInterface::STATUS_WARNING => 11,
+    );
+    $this->submitThresholdSettings('test_sensor_falls', $thresholds);
+    $this->assertText(t('Sensor settings saved.'));
+    $this->assertThresholdSettingsUIDefaults('test_sensor_falls', $thresholds);
+
+    // Make sure that it is possible to save empty thresholds.
+    $thresholds = array(
+      SensorResultInterface::STATUS_CRITICAL => '',
+      SensorResultInterface::STATUS_WARNING => '',
+    );
+    $this->submitThresholdSettings('test_sensor_falls', $thresholds);
+    $this->assertText(t('Sensor settings saved.'));
+    $this->assertThresholdSettingsUIDefaults('test_sensor_falls', $thresholds);
+
+    // Test validation.
+    $thresholds = array(
+      SensorResultInterface::STATUS_CRITICAL => 50,
+      SensorResultInterface::STATUS_WARNING => 45,
+    );
+    $this->submitThresholdSettings('test_sensor_falls', $thresholds);
+    $this->assertText('CRITICAL has to be smaller than WARNING.');
+
+    $thresholds = array(
+      SensorResultInterface::STATUS_CRITICAL => 5,
+      SensorResultInterface::STATUS_WARNING => 5,
+    );
+    $this->submitThresholdSettings('test_sensor_falls', $thresholds);
+    $this->assertText('CRITICAL has to be smaller than WARNING.');
+
+    $thresholds = array(
+      SensorResultInterface::STATUS_CRITICAL => 'alphanumeric',
+      SensorResultInterface::STATUS_WARNING => 'alphanumeric',
+    );
+    $this->submitThresholdSettings('test_sensor_falls', $thresholds);
+    $this->assertText('Status CRITICAL must be a number.', 'Error message for CRITICAL is displayed.');
+    $this->assertText('Status WARNING must be a number.', 'Error message for WARNING is displayed.');
+    return $thresholds;
+  }
+
+  /**
+   * Tests inner threshold settings UI and validation.
+   */
+  protected function checkInnerThresholdSettings() {
+    // Test with valid values.
+    $thresholds = array(
+      SensorResultInterface::STATUS_CRITICAL => array(5, 10),
+      SensorResultInterface::STATUS_WARNING => array(1, 15),
+    );
+    $this->submitThresholdSettings('test_sensor_inner', $thresholds);
+    $this->assertText(t('Sensor settings saved.'));
+    $this->assertThresholdSettingsUIDefaults('test_sensor_inner', $thresholds);
+
+    // Make sure that it is possible to save empty inner thresholds.
+    $thresholds = array(
+      SensorResultInterface::STATUS_CRITICAL => array('', ''),
+      SensorResultInterface::STATUS_WARNING => array('', ''),
+    );
+    $this->submitThresholdSettings('test_sensor_inner', $thresholds);
+    $this->assertText(t('Sensor settings saved.'));
+    $this->assertThresholdSettingsUIDefaults('test_sensor_inner', $thresholds);
+
+    // Test validation.
+    $thresholds = array(
+      SensorResultInterface::STATUS_CRITICAL => array(5, 10),
+      SensorResultInterface::STATUS_WARNING => array(15, 20),
+    );
+    $this->submitThresholdSettings('test_sensor_inner', $thresholds);
+    $this->assertText('CRITICAL threshold has to be inside WARNING.');
+
+    $thresholds = array(
+      SensorResultInterface::STATUS_CRITICAL => array(5, 5),
+      SensorResultInterface::STATUS_WARNING => array(5, 5),
+    );
+    $this->submitThresholdSettings('test_sensor_inner', $thresholds);
+    $this->assertText('Interval FROM for CRITICAL has to be smaller than TO.');
+
+    $thresholds = array(
+      SensorResultInterface::STATUS_CRITICAL => array(50, 55),
+      SensorResultInterface::STATUS_WARNING => array(100, 95),
+    );
+    $this->submitThresholdSettings('test_sensor_inner', $thresholds);
+    $this->assertText('Interval FROM for WARNING has to be smaller than TO.');
+
+    $thresholds = array(
+      SensorResultInterface::STATUS_CRITICAL => array(
+        'alphanumeric',
+        'alphanumeric'
+      ),
+      SensorResultInterface::STATUS_WARNING => array(
+        'alphanumeric',
+        'alphanumeric'
+      ),
+    );
+    $this->submitThresholdSettings('test_sensor_inner', $thresholds);
+    $this->assertText('From must be a number.');
+    $this->assertText('To must be a number.');
+    $this->assertText('Interval FROM for CRITICAL has to be smaller than TO.');
+
+    $thresholds = array(
+      SensorResultInterface::STATUS_CRITICAL => array(50, 45),
+      SensorResultInterface::STATUS_WARNING => array(40, 35),
+    );
+    $this->submitThresholdSettings('test_sensor_inner', $thresholds);
+    $this->assertText('Interval FROM for CRITICAL has to be smaller than TO.');
+    return $thresholds;
+  }
+
+  /**
+   * Tests outer threshold settings UI and validation.
+   */
+  protected function checkOuterThresholdSettings() {
+    // Test with valid values.
+    $thresholds = array(
+      SensorResultInterface::STATUS_CRITICAL => array(5, 15),
+      SensorResultInterface::STATUS_WARNING => array(6, 14),
+    );
+    $this->submitThresholdSettings('test_sensor_outer', $thresholds);
+    $this->assertText(t('Sensor settings saved.'));
+    $this->assertThresholdSettingsUIDefaults('test_sensor_outer', $thresholds);
+
+    // Make sure that it is possible to save empty outer thresholds.
+    $thresholds = array(
+      SensorResultInterface::STATUS_CRITICAL => array('', ''),
+      SensorResultInterface::STATUS_WARNING => array('', ''),
+    );
+    $this->submitThresholdSettings('test_sensor_outer', $thresholds);
+    $this->assertText(t('Sensor settings saved.'));
+    $this->assertThresholdSettingsUIDefaults('test_sensor_outer', $thresholds);
+
+    // Test validation.
+    $thresholds = array(
+      SensorResultInterface::STATUS_CRITICAL => array(5, 10),
+      SensorResultInterface::STATUS_WARNING => array(15, 20),
+    );
+    $this->submitThresholdSettings('test_sensor_outer', $thresholds);
+    $this->assertText('WARNING threshold has to be inside CRITICAL.');
+
+    $thresholds = array(
+      SensorResultInterface::STATUS_CRITICAL => array(5, 5),
+      SensorResultInterface::STATUS_WARNING => array(5, 5),
+    );
+    $this->submitThresholdSettings('test_sensor_outer', $thresholds);
+    $this->assertText('Interval FROM for CRITICAL has to be smaller than TO.');
+
+    $thresholds = array(
+      SensorResultInterface::STATUS_CRITICAL => array(
+        'alphanumeric',
+        'alphanumeric'
+      ),
+      SensorResultInterface::STATUS_WARNING => array(
+        'alphanumeric',
+        'alphanumeric'
+      ),
+    );
+    $this->submitThresholdSettings('test_sensor_outer', $thresholds);
+    $this->assertText('From must be a number.');
+    $this->assertText('To must be a number.');
+    $this->assertText('Interval FROM for CRITICAL has to be smaller than TO.');
+
+    $thresholds = array(
+      SensorResultInterface::STATUS_CRITICAL => array(50, 45),
+      SensorResultInterface::STATUS_WARNING => array(40, 35),
+    );
+    $this->submitThresholdSettings('test_sensor_outer', $thresholds);
+    $this->assertText('Interval FROM for CRITICAL has to be smaller than TO.');
+
+    $thresholds = array(
+      SensorResultInterface::STATUS_CRITICAL => array(50, 55),
+      SensorResultInterface::STATUS_WARNING => array(100, 95),
+    );
+    $this->submitThresholdSettings('test_sensor_outer', $thresholds);
+    $this->assertText('Interval FROM for WARNING has to be smaller than TO.');
   }
 
 }

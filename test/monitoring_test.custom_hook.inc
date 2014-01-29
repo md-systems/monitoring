@@ -50,8 +50,8 @@ function monitoring_test_monitoring_sensor_info() {
         'result_logging' => TRUE,
         'categories' => 'Test',
         'thresholds' => array(
-          SensorResultInterface::STATUS_CRITICAL => array('inner_interval' => array(3, 6)),
-          SensorResultInterface::STATUS_WARNING => array('inner_interval' => array(1, 8)),
+          SensorResultInterface::STATUS_CRITICAL => array('inner_interval' => array(7, 9)),
+          SensorResultInterface::STATUS_WARNING => array('inner_interval' => array(1, 4)),
         ),
       ),
     ),
@@ -63,8 +63,8 @@ function monitoring_test_monitoring_sensor_info() {
         'result_logging' => TRUE,
         'category' => 'Test',
         'thresholds' => array(
-          SensorResultInterface::STATUS_CRITICAL => array('outer_interval' => array(10, 50)),
-          SensorResultInterface::STATUS_WARNING => array('outer_interval' => array(20, 40)),
+          SensorResultInterface::STATUS_CRITICAL => array('outer_interval' => array(30, 50)),
+          SensorResultInterface::STATUS_WARNING => array('outer_interval' => array(10, 22)),
         ),
       ),
     ),

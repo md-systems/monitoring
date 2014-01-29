@@ -89,7 +89,7 @@ class Thresholds {
    * @return bool
    */
   protected function exceeds($value, $threshold) {
-    if ($threshold === NULL) {
+    if ($threshold === NULL || $threshold === '') {
       return FALSE;
     }
     return $value > $threshold;
@@ -104,7 +104,7 @@ class Thresholds {
    * @return bool
    */
   protected function falls($value, $threshold) {
-    if ($threshold === NULL) {
+    if ($threshold === NULL || $threshold === '') {
       return FALSE;
     }
     return $value < $threshold;
@@ -120,7 +120,7 @@ class Thresholds {
    * @return bool
    */
   protected function isInsideTheInterval($value, $interval) {
-    if ($interval[0] === NULL || $interval[1] === NULL) {
+    if ($interval[0] === NULL || $interval[1] === NULL || $interval[0] === '' || $interval[1] === '') {
       return FALSE;
     }
     return ($value > $interval[0] && $value < $interval[1]);
@@ -136,7 +136,7 @@ class Thresholds {
    * @return bool
    */
   protected function isOutsideTheInterval($value, $interval) {
-    if ($interval[0] === NULL || $interval[1] === NULL) {
+    if ($interval[0] === NULL || $interval[1] === NULL || $interval[0] === '' || $interval[1] === '') {
       return FALSE;
     }
     return ($value < $interval[0] || $value > $interval[1]);

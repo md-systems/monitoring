@@ -92,8 +92,8 @@ function monitoring_monitoring_test_monitoring_sensor_info() {
         'thresholds' => array(
           'type' => 'falls',
           'intervals' => array(
-            SensorResultInterface::STATUS_CRITICAL => 2,
-            SensorResultInterface::STATUS_WARNING => 1,
+            SensorResultInterface::STATUS_CRITICAL => 1,
+            SensorResultInterface::STATUS_WARNING => 2,
           ),
         ),
       ),
@@ -124,8 +124,8 @@ function monitoring_monitoring_test_monitoring_sensor_info() {
         'thresholds' => array(
           'type' => 'inner_interval',
           'intervals' => array(
-            SensorResultInterface::STATUS_CRITICAL => array(3, 6),
-            SensorResultInterface::STATUS_WARNING => array(1, 8),
+            SensorResultInterface::STATUS_CRITICAL => array(4, 6),
+            SensorResultInterface::STATUS_WARNING => array(1, 9),
           ),
         ),
       ),
@@ -140,8 +140,8 @@ function monitoring_monitoring_test_monitoring_sensor_info() {
         'thresholds' => array(
           'type' => 'outer_interval',
           'intervals' => array(
-            SensorResultInterface::STATUS_CRITICAL => array(10, 50),
-            SensorResultInterface::STATUS_WARNING => array(20, 40),
+            SensorResultInterface::STATUS_CRITICAL => array(60, 90),
+            SensorResultInterface::STATUS_WARNING => array(70, 80),
           ),
         ),
       ),

@@ -18,7 +18,7 @@ interface SensorConfigurableInterface {
    * @param $form
    *   Drupal $form structure.
    * @param array $form_state
-   *   Drupal $form_state object.
+   *   Drupal $form_state object. Carrying the string sensor_name.
    *
    * @return array
    *   Drupal form structure.
@@ -31,7 +31,7 @@ interface SensorConfigurableInterface {
    * @param $form
    *   Drupal $form structure.
    * @param array $form_state
-   *   Drupal $form_state object.
+   *   Drupal $form_state object. Carrying the string sensor_name.
    */
   function settingsFormValidate($form, &$form_state);
 
