@@ -248,8 +248,6 @@ function monitoring_dblog_monitoring_sensor_info() {
         'table' => 'watchdog',
         'conditions' => array(
           array('field' => 'severity', 'value' => $level),
-          // This is to exclude monitoring records.
-          array('field' => 'type', 'value' => 'monitoring', 'operator' => '!='),
         ),
         'time_interval_field' => 'timestamp',
         'time_interval_value' => 24 * 60 * 60,

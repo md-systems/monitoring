@@ -396,37 +396,6 @@ class MonitoringApiTest extends MonitoringTestBase {
     monitoring_sensor_run('test_sensor', TRUE);
     $this->assertEqual(count($logs), 3);
 
-    // Test logging critical events to watchdog.
-    $test_sensor_result_data = array(
-      'sensor_status' => SensorResultInterface::STATUS_CRITICAL,
-    );
-    variable_set('test_sensor_result_data', $test_sensor_result_data);
-    monitoring_sensor_run('test_sensor', TRUE);
-    // See if the event was logged with proper data.
-    $results = db_select('watchdog', 'w')->fields('w')->condition('type', 'monitoring')->execute()->fetchAll();
-    $result = array_shift($results);
-    $this->assertEqual($result->message, 'Failing sensor %name with message %message and value %value');
-    $variables = unserialize($result->variables);
-    $this->assertEqual($variables['%name'], 'Test sensor');
-    $this->assertEqual($variables['%message'], 'No value');
-    $this->assertEqual($variables['%value'], NULL);
-
-    // Run test sensor which is in category Watchdog. Note that sensor_status
-    // is still critical.
-    monitoring_sensor_run('test_sensor_cat_watchdog', TRUE);
-    // Get results form watchdog - there should be only one as the Watchdog
-    // category should not get logged.
-    $results = db_select('watchdog', 'w')->fields('w')->condition('type', 'monitoring')->execute()->fetchAll();
-    $this->assertEqual(count($results), 1);
-
-    // Test exception handling in the sensor runner.
-    variable_set('test_sensor_result_data', array('sensor_exception_message' => 'Example exception'));
-    $result = monitoring_sensor_run('test_sensor', TRUE);
-    $this->assertTrue($result->isCritical());
-    debug($result->getSensorMessage());
-    // See if the event was logged with proper data.
-    $results = db_select('watchdog', 'w')->fields('w')->condition('type', 'monitoring_exception')->execute()->fetchAll();
-    $this->assertEqual(count($results), 1);
   }
 
   /**

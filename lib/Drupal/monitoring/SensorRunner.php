@@ -227,17 +227,6 @@ class SensorRunner implements \IteratorAggregate {
         continue;
       }
 
-      // Define which sensor categories should not be logged by watchdog.
-      $skip_categories = array('Past', 'Watchdog');
-      // If we have critical log the event into using watchdog.
-      if ($result->isCritical() && (!in_array($result->getSensorInfo()->getCategory(), $skip_categories))) {
-        watchdog('monitoring', 'Failing sensor %name with message %message and value %value', array(
-          '%name' => $result->getSensorInfo()->getLabel(),
-          '%message' => $result->getSensorMessage(),
-          '%value' => $result->getSensorValue(),
-        ), WATCHDOG_ERROR);
-      }
-
       $old_status = NULL;
       // Try to load the previous log result for this sensor.
       if ($last_result = monitoring_sensor_result_last($result->getSensorName())) {
