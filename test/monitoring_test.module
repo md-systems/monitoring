@@ -86,7 +86,7 @@ function monitoring_monitoring_test_monitoring_sensor_info() {
         'caching_time' => 3600,
         'table' => 'node',
         'conditions' => array(
-          array('field' => 'promote', 'value' => '1'),
+          'test' => array('field' => 'promote', 'value' => '1'),
         ),
         'time_interval_field' => 'created',
         'time_interval_value' => 24 * 60 * 60,
@@ -221,3 +221,16 @@ function monitoring_test_endpoint() {
     return MENU_NOT_FOUND;
   }
 }
+
+/**
+ * Implements hook_commerce_currency_info_alter().
+ */
+function monitoring_test_commerce_currency_info_alter(&$currencies, $langcode) {
+  // Alter CHF currency to use a ' as thousands separator, to verify correct
+  // encoding of the status message.
+  $currencies['CHF']['decimal_separator'] = '.';
+  $currencies['CHF']['thousands_separator'] = '\'';
+  $currencies['CHF']['code_placement'] = 'before';
+}
+
+

@@ -676,6 +676,10 @@ function monitoring_value_types() {
       'label' => 'Status',
       'formatter_callback' => 'monitoring_value_label_callback_bool',
     ),
+    'commerce_currency' => array(
+      'label' => 'Commerce currency',
+      'formatter_callback' => 'monitoring_value_label_callback_commerce_currency',
+    ),
   );
 }
 
@@ -703,4 +707,27 @@ function monitoring_value_label_callback_interval(SensorResultInterface $result)
  */
 function monitoring_value_label_callback_bool(SensorResultInterface $result) {
   return $result->getSensorValue() ? 'TRUE' : 'FALSE';
+}
+
+/**
+ * Commerce currency amount value formatter.
+ *
+ * @param \Drupal\monitoring\Result\SensorResultInterface $result
+ *   Result object for which to get the formatted value.
+ *
+ * @return string
+ *   Formatted amount.
+ */
+function monitoring_value_label_callback_commerce_currency(SensorResultInterface $result) {
+  if (module_exists('commerce')) {
+    $currency = $result->getSensorInfo()->getSetting('currency_code');
+    if (empty($currency)) {
+      $currency = commerce_default_currency();
+    }
+    // commerce_currency_format() uses @placeholders and runs the price through
+    // check_plain(), that can cause double encoding, so decode entities again.
+    return html_entity_decode(commerce_currency_format($result->getSensorValue(), $currency, NULL, FALSE), ENT_QUOTES);
+  }
+
+  return $result->getSensorValue();
 }

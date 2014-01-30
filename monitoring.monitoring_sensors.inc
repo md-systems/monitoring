@@ -694,6 +694,89 @@ function monitoring_maillog_monitoring_sensor_info() {
 }
 
 /**
+ * Implements monitoring_MODULE_monitoring_sensor_info().
+ *
+ * Module: commerce_order
+ */
+function monitoring_commerce_order_monitoring_sensor_info() {
+  $info = array();
+
+  // Expose a sensor for each order status, disabled by default.
+  foreach (commerce_order_statuses() as $status_name => $status_info) {
+    $info['commerce_order_status_' . $status_name] = array(
+      'label' => format_string('Orders in status @name', array('@name' => $status_info['title'])),
+      'sensor_class' => 'Drupal\monitoring\Sensor\Sensors\SensorDatabaseAggregator',
+      'value_label' => 'Orders',
+      'settings' => array(
+        'enabled' => FALSE,
+        'category' => 'Commerce',
+        'table' => 'commerce_order',
+        'conditions' => array(
+          array('field' => 'status', 'value' => $status_name),
+        ),
+        'time_interval_field' => 'created',
+        'time_interval_value' => 60 * 60 * 24,
+        'caching_time' => 3600,
+      ),
+    );
+  }
+
+  // Expose a turnover sensor for each currency.
+  $currencies = commerce_currencies(TRUE);
+  foreach ($currencies as $currency) {
+    $info['commerce_order_turnover_' . strtolower($currency['code'])] = array(
+      'label' => format_string('Turnover in @currency', array('@currency' => $currency['code'])),
+      'description' => format_string('Turnover from completed orders in @currency', array('@currency' => $currency['code'])),
+      'sensor_class' => 'Drupal\monitoring\Sensor\Sensors\SensorCommerceTurnover',
+      'value_label' => $currency['code'],
+      'value_type' => 'commerce_currency',
+      'settings' => array(
+        'category' => 'Commerce',
+        'table' => 'commerce_order',
+        'conditions' => array(
+          'status' => array(
+            'field' => 'status',
+            'value' => array('pending'),
+            'operator' => 'IN',
+          ),
+        ),
+        'time_interval_field' => 'created',
+        'time_interval_value' => 60 * 60 * 24,
+        'caching_time' => 3600,
+        'currency_code' => $currency['code'],
+      ),
+    );
+  }
+  // Provide total turnover sensor if we have more than one enabled currency
+  // that sums up all currencies and reports in the default currency.
+  if (count($currencies) > 1) {
+    $info['commerce_order_turnover_total'] = array(
+      'label' => 'Total turnover',
+      'description' => 'Total turnover from completed orders in all currencies',
+      'sensor_class' => 'Drupal\monitoring\Sensor\Sensors\SensorCommerceTurnover',
+      'value_label' => $currencies[commerce_default_currency()]['code'],
+      'value_type' => 'commerce_currency',
+      'settings' => array(
+        'category' => 'Commerce',
+        'table' => 'commerce_order',
+        'conditions' => array(
+          'status' => array(
+            'field' => 'status',
+            'value' => array('pending'),
+            'operator' => 'IN',
+          ),
+        ),
+        'time_interval_field' => 'created',
+        'caching_time' => 3600,
+        'time_interval_value' => 60 * 60 * 24,
+      ),
+    );
+  }
+
+  return $info;
+}
+
+/**
  * Maps severities to their machine names.
  *
  * @return array

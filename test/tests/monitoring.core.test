@@ -547,7 +547,7 @@ class MonitoringCoreTest extends MonitoringTestBase {
     // Test with settings updated.
     $settings = monitoring_sensor_settings_get('db_aggregate_test');
     $settings['conditions'] = array(
-      array('field' => 'promote', 'value' => '0'),
+      'test' => array('field' => 'promote', 'value' => '0'),
     );
     monitoring_sensor_settings_save('db_aggregate_test', $settings);
     $result = $this->runSensor('db_aggregate_test');
@@ -667,7 +667,7 @@ class MonitoringCoreTest extends MonitoringTestBase {
     // first field.
     $settings = monitoring_sensor_settings_get('db_aggregate_test');
     $settings['conditions'] = array(
-      array('field' => 'term_reference.tid', 'value' => $term1->tid),
+      'test' => array('field' => 'term_reference.tid', 'value' => $term1->tid),
     );
     monitoring_sensor_settings_save('db_aggregate_test', $settings);
     $result = $this->runSensor('db_aggregate_test');
@@ -678,8 +678,8 @@ class MonitoringCoreTest extends MonitoringTestBase {
     // first field and term2 in the second.
     $settings = monitoring_sensor_settings_get('db_aggregate_test');
     $settings['conditions'] = array(
-      array('field' => 'term_reference.tid', 'value' => $term1->tid),
-      array('field' => 'term_reference2.tid', 'value' => $term2->tid),
+      'test' => array('field' => 'term_reference.tid', 'value' => $term1->tid),
+      'test2' => array('field' => 'term_reference2.tid', 'value' => $term2->tid),
     );
     monitoring_sensor_settings_save('db_aggregate_test', $settings);
     $result = $this->runSensor('db_aggregate_test');

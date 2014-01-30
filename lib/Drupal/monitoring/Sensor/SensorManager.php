@@ -237,10 +237,72 @@ class SensorManager {
    * @return array
    *   Merged settings.
    */
-  function mergeSettings($sensor_name, array $default_settings) {
+  protected function mergeSettings($sensor_name, array $default_settings) {
     $saved_settings = monitoring_sensor_settings_get($sensor_name);
-    $default_settings = array_merge($default_settings, $saved_settings);
+    $default_settings = $this->mergeSettingsArrays(array($default_settings, $saved_settings));
     return $default_settings;
+  }
+
+  /**
+   * Merges settings arrays.
+   *
+   * Based on drupal_array_merge_deep_array() but with the additional special
+   * case that flat arrays (arrays that don't have other arrays as values)
+   * are replaced, not merged.
+   *
+   * That allows to expose settings forms for multiple values that can override
+   * the default configuration.
+   *
+   * @param $arrays
+   *   List of arrays to merge, later arrays replace keys in the previous.
+   *
+   * @return array
+   *   The merged array.
+   */
+  protected function mergeSettingsArrays($arrays) {
+    $result = array();
+
+    foreach ($arrays as $array) {
+      foreach ($array as $key => $value) {
+        // Renumber integer keys as array_merge_recursive() does. Note that PHP
+        // automatically converts array keys that are integer strings (e.g., '1')
+        // to integers.
+        if (is_integer($key)) {
+          $result[] = $value;
+        }
+        // Check if we have an array and the first array is flat.
+        elseif (isset($result[$key]) && is_array($result[$key]) && is_array($value) && $this->isFlatArray($result[$key]))  {
+          $result[$key] = $value;
+        }
+        // Recurse when both values are arrays.
+        elseif (isset($result[$key]) && is_array($result[$key]) && is_array($value)) {
+          $result[$key] = $this->mergeSettingsArrays(array($result[$key], $value));
+        }
+        // Otherwise, use the latter value, overriding any previous value.
+        else {
+          $result[$key] = $value;
+        }
+      }
+    }
+    return $result;
+  }
+
+  /**
+   * Returns if an array is flat.
+   *
+   * @param $array
+   *   The array to check.
+   *
+   * @return bool
+   *   TRUE if the array has no values that are themself arrays.
+   */
+  protected function isFlatArray($array) {
+    foreach ($array as $value) {
+      if (is_array($value)) {
+        return FALSE;
+      }
+    }
+    return TRUE;
   }
 
 }

@@ -141,11 +141,10 @@ class SensorResult implements SensorResultInterface {
     // Set the default message variables.
     $default_variables = array(
       '@sensor' => $this->getSensorName(),
-      '@value' => $this->getSensorValue(),
-      '@formatted_value' => $this->getFormattedValue(),
+      '!formatted_value' => $this->getFormattedValue(),
       '@time' => $this->getTimestamp(),
-      '@expected' => $msg_expected,
-      '@time_interval' => format_interval($this->getSensorInfo()->getTimeIntervalValue()),
+      '!expected' => $msg_expected,
+      '!time_interval' => format_interval($this->getSensorInfo()->getTimeIntervalValue()),
     );
 
     if (!empty($this->sensorMessage)) {
@@ -160,10 +159,10 @@ class SensorResult implements SensorResultInterface {
         // If the sensor defines time interval we append the info to the
         // message.
         if ($this->getSensorInfo()->getTimeIntervalValue()) {
-          $messages[] = format_string('@formatted_value in @time_interval', $default_variables);
+          $messages[] = format_string('!formatted_value in !time_interval', $default_variables);
         }
         else {
-          $messages[] = $default_variables['@formatted_value'];
+          $messages[] = $default_variables['!formatted_value'];
         }
       }
       // Avoid an empty sensor message.
@@ -173,7 +172,7 @@ class SensorResult implements SensorResultInterface {
 
       // Set the expected value message if the sensor did not match.
       if ($this->isCritical() && $this->getSensorExpectedValue() !== NULL) {
-        $messages[] = format_string('expected @expected', $default_variables);
+        $messages[] = format_string('expected !expected', $default_variables);
       }
       // Set the threshold message if there is any.
       if ($threshold_message !== NULL) {
@@ -251,10 +250,10 @@ class SensorResult implements SensorResultInterface {
       // @todo This assumption will no longer work when non-english messages
       // supported.
       $label = drupal_strtolower($label);
-      return format_string('@value @label', array('@value' => $this->getSensorValue(), '@label' => $label));
+      return format_string('!value !label', array('!value' => $this->getSensorValue(), '!label' => $label));
     }
 
-    return format_string('Value @value', array('@value' => $this->getSensorValue()));
+    return format_string('Value !value', array('!value' => $this->getSensorValue()));
   }
 
   /**

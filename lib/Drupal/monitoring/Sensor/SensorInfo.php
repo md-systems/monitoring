@@ -107,12 +107,13 @@ class SensorInfo {
    *   Sensor value label.
    */
   public function getValueLabel() {
+    if (isset($this->sensorInfo['value_label'])) {
+      return $this->sensorInfo['value_label'];
+    }
     if ($value_type = $this->getValueType()) {
       $value_types = monitoring_value_types();
       return $value_types[$value_type]['label'];
     }
-
-    return isset($this->sensorInfo['value_label']) ? $this->sensorInfo['value_label'] : NULL;
   }
 
   /**

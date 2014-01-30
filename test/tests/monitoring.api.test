@@ -72,6 +72,7 @@ class MonitoringApiTest extends MonitoringTestBase {
     // Test value label provided by the monitoring_value_types().
     // Set the value type to one defined by the monitoring_value_types().
     $sensor_info_data['value_type'] = 'time_interval';
+    unset($sensor_info_data['value_label']);
     variable_set('monitoring_test_sensor_info', $sensor_info_data);
     $this->sensorManager->resetCache();
     $sensor_info = $this->sensorManager->getSensorInfoByName('test_sensor_info');
