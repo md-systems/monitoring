@@ -54,6 +54,6 @@ class SensorGitDirtyTree extends SensorConfigurable implements SensorExtendedInf
   protected function buildCMD() {
     $repo_path = DRUPAL_ROOT . '/' . $this->info->getSetting('repo_path');
     $cmd = $this->info->getSetting('cmd');
-    return "cd $repo_path\n$cmd  2>&1";
+    return 'cd ' . escapeshellarg($repo_path) . "\n$cmd  2>&1";
   }
 }
