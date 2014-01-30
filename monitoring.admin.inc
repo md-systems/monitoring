@@ -140,7 +140,7 @@ function monitoring_reports_sensors_overview() {
 
       $row['data']['label'] = '<span title="' . $sensor_info->getDescription() . '">' . $sensor_info->getLabel() . '</span>';
       $row['data']['sensor_status'] = array(
-        'data' => $sensor_result->getSensorStatus(),
+        'data' => $sensor_result->getSensorStatusLabel(),
         'class' => array('status', 'having-dropbutton'),
       );
 
@@ -331,7 +331,7 @@ function monitoring_sensor_details($form, &$form_state, SensorInfo $sensor_info)
   $form['sensor_result']['status'] = array(
     '#type' => 'item',
     '#title' => t('Status'),
-    '#markup' => $result->getSensorStatus(),
+    '#markup' => $result->getSensorStatusLabel(),
   );
 
   $form['sensor_result']['message'] = array(

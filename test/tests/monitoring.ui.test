@@ -156,7 +156,7 @@ class MonitoringUITest extends MonitoringTestBase {
     $this->assertText(t('Description'));
     $this->assertText($sensor_info->getDescription());
     $this->assertText(t('Status'));
-    $this->assertText('WARNING');
+    $this->assertText('Warning');
     $this->assertText(t('Message'));
     $this->assertText('1 druplicons in 1 day, falls below 2');
     $this->assertText(t('Execution time'));

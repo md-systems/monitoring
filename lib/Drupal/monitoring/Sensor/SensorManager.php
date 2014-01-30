@@ -90,6 +90,9 @@ class SensorManager {
       $info_by_categories[$sensor_info->getCategory()][$sensor_name] = $sensor_info;
     }
 
+    // Sort the categories by their name.
+    ksort($info_by_categories);
+
     return $info_by_categories;
   }
 

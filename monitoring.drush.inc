@@ -98,7 +98,7 @@ function monitoring_drush_run($sensor_name) {
 
   $rows = array(
     array(dt('Name'), $result->getSensorName()),
-    array(dt('Status'), $result->getSensorStatus()),
+    array(dt('Status'), $result->getSensorStatusLabel()),
     array(dt('Value'), $result->getSensorValue()),
     array(dt('Message'), $result->getSensorMessage()),
     array(dt('Execution time'), $result->getSensorExecutionTime() . 'ms'),

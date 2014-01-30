@@ -22,12 +22,17 @@ interface SensorResultInterface {
   /**
    * Gets sensor status.
    *
-   * This method should be called after runSensor().
-   *
    * @return string
    *   Sensor status.
    */
   function getSensorStatus();
+  /**
+   * Gets a human readable label for the sensor status.
+   *
+   * @return string
+   *   Sensor status label.
+   */
+  function getSensorStatusLabel();
 
   /**
    * Sets sensor status.

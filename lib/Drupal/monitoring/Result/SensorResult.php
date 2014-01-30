@@ -88,6 +88,21 @@ class SensorResult implements SensorResultInterface {
     return $this->getResultData('sensor_status');
   }
 
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getSensorStatusLabel() {
+    $labels = array(
+      self::STATUS_CRITICAL => t('Critical'),
+      self::STATUS_WARNING => t('Warning'),
+      self::STATUS_INFO => t('Info'),
+      self::STATUS_OK => t('OK'),
+      self::STATUS_UNKNOWN => t('Unknown'),
+    );
+    return $labels[$this->getResultData('sensor_status')];
+  }
+
   /**
    * {@inheritdoc}
    */
