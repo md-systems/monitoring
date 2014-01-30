@@ -135,12 +135,75 @@ class MonitoringUITest extends MonitoringTestBase {
       $i++;
     }
 
-    // Test sensor detail page.
-    $sensor_info = monitoring_sensor_info('test_sensor');
-    $this->drupalGet('admin/reports/monitoring/sensors/test_sensor');
+  }
+
+  /**
+   * Tests the sensor detail page.
+   */
+  function testSensorDetailpage() {
+    $account = $this->drupalCreateUser(array('monitoring reports', 'monitoring verbose', 'monitoring force run'));
+    $this->drupalLogin($account);
+
+    $this->drupalCreateNode(array('promote' => '1'));
+
+    $sensor_info = monitoring_sensor_manager()->getSensorInfoByName('db_aggregate_test');
+    $this->drupalGet('admin/reports/monitoring/sensors/db_aggregate_test');
     $this->assertTitle(t('@label (@category) | Drupal', array('@label' => $sensor_info->getLabel(), '@category' => $sensor_info->getCategory())));
 
-    // Test that accessing a disabled or not-existing sensor results in a page
+    // Make sure that all relevant information is displayed.
+    // @todo: Assert position/order.
+    $result = monitoring_sensor_run('db_aggregate_test');
+    $this->assertText(t('Description'));
+    $this->assertText($sensor_info->getDescription());
+    $this->assertText(t('Status'));
+    $this->assertText('WARNING');
+    $this->assertText(t('Message'));
+    $this->assertText('1 druplicons in 1 day, falls below 2');
+    $this->assertText(t('Execution time'));
+    // The sensor is cached, so we have the same cached execution time.
+    $this->assertText($result->getSensorExecutionTime() . 'ms');
+    $this->assertText(t('Cache information'));
+    $this->assertText('Executed now, valid for 1 hour');
+    $this->assertRaw(t('Run again'));
+
+    $this->assertText(t('Verbose'));
+    $this->assertText(t('Query'));
+    // Check that the query is there by looking for a part of it.
+    $this->assertRaw('(promote = :db_condition_placeholder_0) AND (created > :timestamp_value)');
+    $this->assertText(t('Arguments'));
+
+    $this->assertText(t('Settings'));
+    // @todo Add asserts about displayed settings once we display them in a
+    //   better way.
+
+    $this->assertText(t('Log'));
+
+    // Check that the log table contains one result.
+    $rows = $this->xpath('//div[contains(@class, "view-monitoring-sensor-results")]//tbody/tr');
+    $this->assertEqual(count($rows), 1);
+    $this->assertEqual(trim((string)$rows[0]->td[1]), 'WARNING');
+    $this->assertEqual(trim((string)$rows[0]->td[2]), '1 druplicons in 1 day, falls below 2');
+
+    // Create another node and run again.
+    $this->drupalCreateNode(array('promote' => '1'));
+    $this->drupalPost(NULL, array(), t('Run again'));
+    $this->assertText('OK');
+    $this->assertText('2 druplicons in 1 day');
+    $rows = $this->xpath('//div[contains(@class, "view-monitoring-sensor-results")]//tbody/tr');
+    $this->assertEqual(count($rows), 2);
+    // The latest log result should be displayed first.
+    $this->assertEqual(trim((string)$rows[0]->td[1]), 'OK');
+    $this->assertEqual(trim((string)$rows[1]->td[1]), 'WARNING');
+
+    // Refresh the page, this not run the sensor again.
+    $this->drupalGet('admin/reports/monitoring/sensors/db_aggregate_test');
+    $this->assertText('OK');
+    $this->assertText('2 druplicons in 1 day');
+    $this->assertText(t('Verbose output is not available for cached sensor results. Click force run to see verbose output.'));
+    $rows = $this->xpath('//div[contains(@class, "view-monitoring-sensor-results")]//tbody/tr');
+    $this->assertEqual(count($rows), 2);
+
+    // Test that accessing a disabled or nisot-existing sensor results in a page
     // not found response.
     $this->sensorManager->disableSensor('test_sensor');
     $this->drupalGet('admin/reports/monitoring/sensors/test_sensor');

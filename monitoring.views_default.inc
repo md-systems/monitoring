@@ -21,34 +21,27 @@ function monitoring_views_default_views() {
   $handler->display->display_options['cache']['type'] = 'none';
   $handler->display->display_options['query']['type'] = 'views_query';
   $handler->display->display_options['exposed_form']['type'] = 'basic';
-  $handler->display->display_options['pager']['type'] = 'full';
-  $handler->display->display_options['pager']['options']['items_per_page'] = '30';
+  $handler->display->display_options['pager']['type'] = 'mini';
+  $handler->display->display_options['pager']['options']['items_per_page'] = '10';
+  $handler->display->display_options['pager']['options']['offset'] = '0';
+  $handler->display->display_options['pager']['options']['id'] = '0';
   $handler->display->display_options['style_plugin'] = 'table';
   $handler->display->display_options['style_options']['columns'] = array(
-    'sensor_name' => 'sensor_name',
+    'timestamp' => 'timestamp',
     'sensor_status' => 'sensor_status',
-    'sensor_value' => 'sensor_value',
     'sensor_message' => 'sensor_message',
     'execution_time' => 'execution_time',
-    'timestamp' => 'timestamp',
   );
-  $handler->display->display_options['style_options']['default'] = 'timestamp';
+  $handler->display->display_options['style_options']['default'] = '-1';
   $handler->display->display_options['style_options']['info'] = array(
-    'sensor_name' => array(
+    'timestamp' => array(
       'sortable' => 0,
-      'default_sort_order' => 'asc',
+      'default_sort_order' => 'desc',
       'align' => '',
       'separator' => '',
       'empty_column' => 0,
     ),
     'sensor_status' => array(
-      'sortable' => 0,
-      'default_sort_order' => 'asc',
-      'align' => '',
-      'separator' => '',
-      'empty_column' => 0,
-    ),
-    'sensor_value' => array(
       'sortable' => 0,
       'default_sort_order' => 'asc',
       'align' => '',
@@ -63,15 +56,8 @@ function monitoring_views_default_views() {
       'empty_column' => 0,
     ),
     'execution_time' => array(
-      'sortable' => 1,
+      'sortable' => 0,
       'default_sort_order' => 'asc',
-      'align' => '',
-      'separator' => '',
-      'empty_column' => 0,
-    ),
-    'timestamp' => array(
-      'sortable' => 1,
-      'default_sort_order' => 'desc',
       'align' => '',
       'separator' => '',
       'empty_column' => 0,
@@ -85,11 +71,11 @@ function monitoring_views_default_views() {
   $handler->display->display_options['empty']['area']['empty'] = TRUE;
   $handler->display->display_options['empty']['area']['content'] = 'No logs available.';
   $handler->display->display_options['empty']['area']['format'] = 'filtered_html';
-  /* Field: Monitoring sensor result: Sensor_value */
-  $handler->display->display_options['fields']['sensor_value']['id'] = 'sensor_value';
-  $handler->display->display_options['fields']['sensor_value']['table'] = 'monitoring_sensor_result';
-  $handler->display->display_options['fields']['sensor_value']['field'] = 'sensor_value';
-  $handler->display->display_options['fields']['sensor_value']['label'] = 'Value';
+  /* Field: Monitoring sensor result: Timestamp */
+  $handler->display->display_options['fields']['timestamp']['id'] = 'timestamp';
+  $handler->display->display_options['fields']['timestamp']['table'] = 'monitoring_sensor_result';
+  $handler->display->display_options['fields']['timestamp']['field'] = 'timestamp';
+  $handler->display->display_options['fields']['timestamp']['date_format'] = 'short';
   /* Field: Monitoring sensor result: Sensor_status */
   $handler->display->display_options['fields']['sensor_status']['id'] = 'sensor_status';
   $handler->display->display_options['fields']['sensor_status']['table'] = 'monitoring_sensor_result';
@@ -107,16 +93,17 @@ function monitoring_views_default_views() {
   $handler->display->display_options['fields']['execution_time']['label'] = 'Execution time';
   $handler->display->display_options['fields']['execution_time']['set_precision'] = TRUE;
   $handler->display->display_options['fields']['execution_time']['precision'] = '2';
-  /* Field: Monitoring sensor result: Timestamp */
-  $handler->display->display_options['fields']['timestamp']['id'] = 'timestamp';
-  $handler->display->display_options['fields']['timestamp']['table'] = 'monitoring_sensor_result';
-  $handler->display->display_options['fields']['timestamp']['field'] = 'timestamp';
-  $handler->display->display_options['fields']['timestamp']['date_format'] = 'short';
-  /* Field: Monitoring sensor result: Sensor_name */
-  $handler->display->display_options['fields']['sensor_name']['id'] = 'sensor_name';
-  $handler->display->display_options['fields']['sensor_name']['table'] = 'monitoring_sensor_result';
-  $handler->display->display_options['fields']['sensor_name']['field'] = 'sensor_name';
-  $handler->display->display_options['fields']['sensor_name']['label'] = 'Sensor name';
+  $handler->display->display_options['fields']['execution_time']['suffix'] = 'ms';
+  /* Sort criterion: Monitoring sensor result: Timestamp */
+  $handler->display->display_options['sorts']['timestamp']['id'] = 'timestamp';
+  $handler->display->display_options['sorts']['timestamp']['table'] = 'monitoring_sensor_result';
+  $handler->display->display_options['sorts']['timestamp']['field'] = 'timestamp';
+  $handler->display->display_options['sorts']['timestamp']['order'] = 'DESC';
+  /* Sort criterion: Monitoring sensor result: Monitoring sensor result ID */
+  $handler->display->display_options['sorts']['record_id']['id'] = 'record_id';
+  $handler->display->display_options['sorts']['record_id']['table'] = 'monitoring_sensor_result';
+  $handler->display->display_options['sorts']['record_id']['field'] = 'record_id';
+  $handler->display->display_options['sorts']['record_id']['order'] = 'DESC';
   /* Contextual filter: Monitoring sensor result: Sensor_name */
   $handler->display->display_options['arguments']['sensor_name']['id'] = 'sensor_name';
   $handler->display->display_options['arguments']['sensor_name']['table'] = 'monitoring_sensor_result';
@@ -129,47 +116,6 @@ function monitoring_views_default_views() {
   $handler->display->display_options['arguments']['sensor_name']['summary']['format'] = 'default_summary';
   $handler->display->display_options['arguments']['sensor_name']['summary_options']['items_per_page'] = '25';
   $handler->display->display_options['arguments']['sensor_name']['limit'] = '0';
-
-  /* Display: Sensor specific */
-  $handler = $view->new_display('page', 'Sensor specific', 'page');
-  $handler->display->display_options['defaults']['fields'] = FALSE;
-  /* Field: Monitoring sensor result: Sensor_status */
-  $handler->display->display_options['fields']['sensor_status']['id'] = 'sensor_status';
-  $handler->display->display_options['fields']['sensor_status']['table'] = 'monitoring_sensor_result';
-  $handler->display->display_options['fields']['sensor_status']['field'] = 'sensor_status';
-  $handler->display->display_options['fields']['sensor_status']['label'] = 'Status';
-  /* Field: Monitoring sensor result: Sensor_value */
-  $handler->display->display_options['fields']['sensor_value']['id'] = 'sensor_value';
-  $handler->display->display_options['fields']['sensor_value']['table'] = 'monitoring_sensor_result';
-  $handler->display->display_options['fields']['sensor_value']['field'] = 'sensor_value';
-  $handler->display->display_options['fields']['sensor_value']['label'] = 'Value';
-  /* Field: Monitoring sensor result: Sensor_message */
-  $handler->display->display_options['fields']['sensor_message']['id'] = 'sensor_message';
-  $handler->display->display_options['fields']['sensor_message']['table'] = 'monitoring_sensor_result';
-  $handler->display->display_options['fields']['sensor_message']['field'] = 'sensor_message';
-  $handler->display->display_options['fields']['sensor_message']['label'] = 'Status message';
-  $handler->display->display_options['fields']['sensor_message']['alter']['max_length'] = '255';
-  $handler->display->display_options['fields']['sensor_message']['alter']['trim'] = TRUE;
-  /* Field: Monitoring sensor result: Execution_time */
-  $handler->display->display_options['fields']['execution_time']['id'] = 'execution_time';
-  $handler->display->display_options['fields']['execution_time']['table'] = 'monitoring_sensor_result';
-  $handler->display->display_options['fields']['execution_time']['field'] = 'execution_time';
-  $handler->display->display_options['fields']['execution_time']['label'] = 'Execution time';
-  $handler->display->display_options['fields']['execution_time']['alter']['alter_text'] = TRUE;
-  $handler->display->display_options['fields']['execution_time']['alter']['text'] = '[execution_time]ms';
-  $handler->display->display_options['fields']['execution_time']['set_precision'] = TRUE;
-  $handler->display->display_options['fields']['execution_time']['precision'] = '2';
-  /* Field: Monitoring sensor result: Timestamp */
-  $handler->display->display_options['fields']['timestamp']['id'] = 'timestamp';
-  $handler->display->display_options['fields']['timestamp']['table'] = 'monitoring_sensor_result';
-  $handler->display->display_options['fields']['timestamp']['field'] = 'timestamp';
-  $handler->display->display_options['fields']['timestamp']['date_format'] = 'short';
-  $handler->display->display_options['path'] = 'admin/reports/monitoring/sensors/%/log';
-  $handler->display->display_options['menu']['type'] = 'tab';
-  $handler->display->display_options['menu']['title'] = 'Log';
-  $handler->display->display_options['menu']['weight'] = '0';
-  $handler->display->display_options['menu']['context'] = 0;
-  $handler->display->display_options['menu']['context_only_inline'] = 0;
 
   /* Display: Overview */
   $handler = $view->new_display('page', 'Overview', 'page_1');
@@ -186,11 +132,6 @@ function monitoring_views_default_views() {
   $handler->display->display_options['fields']['sensor_status']['table'] = 'monitoring_sensor_result';
   $handler->display->display_options['fields']['sensor_status']['field'] = 'sensor_status';
   $handler->display->display_options['fields']['sensor_status']['label'] = 'Status';
-  /* Field: Monitoring sensor result: Sensor_value */
-  $handler->display->display_options['fields']['sensor_value']['id'] = 'sensor_value';
-  $handler->display->display_options['fields']['sensor_value']['table'] = 'monitoring_sensor_result';
-  $handler->display->display_options['fields']['sensor_value']['field'] = 'sensor_value';
-  $handler->display->display_options['fields']['sensor_value']['label'] = 'Value';
   /* Field: Monitoring sensor result: Sensor_message */
   $handler->display->display_options['fields']['sensor_message']['id'] = 'sensor_message';
   $handler->display->display_options['fields']['sensor_message']['table'] = 'monitoring_sensor_result';
@@ -205,8 +146,7 @@ function monitoring_views_default_views() {
   $handler->display->display_options['fields']['execution_time']['label'] = 'Execution time';
   $handler->display->display_options['fields']['execution_time']['alter']['alter_text'] = TRUE;
   $handler->display->display_options['fields']['execution_time']['alter']['text'] = '[execution_time]ms';
-  $handler->display->display_options['fields']['execution_time']['set_precision'] = TRUE;
-  $handler->display->display_options['fields']['execution_time']['precision'] = '2';
+  $handler->display->display_options['fields']['execution_time']['precision'] = '0';
   /* Field: Monitoring sensor result: Timestamp */
   $handler->display->display_options['fields']['timestamp']['id'] = 'timestamp';
   $handler->display->display_options['fields']['timestamp']['table'] = 'monitoring_sensor_result';
@@ -219,6 +159,9 @@ function monitoring_views_default_views() {
   $handler->display->display_options['menu']['weight'] = '0';
   $handler->display->display_options['menu']['context'] = 0;
   $handler->display->display_options['menu']['context_only_inline'] = 0;
+
+  /* Display: Detail Page Log */
+  $handler = $view->new_display('block', 'Detail Page Log', 'detail_page_log');
   $translatables['monitoring_sensor_results'] = array(
     t('Master'),
     t('Sensor calls log'),
@@ -237,20 +180,20 @@ function monitoring_views_default_views() {
     t('last »'),
     t('No log entries text'),
     t('No logs available.'),
-    t('Value'),
+    t('Timestamp'),
     t('Status'),
     t('Status message'),
     t('Execution time'),
     t('.'),
     t(','),
-    t('Timestamp'),
-    t('Sensor name'),
+    t('ms'),
     t('All'),
     t('%1'),
-    t('Sensor specific'),
-    t('[execution_time]ms'),
     t('Overview'),
     t('All sensors calls log'),
+    t('Sensor name'),
+    t('[execution_time]ms'),
+    t('Detail Page Log'),
   );
 
   $views[$view->name] = $view;

@@ -83,6 +83,7 @@ function monitoring_monitoring_test_monitoring_sensor_info() {
       'result_logging' => TRUE,
       'settings' => array(
         'category' => 'Test',
+        'caching_time' => 3600,
         'table' => 'node',
         'conditions' => array(
           array('field' => 'promote', 'value' => '1'),

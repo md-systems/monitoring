@@ -4,6 +4,7 @@
  * Admin page/form callbacks.
  */
 
+use Drupal\monitoring\Sensor\DisabledSensorException;
 use Drupal\monitoring\Sensor\NonExistingSensorException;
 use Drupal\monitoring\SensorRunner;
 use Drupal\monitoring\Sensor\Sensor;
@@ -299,93 +300,135 @@ function monitoring_sensor_details($form, &$form_state, SensorInfo $sensor_info)
   try {
     $result = monitoring_sensor_run($sensor_info->getName(), FALSE, TRUE);
   }
-  catch (InvalidArgumentException $e) {
+  catch (DisabledSensorException $e) {
     // Exception is thrown if the sensor is not enabled.
     // Display a page not found in that case.
     drupal_not_found();
     drupal_exit();
   }
 
-  $form['force_run'] = array(
-    '#type' => 'submit',
-    '#value' => t('Force run'),
-    '#access' => user_access('monitoring force run'),
-    '#weight' => -15,
-  );
+  if ($sensor_info->getDescription()) {
+    $form['sensor_info']['description'] = array(
+      '#type' => 'item',
+      '#title' => t('Description'),
+      '#markup' => $sensor_info->getDescription(),
+    );
+  }
+
+  if ($sensor_info->getCategory()) {
+    $form['sensor_info']['category'] = array(
+      '#type' => 'item',
+      '#title' => t('Category'),
+      '#markup' => $sensor_info->getCategory(),
+    );
+  }
 
   $form['sensor_result'] = array(
     '#type' => 'fieldset',
     '#title' => t('Result'),
-    '#weight' => -10,
   );
 
-  $form['sensor_result']['cached'] = array(
-    '#type' => 'item',
-    '#title' => t('Cached'),
-    '#markup' => $result->isCached() ? format_date($result->getTimestamp()) : t('no')
-  );
-  $form['sensor_result']['value'] = array(
-    '#type' => 'item',
-    '#title' => t('Value'),
-    '#markup' => $result->getSensorValue(),
-  );
-  if ($result->getSensorExpectedValue() !== NULL) {
-    $form['sensor_result']['expected_value'] = array(
-      '#type' => 'item',
-      '#title' => t('Expected value'),
-      '#markup' => $sensor_info->isDefiningThresholds() ?
-          t('Thresholds type %type <pre>@intervals</pre>',
-            array('%type' => $sensor_info->getThresholdsType(), '@intervals' => var_export($sensor_info->getThresholdsIntervals(), TRUE))) :
-          $result->getSensorExpectedValue(),
-    );
-  }
   $form['sensor_result']['status'] = array(
     '#type' => 'item',
     '#title' => t('Status'),
     '#markup' => $result->getSensorStatus(),
   );
+
   $form['sensor_result']['message'] = array(
     '#type' => 'item',
     '#title' => t('Message'),
     '#markup' => $result->getSensorMessage(),
   );
 
+
+  $form['sensor_result']['execution_time'] = array(
+    '#type' => 'item',
+    '#title' => t('Execution time'),
+    '#markup' => $result->getSensorExecutionTime() . 'ms',
+  );
+
+  if ($result->isCached()) {
+    $form['sensor_result']['cached'] = array(
+      '#type' => 'item',
+      '#title' => t('Cache information'),
+      '#markup' => t('Executed @interval ago, valid for @valid', array('@interval' => format_interval(REQUEST_TIME - $result->getTimestamp()), '@valid' => format_interval($sensor_info->getCachingTime()))),
+    );
+
+    $form['sensor_result']['force_run'] = array(
+      '#type' => 'submit',
+      '#value' => t('Run now'),
+      '#access' => user_access('monitoring force run'),
+    );
+  }
+  elseif ($sensor_info->getCachingTime()) {
+    $form['sensor_result']['cached'] = array(
+      '#type' => 'item',
+      '#title' => t('Cache information'),
+      '#markup' => t('Executed now, valid for @valid', array('@valid' => format_interval($sensor_info->getCachingTime()))),
+    );
+
+    $form['sensor_result']['force_run'] = array(
+      '#type' => 'submit',
+      '#value' => t('Run again'),
+      '#access' => user_access('monitoring force run'),
+    );
+  }
+  else {
+    $form['sensor_result']['cached'] = array(
+      '#type' => 'item',
+      '#title' => t('Cache information'),
+      '#markup' => t('Not cached'),
+    );
+  }
+
   if ($sensor_info->isExtendedInfo()) {
-    $form['verbose'] = array(
+    $form['sensor_result']['verbose'] = array(
       '#type' => 'fieldset',
       '#title' => t('Verbose'),
       '#access' => user_access('monitoring verbose'),
     );
     if ($result->isCached()) {
-      $form['verbose']['output'] = array(
+      $form['sensor_result']['verbose']['output'] = array(
         '#type' => 'markup',
         '#markup' => '<p>' . t('Verbose output is not available for cached sensor results. Click force run to see verbose output.') . '</p>',
       );
     }
     elseif ($verbose_output = $result->getVerboseOutput()) {
-      $form['verbose']['output'] = array(
+      $form['sensor_result']['verbose']['output'] = array(
         '#type' => 'markup',
         '#markup' => '<pre>' . $verbose_output . '</pre>',
       );
     }
     else {
-      $form['verbose']['output'] = array(
+      $form['sensor_result']['verbose']['output'] = array(
         '#type' => 'markup',
         '#markup' => '<p>' . t('No verbose output available for this sensor execution.') . '</p>',
       );
     }
   }
 
-  $form['sensor_info'] = array(
+  $form['settings'] = array(
     '#type' => 'fieldset',
-    '#title' => t('Sensor info'),
+    '#title' => t('Settings'),
+    '#description' => '<pre>' . var_export($sensor_info->getSettings(), TRUE) . '</pre>',
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
   );
-  $form['sensor_info'][$sensor_info->getName()] = array(
-    '#type' => 'markup',
-    '#markup' => '<pre>' . var_export($sensor_info, TRUE) . '</pre>',
-  );
+
+  $view = views_get_view('monitoring_sensor_results');
+  if (!empty($view)) {
+    $view->init_display();
+    $output = $view->preview('detail_page_log', array($sensor_info->getName()));
+    if (!empty($view->result)) {
+      $form['sensor_log'] = array(
+        '#type' => 'fieldset',
+        '#title' => t('Log'),
+        '#collapsible' => TRUE,
+        '#collapsed' => TRUE,
+      );
+      $form['sensor_log']['view']['#markup'] = $output;
+    }
+  }
 
   return $form;
 }
