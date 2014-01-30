@@ -18,39 +18,10 @@ class SensorDrupalUpdate extends Sensor {
    * {@inheritdoc}
    */
   function runSensor(SensorResultInterface $result) {
-    module_load_include('install', 'update');
-
-    $requirements = update_requirements('runtime');
     $type = $this->info->getSetting('type');
+    $status = $this->calculateStatus($type);
 
-    $update_info = array();
-    if (isset($requirements['update_' . $type])) {
-      $update_info = $requirements['update_' . $type];
-    }
-    $update_info += array(
-      'severity' => REQUIREMENT_OK,
-    );
-
-    if ($update_info['severity'] == REQUIREMENT_OK) {
-      $result->setSensorStatus(SensorResultInterface::STATUS_OK);
-    }
-    elseif ($update_info['severity'] == REQUIREMENT_INFO) {
-      $result->setSensorStatus(SensorResultInterface::STATUS_INFO);
-    }
-    // If the level is warning, which is updates available, we do not need to
-    // escalate.
-    elseif ($update_info['severity'] == REQUIREMENT_WARNING) {
-      $result->setSensorStatus(SensorResultInterface::STATUS_INFO);
-    }
-    else {
-      $result->setSensorStatus(SensorResultInterface::STATUS_CRITICAL);
-    }
-
-    // If the status is not OK add the link to the update page as the first
-    // message part.
-    if (!$result->isOk()) {
-      $result->addSensorStatusMessage(url('admin/reports/updates', array('absolute' => TRUE)));
-    }
+    $result->setSensorStatus($status);
 
     $available = update_get_available();
     $project_data = update_calculate_project_data($available);
@@ -170,6 +141,44 @@ class SensorDrupalUpdate extends Sensor {
       case UPDATE_FETCH_PENDING:
         return 'unknown';
         break;
+    }
+  }
+
+  /**
+   * Executes the update requirements hook and calculates the status for it.
+   *
+   * @param string $type
+   *   Which types of updates to check for, core or contrib.
+   *
+   * @return string
+   *   One of the SensorResultInterface status constants.
+   */
+  protected function calculateStatus($type) {
+    module_load_include('install', 'update');
+
+    $requirements = update_requirements('runtime');
+
+    $update_info = array();
+    if (isset($requirements['update_' . $type])) {
+      $update_info = $requirements['update_' . $type];
+    }
+    $update_info += array(
+      'severity' => REQUIREMENT_OK,
+    );
+
+    if ($update_info['severity'] == REQUIREMENT_OK) {
+      return SensorResultInterface::STATUS_OK;
+    }
+    elseif ($update_info['severity'] == REQUIREMENT_INFO) {
+      return SensorResultInterface::STATUS_INFO;
+    }
+    // If the level is warning, which is updates available, we do not need to
+    // escalate.
+    elseif ($update_info['severity'] == REQUIREMENT_WARNING) {
+      return SensorResultInterface::STATUS_INFO;
+    }
+    else {
+      return SensorResultInterface::STATUS_CRITICAL;
     }
   }
 
