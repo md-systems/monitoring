@@ -122,7 +122,7 @@ function monitoring_sensor_run($sensor_name, $force_run = FALSE, $verbose = FALS
  * @throws \Drupal\monitoring\Sensor\DisabledSensorException
  *   Thrown if any of the passed sensor names is not enabled.
  */
-function monitoring_sensor_run_multiple($sensor_names = array(), $force_run = FALSE, $verbose = NULL) {
+function monitoring_sensor_run_multiple($sensor_names = array(), $force_run = FALSE, $verbose = FALSE) {
   $sensors_info = array();
   if (empty($sensor_names)) {
     foreach (monitoring_sensor_manager()->getEnabledSensorInfo() as $sensor_name => $sensor_info) {
