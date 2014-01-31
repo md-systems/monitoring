@@ -482,5 +482,5 @@ function monitoring_settings_form($form, &$form_state) {
 function monitoring_sensor_thresholds_ajax($form, &$form_state) {
   $sensor_name = $form_state['sensor_name'];
   $form_key = monitoring_sensor_settings_key($sensor_name);
-  return $form[$form_key]['thresholds']['intervals'];
+  return $form[$form_key]['thresholds'];
 }

@@ -165,24 +165,19 @@ class SensorInfo {
   }
 
   /**
-   * Gets thresholds.
+   * Returns a given threshold if one is configured.
    *
-   * This is also used for validation, the status with the highest priority
-   * has to be on top.
+   * @param $key
+   *   Name of the threshold, for example warning or critical.
    *
-   * @return array
-   *   Thresholds definition.
+   * @return int|null
+   *   The threshold value or NULL if not-configured.
    */
-  public function getThresholdsIntervals() {
+  public function getThresholdValue($key) {
     $thresholds = $this->getSetting('thresholds');
-    if (!empty($thresholds['intervals'])) {
-      return $thresholds['intervals'];
+    if (isset($thresholds[$key]) && $thresholds[$key] !== '') {
+      return $thresholds[$key];
     }
-
-    return array(
-      SensorResultInterface::STATUS_CRITICAL => NULL,
-      SensorResultInterface::STATUS_WARNING => NULL,
-    );
   }
 
   /**
@@ -277,10 +272,7 @@ class SensorInfo {
     );
 
     if ($this->isDefiningThresholds()) {
-      $info_array['thresholds'] = array(
-        'type' => $this->getThresholdsType(),
-        'intervals' => $this->getThresholdsIntervals(),
-      );
+      $info_array['thresholds'] = $this->getSetting('thresholds');
     }
 
     return $info_array;

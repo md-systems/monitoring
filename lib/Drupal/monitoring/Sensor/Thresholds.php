@@ -14,60 +14,53 @@ use Drupal\monitoring\Result\SensorResultInterface;
 class Thresholds {
 
   /**
-   * Thresholds definitions.
+   * The SensorInfo instance.
    *
-   * @var array
+   * @var \Drupal\monitoring\Sensor\SensorInfo
    */
-  protected $definitions = array();
-
-  protected $message;
-  protected $thresholdType;
+  protected $sensorInfo;
 
   /**
-   * @param string $threshold_type
-   *   Threshold type - one of exceeds, falls, inner_interval, outer_interval
-   * @param array $threshold_definitions
-   *   Threshold definitions array where keys are statuses.
-   *   - status
-   *     - int value|interval defined by array of two ints
+   * The message that will be added to the result status message.
+   *
+   * @var string
    */
-  function __construct($threshold_type, array $threshold_definitions) {
-    $this->thresholdType = $threshold_type;
-    $this->definitions = $threshold_definitions;
+  protected $message;
+
+  /**
+   * Constructs a Thresholds object.
+   *
+   * @param \Drupal\monitoring\Sensor\SensorInfo $sensor_info
+   *   The SensorInfo instance.
+   */
+  function __construct(SensorInfo $sensor_info) {
+    $this->sensorInfo = $sensor_info;
   }
 
   /**
    * Gets status based on given value.
    *
-   * Note that if the threshold value is NULL no assessment will be carried out
-   * therefore the OK value will be returned.
+   * Note that if the threshold value is NULL or an empty string no assessment
+   * will be carried out therefore the OK value will be returned.
    *
    * @param int $value
+   *   The sensor value to assess.
    *
-   * @return string
-   *   Status string.
+   * @return int
+   *   The assessed sensor status.
    */
   public function getMatchedThreshold($value) {
-    foreach ($this->definitions as $threshold => $threshold_value) {
-      if ($this->thresholdType == 'exceeds' && $this->exceeds($value, $threshold_value)) {
-        $this->message = format_string('exceeds @expected', array('@expected' => $threshold_value));
-        return $threshold;
+    if (method_exists($this, $this->sensorInfo->getThresholdsType())) {
+      $status = $this->{$this->sensorInfo->getThresholdsType()}($value);
+      if ($status !== NULL) {
+        return $status;
       }
-      if ($this->thresholdType == 'falls' && $this->falls($value, $threshold_value)) {
-        $this->message = format_string('falls below @expected', array('@expected' => $threshold_value));
-        return $threshold;
-      }
-      if ($this->thresholdType == 'inner_interval' && $this->isInsideTheInterval($value, $threshold_value)) {
-        $this->message = format_string('violating the interval @from - @to', array('@from' => $threshold_value[0], '@to' => $threshold_value[1]));
-        return $threshold;
-      }
-      if ($this->thresholdType == 'outer_interval' && $this->isOutsideTheInterval($value, $threshold_value)) {
-        $this->message = format_string('outside the allowed interval @from - @to', array('@from' => $threshold_value[0], '@to' => $threshold_value[1]));
-        return $threshold;
-      }
+      return SensorResultInterface::STATUS_OK;
     }
-
-    return SensorResultInterface::STATUS_OK;
+    else {
+      $this->message = format_string('Unknown threshold type @type', array('@type' => $this->$this->sensorInfo->getThresholdsType()));
+      return SensorResultInterface::STATUS_CRITICAL;
+    }
   }
 
   /**
@@ -81,65 +74,91 @@ class Thresholds {
   }
 
   /**
-   * Checks if provided value exceeds the given threshold.
+   * Checks if provided value exceeds the configured threshold.
    *
    * @param int $value
-   * @param int $threshold
+   *   The value to check.
    *
-   * @return bool
+   * @return int|null
+   *   A sensor status or NULL.
    */
-  protected function exceeds($value, $threshold) {
-    if ($threshold === NULL || $threshold === '') {
-      return FALSE;
+  protected function exceeds($value) {
+    if (($threshold = $this->sensorInfo->getThresholdValue('critical')) && $value > $threshold) {
+      $this->message = format_string('exceeds @expected', array('@expected' => $threshold));
+      return SensorResultInterface::STATUS_CRITICAL;
     }
-    return $value > $threshold;
+    if (($threshold = $this->sensorInfo->getThresholdValue('warning')) && $value > $threshold) {
+      $this->message = format_string('exceeds @expected', array('@expected' => $threshold));
+      return SensorResultInterface::STATUS_WARNING;
+    }
   }
 
   /**
-   * Checks if provided value falls below the given threshold.
+   * Checks if provided value falls below the configured threshold.
    *
    * @param int $value
-   * @param int $threshold
+   *   The value to check.
    *
-   * @return bool
+   * @return int|null
+   *   A sensor status or NULL.
    */
-  protected function falls($value, $threshold) {
-    if ($threshold === NULL || $threshold === '') {
-      return FALSE;
+  protected function falls($value) {
+    if (($threshold = $this->sensorInfo->getThresholdValue('critical')) && $value < $threshold) {
+      $this->message = format_string('falls below @expected', array('@expected' => $threshold));
+      return SensorResultInterface::STATUS_CRITICAL;
     }
-    return $value < $threshold;
+    if (($threshold = $this->sensorInfo->getThresholdValue('warning')) && $value < $threshold) {
+      $this->message = format_string('falls below @expected', array('@expected' => $threshold));
+      return SensorResultInterface::STATUS_WARNING;
+    }
   }
 
   /**
-   * Checks if provided value is inside the interval.
+   * Checks if provided value falls inside the configured interval.
    *
-   * @param $value
-   * @param array $interval
-   *   Array of two values defining the interval.
+   * @param int $value
+   *   The value to check.
    *
-   * @return bool
+   * @return int|null
+   *   A sensor status or NULL.
    */
-  protected function isInsideTheInterval($value, $interval) {
-    if ($interval[0] === NULL || $interval[1] === NULL || $interval[0] === '' || $interval[1] === '') {
-      return FALSE;
+  protected function inner_interval($value) {
+    if (($low = $this->sensorInfo->getThresholdValue('critical_low')) && ($high = $this->sensorInfo->getThresholdValue('critical_high'))) {
+      if ($value > $low && $value < $high) {
+        $this->message = format_string('violating the interval @low - @high', array('@low' => $low, '@high' => $high));
+        return SensorResultInterface::STATUS_CRITICAL;
+      }
     }
-    return ($value > $interval[0] && $value < $interval[1]);
+    if (($low = $this->sensorInfo->getThresholdValue('warning_low')) && ($high = $this->sensorInfo->getThresholdValue('warning_high'))) {
+      if ($value > $low && $value < $high) {
+        $this->message = format_string('violating the interval @low - @high', array('@low' => $low, '@high' => $high));
+        return SensorResultInterface::STATUS_WARNING;
+      }
+    }
   }
 
   /**
-   * Checks if provided value is outside the interval.
+   * Checks if provided value is outside of the configured interval.
    *
-   * @param $value
-   * @param array $interval
-   *   Array of two values defining the inner interval.
+   * @param int $value
+   *   The value to check.
    *
-   * @return bool
+   * @return int|null
+   *   A sensor status or NULL.
    */
-  protected function isOutsideTheInterval($value, $interval) {
-    if ($interval[0] === NULL || $interval[1] === NULL || $interval[0] === '' || $interval[1] === '') {
-      return FALSE;
+  protected function outer_interval($value) {
+    if (($low = $this->sensorInfo->getThresholdValue('critical_low')) && ($high = $this->sensorInfo->getThresholdValue('critical_high'))) {
+      if ($value < $low || $value > $high) {
+        $this->message = format_string('outside the allowed interval @low - @high', array('@low' => $low, '@high' => $high));
+        return SensorResultInterface::STATUS_CRITICAL;
+      }
     }
-    return ($value < $interval[0] || $value > $interval[1]);
+    if (($low = $this->sensorInfo->getThresholdValue('warning_low')) && ($high = $this->sensorInfo->getThresholdValue('warning_high'))) {
+      if ($value < $low || $value > $high) {
+        $this->message = format_string('outside the allowed interval @low - @high', array('@low' => $low, '@high' => $high));
+        return SensorResultInterface::STATUS_WARNING;
+      }
+    }
   }
 
 }

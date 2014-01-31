@@ -49,25 +49,31 @@ function hook_monitoring_sensor_info() {
       // A sensor may define a time interval. This will be added to the default
       // message automatically.
       'time_interval_value' => 900,
-      // Define sensor value thresholds.
-      // Threshold can be warning or critical.
-      // Threshold is defined by an array with two values which represents a sharp
-      // limit. In case you want to consider only one value, set the other one to
-      // NULL.
+      // Define sensor value thresholds, which allow to have (configurable)
+      // intervals that set the sensor status to warning or critical based on
+      // the value. All sensors that extend from
+      // \Drupal\monitoring\Sensor\SensorThresholds support thresholds, this
+      // definition is only necessary to provide explicit default thresholds.
       'thresholds' => array(
-        // This means that anything smaller or equal to 3 and anything grater or
-        // equal to 6 will result in warning status.
-        //
-        // !! In case any of the provided threshold value is NULL the threshold
-        // will not be assessed and considered in OK status. !!
-        SensorResultInterface::STATUS_WARNING => array(
-          'inner_interval' => array(),
-          'outer_interval' => array(),
-          'exceeds' => 0,
-          'falls' => 0,
-        ),
-        // Same apply for status critical.
-        SensorResultInterface::STATUS_CRITICAL => array(/* .. */),
+        // The threshold type, this defines which of the additional keys
+        // are supported. exceeds and falls use warning/critical, the interval
+        // types use the low/high keys.
+        //   - exceeds: Escalates if the value exceeds the configured limits,
+        //              warning must be lower than critical.
+        //   - falls: Escalates if the value falls below the configured limits,
+        //            warning must be higher than critical.
+        //   - inner_interval: Escalates if the value is within the configured
+        //                     intervals, warning must be outside of critical.
+        //   - outer_interval: Escalates if the value is outside of the
+        //                     configured intervals, warning must be inside of
+        //                     critical.
+        'type' => 'exceeds|falls|inner_interval|outer_interval',
+        'warning' => 5,
+        'critical' => 10,
+        'warning_high' => 5,
+        'warning_low' => 7,
+        'critical_high' => 9,
+        'critical_low' => 3,
       ),
     ),
   );

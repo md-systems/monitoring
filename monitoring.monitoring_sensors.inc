@@ -201,10 +201,8 @@ function monitoring_dblog_monitoring_sensor_info() {
       'caching_time' => 3600,
       'thresholds' => array(
         'type' => 'exceeds',
-        'intervals' => array(
-          SensorResultInterface::STATUS_CRITICAL => 100,
-          SensorResultInterface::STATUS_WARNING => 20,
-        ),
+        'warning' => 20,
+        'critical' => 100,
       ),
       'table' => 'watchdog',
       'conditions' => array(
@@ -240,10 +238,8 @@ function monitoring_dblog_monitoring_sensor_info() {
         'caching_time' => $caching_time,
         'thresholds' => array(
           'type' => 'exceeds',
-          'intervals' => array(
-            SensorResultInterface::STATUS_CRITICAL => $critical_threshold,
-            SensorResultInterface::STATUS_WARNING => $warning_threshold,
-          ),
+          'warning' => $warning_threshold,
+          'critical' => $critical_threshold,
         ),
         'table' => 'watchdog',
         'conditions' => array(
@@ -304,10 +300,8 @@ function monitoring_dblog_monitoring_sensor_info() {
       // will probably not fit all sites, especially larger once.
       'thresholds' => array(
         'type' => 'exceeds',
-        'intervals' => array(
-          SensorResultInterface::STATUS_CRITICAL => 120,
-          SensorResultInterface::STATUS_WARNING => 50,
-        ),
+        'warning' => 50,
+        'critical' => 120,
       ),
       'table' => 'watchdog',
       'conditions' => array(
@@ -332,10 +326,8 @@ function monitoring_dblog_monitoring_sensor_info() {
         'caching_time' => 3600,
         'thresholds' => array(
           'type' => 'exceeds',
-          'intervals' => array(
-            SensorResultInterface::STATUS_CRITICAL => 20,
-            SensorResultInterface::STATUS_WARNING => 5,
-          ),
+          'warning' => 5,
+          'critical' => 20,
         ),
         'table' => 'watchdog',
         'conditions' => array(
@@ -385,10 +377,8 @@ function monitoring_past_db_monitoring_sensor_info() {
   // Default thresholds for criticals (fatal errors).
   $info['past_db_event_severity_' . $severities[PAST_SEVERITY_CRITICAL]]['settings']['thresholds'] = array(
     'type' => 'exceeds',
-    'intervals' => array(
-      SensorResultInterface::STATUS_CRITICAL => 5,
-      SensorResultInterface::STATUS_WARNING => 1,
-    ),
+    'warning' => 5,
+    'critical' => 1,
   );
   return $info;
 }
@@ -453,10 +443,8 @@ function monitoring_system_monitoring_sensor_info() {
       'category' => 'Cron',
       'thresholds' => array(
         'type' => 'exceeds',
-        'intervals' => array(
-          SensorResultInterface::STATUS_CRITICAL => 60 * 60 * 24 * 3,
-          SensorResultInterface::STATUS_WARNING => 60 * 60 * 24,
-        ),
+        'warning' => 60 * 60 * 24,
+        'critical' => 60 * 60 * 24 * 3,
       ),
     ),
   );

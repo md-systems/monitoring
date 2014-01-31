@@ -238,10 +238,10 @@ function monitoring_munin_config() {
       $graph['graph_vlabel'] = ($info->getValueLabel() ? $info->getValueLabel() : $info->getLabel());
       $graph['graph_category'] = $host;
       $graph[$munin_sensor_name . '.label'] = $info->getLabel();
-      foreach ($info->getThresholdsIntervals() as $status => $threshold) {
-        // @todo - deal with other threshold types.
-        if ($info->getThresholdsType() == 'exceeds') {
-          $graph[$munin_sensor_name . '.' . strtolower($status)] = $threshold;
+      // @todo - deal with other threshold types.
+      if ($info->getThresholdsType() == 'exceeds') {
+        foreach (array('warning', 'critical') as $key) {
+          $graph[$munin_sensor_name . '.' . $key] = $info->getThresholdValue($key);
         }
       }
       $config[$munin_sensor_name] = $graph;

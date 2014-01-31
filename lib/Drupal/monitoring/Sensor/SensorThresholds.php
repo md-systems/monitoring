@@ -1,12 +1,10 @@
 <?php
 /**
  * @file
- * Contains Drupal\monitoring\Sensor\SensorThresholds
+ * Contains Drupal\monitoring\Sensor\SensorThresholds.
  */
 
 namespace Drupal\monitoring\Sensor;
-
-use Drupal\monitoring\Result\SensorResultInterface;
 
 /**
  * Provides configuration form for Sensor providing thresholds.
@@ -19,156 +17,200 @@ abstract class SensorThresholds extends SensorConfigurable implements SensorThre
   public function settingsForm($form, &$form_state) {
 
     $form = parent::settingsForm($form, $form_state);
-    $thresholds = $this->info->getThresholdsIntervals();
 
-    if (!empty($thresholds)) {
-      $form['thresholds'] = array(
-        '#type' => 'fieldset',
-        '#title' => t('Sensor thresholds'),
-        '#description' => t('Here you can set limit values that switch sensor to a given state.'),
-      );
+    $form['thresholds'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Sensor thresholds'),
+      '#description' => t('Here you can set limit values that switch the sensor to a given status.'),
+      '#prefix' => '<div id="monitoring-sensor-thresholds">',
+      '#suffix' => '</div>',
+    );
 
-      if (isset($form_state['values'][monitoring_sensor_settings_key($this->getSensorName())]['thresholds']['type'])) {
-        $type = $form_state['values'][monitoring_sensor_settings_key($this->getSensorName())]['thresholds']['type'];
-      }
-      else {
-        $type = $this->info->getThresholdsType();
-      }
+    if (isset($form_state['values'][monitoring_sensor_settings_key($this->getSensorName())]['thresholds']['type'])) {
+      $type = $form_state['values'][monitoring_sensor_settings_key($this->getSensorName())]['thresholds']['type'];
+    }
+    else {
+      $type = $this->info->getThresholdsType();
+    }
 
-      $form['thresholds']['type'] = array(
-        '#type' => 'select',
-        '#title' => t('Threshold type'),
-        '#options' => array(
-          'exceeds' => t('Exceeds'),
-          'falls' => t('Falls'),
-          'inner_interval' => t('Inner interval'),
-          'outer_interval' => t('Outer interval'),
-        ),
-        '#default_value' => $type,
-        '#ajax' => array(
-          'callback' => 'monitoring_sensor_thresholds_ajax',
-          'wrapper' => 'monitoring-sensor-thresholds',
-        ),
-      );
+    $form['thresholds']['type'] = array(
+      '#type' => 'select',
+      '#title' => t('Threshold type'),
+      '#options' => array(
+        'exceeds' => t('Exceeds'),
+        'falls' => t('Falls'),
+        'inner_interval' => t('Inner interval'),
+        'outer_interval' => t('Outer interval'),
+      ),
+      '#default_value' => $type,
+      '#ajax' => array(
+        'callback' => 'monitoring_sensor_thresholds_ajax',
+        'wrapper' => 'monitoring-sensor-thresholds',
+      ),
+    );
 
-      $form['thresholds']['intervals'] = array(
-        '#prefix' => '<div id="monitoring-sensor-thresholds">',
-        '#suffix' => '</div>',
-      );
-
-      foreach ($thresholds as $status => $threshold) {
-
-        switch ($type) {
-          case 'exceeds':
-          case 'falls':
-            $form['thresholds']['intervals']['#type'] = 'fieldset';
-            $form['thresholds']['intervals']['#title'] = t('Set limit values for individual statuses.');
-            $form['thresholds']['intervals'][$status][0] = array(
-              '#type' => 'textfield',
-              '#title' => t('Status @status', array('@status' => $status)),
-              '#default_value' => is_numeric($threshold) ? $threshold : NULL,
-              '#element_validate' => array('element_validate_number'),
-            );
-            $form['thresholds']['intervals'][$status][1] = array(
-              '#type' => 'hidden',
-              '#default_value' => is_numeric($threshold) ? $threshold : NULL,
-            );
-            break;
-          case 'inner_interval':
-            $form['thresholds']['intervals'][$status]['#type'] = 'fieldset';
-            $form['thresholds']['intervals'][$status]['#title'] = t('Set <em>inner</em> interval for status %status', array('%status' => $status));
-            $form['thresholds']['intervals'][$status]['#description'] = t('If a sensor value will be inside the defined interval the status will become %status', array('%status' => $status));
-            $form['thresholds']['intervals'][$status][0] = array(
-              '#type' => 'textfield',
-              '#title' => t('From'),
-              '#default_value' => isset($threshold[0]) ? $threshold[0] : NULL,
-              '#element_validate' => array('element_validate_number'),
-            );
-            $form['thresholds']['intervals'][$status][1] = array(
-              '#type' => 'textfield',
-              '#title' => t('To'),
-              '#default_value' => isset($threshold[1]) ? $threshold[1] : NULL,
-              '#element_validate' => array('element_validate_number'),
-            );
-            break;
-          case 'outer_interval':
-            $form['thresholds']['intervals'][$status]['#type'] = 'fieldset';
-            $form['thresholds']['intervals'][$status]['#title'] = t('Set <em>outer</em> interval for status %status', array('%status' => $status));
-            $form['thresholds']['intervals'][$status]['#description'] = t('If a sensor value will be outside the defined interval the status will become %status', array('%status' => $status));
-            $form['thresholds']['intervals'][$status][0] = array(
-              '#type' => 'textfield',
-              '#title' => t('From'),
-              '#default_value' => isset($threshold[0]) ? $threshold[0] : NULL,
-              '#element_validate' => array('element_validate_number'),
-            );
-            $form['thresholds']['intervals'][$status][1] = array(
-              '#type' => 'textfield',
-              '#title' => t('To'),
-              '#default_value' => isset($threshold[1]) ? $threshold[1] : NULL,
-              '#element_validate' => array('element_validate_number'),
-            );
-            break;
-        }
-      }
+    switch ($type) {
+      case 'exceeds':
+        $form['thresholds']['#description'] = t('The sensor will be set to the corresponding status if the value exceeds the limits.');
+        $form['thresholds']['warning'] = array(
+          '#type' => 'textfield',
+          '#title' => t('Warning'),
+          '#default_value' => $this->info->getThresholdValue('warning'),
+          '#element_validate' => array('element_validate_number'),
+        );
+        $form['thresholds']['critical'] = array(
+          '#type' => 'textfield',
+          '#title' => t('Critical'),
+          '#default_value' => $this->info->getThresholdValue('critical'),
+          '#element_validate' => array('element_validate_number'),
+        );
+        break;
+      case 'falls':
+        $form['thresholds']['#description'] = t('The sensor will be set to the corresponding status if the value falls below the limits.');
+        $form['thresholds']['warning'] = array(
+          '#type' => 'textfield',
+          '#title' => t('Warning'),
+          '#default_value' => $this->info->getThresholdValue('warning'),
+          '#element_validate' => array('element_validate_number'),
+        );
+        $form['thresholds']['critical'] = array(
+          '#type' => 'textfield',
+          '#title' => t('Critical'),
+          '#default_value' => $this->info->getThresholdValue('critical'),
+          '#element_validate' => array('element_validate_number'),
+        );
+        break;
+      case 'inner_interval':
+        $form['thresholds']['#description'] = t('The sensor will be set to the corresponding status if the value is within the limits.');
+        $form['thresholds']['warning_low'] = array(
+          '#type' => 'textfield',
+          '#title' => t('Warning low'),
+          '#default_value' => $this->info->getThresholdValue('warning_low'),
+          '#element_validate' => array('element_validate_number'),
+        );
+        $form['thresholds']['warning_high'] = array(
+          '#type' => 'textfield',
+          '#title' => t('Warning high'),
+          '#default_value' => $this->info->getThresholdValue('warning_high'),
+          '#element_validate' => array('element_validate_number'),
+        );
+        $form['thresholds']['critical_low'] = array(
+          '#type' => 'textfield',
+          '#title' => t('Critical low'),
+          '#default_value' => $this->info->getThresholdValue('critical_low'),
+          '#element_validate' => array('element_validate_number'),
+        );
+        $form['thresholds']['critical_high'] = array(
+          '#type' => 'textfield',
+          '#title' => t('Critical high'),
+          '#default_value' => $this->info->getThresholdValue('critical_high'),
+          '#element_validate' => array('element_validate_number'),
+        );
+        break;
+      case 'outer_interval':
+        $form['thresholds']['#description'] = t('The sensor will be set to the corresponding status if the value is outside of the limits.');
+        $form['thresholds']['warning_low'] = array(
+          '#type' => 'textfield',
+          '#title' => t('Warning low'),
+          '#default_value' => $this->info->getThresholdValue('warning_low'),
+          '#element_validate' => array('element_validate_number'),
+        );
+        $form['thresholds']['warning_high'] = array(
+          '#type' => 'textfield',
+          '#title' => t('Warning high'),
+          '#default_value' => $this->info->getThresholdValue('warning_high'),
+          '#element_validate' => array('element_validate_number'),
+        );
+        $form['thresholds']['critical_low'] = array(
+          '#type' => 'textfield',
+          '#title' => t('Critical low'),
+          '#default_value' => $this->info->getThresholdValue('critical_low'),
+          '#element_validate' => array('element_validate_number'),
+        );
+        $form['thresholds']['critical_high'] = array(
+          '#type' => 'textfield',
+          '#title' => t('Critical high'),
+          '#default_value' => $this->info->getThresholdValue('critical_high'),
+          '#element_validate' => array('element_validate_number'),
+        );
+        break;
     }
 
     return $form;
   }
 
   /**
+   * Sets a form error for the given threshold key.
+   *
+   * @param string $threshold_key
+   *   Key of the treshold value form element.
+   * @param string $message
+   *   The validation message.
+   */
+  protected function setFormError($threshold_key, $message) {
+    $form_key = monitoring_sensor_settings_key($this->info->getName());
+    form_set_error($form_key . '][thresholds][' . $threshold_key, $message);
+  }
+
+  /**
    * {@inheritdoc}
    */
   public function settingsFormValidate($form, &$form_state) {
-    $thresholds = $this->info->getThresholdsIntervals();
     $form_key = monitoring_sensor_settings_key($this->info->getName());
-    $last_highest_state = array();
-    $type = $form_state['values'][$form_key]['thresholds']['type'];
-    foreach ($thresholds as $status => $threshold) {
-      if (in_array($type, array('inner_interval', 'outer_interval'))) {
-        $values = $form_state['values'][$form_key]['thresholds']['intervals'][$status];
-        if (!empty($values[0]) && !empty($values[1]) &&
-          $values[0] >= $values[1]) {
-          form_set_error($form_key, t('Interval <em>FROM</em> for !status has to be smaller than <em>TO</em>.', array('!status' => $status)));
-        }
-        if (count($last_highest_state) > 0) {
-          if ($type == 'inner_interval') {
-            if (!empty($values[0]) && !empty($values[1]) &&
-              !empty($last_highest_state['values'][0]) && !empty($last_highest_state['values'][1]) &&
-              ($values[0] > $last_highest_state['values'][0] ||
-                $values[1] < $last_highest_state['values'][1])) {
-              form_set_error($form_key, t('@outside threshold has to be inside @inside.', array('@outside' => $last_highest_state['status'], '@inside' => $status)));
-            }
-          }
-          else if ($type == 'outer_interval') {
-            if (!empty($values[0]) && !empty($values[1]) &&
-              !empty($last_highest_state['values'][0]) && !empty($last_highest_state['values'][1]) &&
-              ($values[0] < $last_highest_state['values'][0] ||
-                $values[1] > $last_highest_state['values'][1])) {
-              form_set_error($form_key, t('@outside threshold has to be inside @inside.', array('@inside' => $last_highest_state['status'], '@outside' => $status)));
-            }
-          }
-        }
-        $last_highest_state['status'] = $status;
-        $last_highest_state['values'] = $values;
-      }
-      else {
-        $form_state['values'][$form_key]['thresholds']['intervals'][$status] = reset($form_state['values'][$form_key]['thresholds']['intervals'][$status]);
+    $values = $form_state['values'][$form_key]['thresholds'];
+    $type = $values['type'];
 
-        if (!empty($last_highest_state['value'])) {
-          if ($type == 'falls') {
-            if ($form_state['values'][$form_key]['thresholds']['intervals'][$status] <= $last_highest_state['value']) {
-              form_set_error($form_key, t('@bigger has to be smaller than @inside.', array('@inside' => $status, '@bigger' => $last_highest_state['status'])));
-            }
-          }
-          else {
-            if ($form_state['values'][$form_key]['thresholds']['intervals'][$status] >= $last_highest_state['value']) {
-              form_set_error($form_key, t('@inside has to be bigger than @bigger.', array('@inside' => $last_highest_state['status'], '@bigger' => $status)));
-            }
-          }
+    switch ($type) {
+      case 'exceeds':
+        if (!empty($values['warning']) && !empty($values['critical']) && $values['warning'] >= $values['critical']) {
+          $this->setFormError('warning', t('Warning must be lower than critical or empty.'));
         }
-        $last_highest_state['status'] = $status;
-        $last_highest_state['value'] = $form_state['values'][$form_key]['thresholds']['intervals'][$status];
-      }
+        break;
+      case 'falls':
+        if (!empty($values['warning']) && !empty($values['critical']) && $values['warning'] <= $values['critical']) {
+          $this->setFormError('warning', t('Warning must be higher than critical or empty.'));
+        }
+        break;
+      case 'inner_interval':
+        if (empty($values['warning_low']) && !empty($values['warning_high']) || !empty($values['warning_low']) && empty($values['warning_high'])) {
+          $this->setFormError('warning_low', t('Either both warning values must be provided or none.'));
+        }
+        elseif (empty($values['critical_low']) && !empty($values['critical_high']) || !empty($values['critical_low']) && empty($values['critical_high'])) {
+          $this->setFormError('critical_low', t('Either both critical values must be provided or none.'));
+        }
+        elseif (!empty($values['warning_low']) && !empty($values['warning_high']) && $values['warning_low'] >= $values['warning_high']) {
+          $this->setFormError('warning_low', t('Warning low must be lower than warning high or empty.'));
+        }
+        elseif (!empty($values['critical_low']) && !empty($values['critical_high']) && $values['critical_low'] >= $values['critical_high']) {
+          $this->setFormError('warning_low', t('Critical low must be lower than critical high or empty.'));
+        }
+        elseif (!empty($values['warning_low']) && !empty($values['critical_low']) && $values['warning_low'] >= $values['critical_low']) {
+          $this->setFormError('warning_low', t('Warning low must be lower than critical low or empty.'));
+        }
+        elseif (!empty($values['warning_high']) && !empty($values['critical_high']) && $values['warning_high'] <= $values['critical_high']) {
+          $this->setFormError('warning_high', t('Warning high must be higher than critical high or empty.'));
+        }
+        break;
+      case 'outer_interval':
+        if (empty($values['warning_low']) && !empty($values['warning_high']) || !empty($values['warning_low']) && empty($values['warning_high'])) {
+          $this->setFormError('warning_low', t('Either both warning values must be provided or none.'));
+        }
+        elseif (empty($values['critical_low']) && !empty($values['critical_high']) || !empty($values['critical_low']) && empty($values['critical_high'])) {
+          $this->setFormError('critical_low', t('Either both critical values must be provided or none.'));
+        }
+        elseif (!empty($values['warning_low']) && !empty($values['warning_high']) && $values['warning_low'] >= $values['warning_high']) {
+          $this->setFormError('warning_low', t('Warning low must be lower than warning high or empty.'));
+        }
+        elseif (!empty($values['critical_low']) && !empty($values['critical_high']) && $values['critical_low'] >= $values['critical_high']) {
+          $this->setFormError('warning_low', t('Critical low must be lower than critical high or empty.'));
+        }
+        elseif (!empty($values['warning_low']) && !empty($values['critical_low']) && $values['warning_low'] <= $values['critical_low']) {
+          $this->setFormError('warning_low', t('Warning low must be higher than critical low or empty.'));
+        }
+        elseif (!empty($values['warning_high']) && !empty($values['critical_high']) && $values['warning_high'] >= $values['critical_high']) {
+          $this->setFormError('warning_high', t('Warning high must be lower than critical high or empty.'));
+        }
+        break;
     }
   }
 }

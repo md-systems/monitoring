@@ -224,7 +224,7 @@ class SensorResult implements SensorResultInterface {
    *   The message associated with the threshold.
    */
   protected function assessThresholds() {
-    $thresholds = new Thresholds($this->sensorInfo->getThresholdsType(), $this->sensorInfo->getThresholdsIntervals());
+    $thresholds = new Thresholds($this->sensorInfo);
     $matched_threshold = $thresholds->getMatchedThreshold($this->getSensorValue());
 
     // Set sensor status based on matched threshold.

@@ -53,8 +53,7 @@ class MonitoringServicesTest extends MonitoringTestBase {
       $this->assertEqual($response_data[$sensor_name]['uri'], url('monitoring/v1/sensor-info/' . $sensor_info->getName(), array('absolute' => TRUE)));
 
       if ($sensor_info->isDefiningThresholds()) {
-        $this->assertEqual($response_data[$sensor_name]['thresholds']['type'], $sensor_info->getThresholdsType());
-        $this->assertEqual($response_data[$sensor_name]['thresholds']['intervals'], $sensor_info->getThresholdsIntervals());
+        $this->assertEqual($response_data[$sensor_name]['thresholds'], $sensor_info->getSetting('thresholds'));
       }
     }
 
@@ -78,8 +77,7 @@ class MonitoringServicesTest extends MonitoringTestBase {
     $this->assertEqual($response_data['uri'], url('monitoring/v1/sensor-info/' . $sensor_info->getName(), array('absolute' => TRUE)));
 
     if ($sensor_info->isDefiningThresholds()) {
-      $this->assertEqual($response_data['thresholds']['type'], $sensor_info->getThresholdsType());
-      $this->assertEqual($response_data['thresholds']['intervals'], $sensor_info->getThresholdsIntervals());
+      $this->assertEqual($response_data['thresholds'], $sensor_info->getSetting('thresholds'));
     }
   }
 
