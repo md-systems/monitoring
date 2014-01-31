@@ -214,9 +214,9 @@ class MonitoringUITest extends MonitoringTestBase {
   }
 
   /**
-   * Tests the force execute all command.
+   * Tests the force execute all and sensor specific force execute links.
    */
-  function testForceExecuteAll() {
+  function testForceExecute() {
     $account = $this->drupalCreateUser(array('monitoring force run', 'monitoring reports'));
     $this->drupalLogin($account);
 
@@ -242,6 +242,18 @@ class MonitoringUITest extends MonitoringTestBase {
     $this->clickLink(t('Force execute all'));
     $this->assertNoText('First message');
     $this->assertText('Second message');
+
+    // Update the sensor message again.
+    $test_sensor_result_data['sensor_message'] = 'Third message';
+    variable_set('test_sensor_result_data', $test_sensor_result_data);
+
+    // Simulate a click on Force execution, there are many of those so we just
+    // verify that such links exist and visit the path manually.
+    $this->assertLink(t('Force execution'));
+    $this->drupalGet('monitoring/sensors/force/test_sensor');
+    $this->assertNoText('Second message');
+    $this->assertText('Third message');
+
   }
 
   /**

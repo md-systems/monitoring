@@ -155,6 +155,10 @@ function monitoring_reports_sensors_overview() {
 
       $links = array();
       $links['details'] = array('title' => t('Details'), 'href' => 'admin/reports/monitoring/sensors/' . $sensor_name);
+      // Display a force execution link for any sensor that can be cached.
+      if ($sensor_info->getCachingTime() && user_access('monitoring force run')) {
+        $links['force_execution'] = array('title' => t('Force execution'), 'href' => 'monitoring/sensors/force/' . $sensor_name);
+      }
       if (user_access('monitoring verbose')) {
         $links['log'] = array('title' => t('Log'), 'href' => 'admin/reports/monitoring/sensors/' . $sensor_name . '/log');
       }
@@ -441,8 +445,15 @@ function monitoring_sensor_details_submit($form, &$form_state) {
 /**
  * Page callback to clear sensor caches.
  */
-function monitoring_force_execution() {
-  SensorRunner::resetCache();
+function monitoring_force_execution($sensor_name = NULL) {
+  if ($sensor_name) {
+    // If a sensor was passed, reset just that.
+    SensorRunner::resetCache(array($sensor_name));
+  }
+  else {
+    // Otherwise reset all.
+    SensorRunner::resetCache();
+  }
   drupal_goto('admin/reports/monitoring');
 }
 
