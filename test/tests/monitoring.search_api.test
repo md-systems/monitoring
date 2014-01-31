@@ -41,7 +41,7 @@ class MonitoringSearchAPITest extends MonitoringTestBase {
 
     // Reset sensor info so that sensor for newly created search api index
     // gets picked up.
-    monitoring_sensor_info(NULL, TRUE);
+    $this->sensorManager->resetCache();
     // Load indexes.
     $indexes = search_api_index_load_multiple(FALSE);
 

@@ -7,7 +7,7 @@
 /**
  * Class MonitoringAPITest
  */
-class MonitoringMuninTest extends DrupalWebTestCase {
+class MonitoringMuninTest extends MonitoringTestBase {
 
   /**
    * {@inheritdoc}
@@ -24,7 +24,7 @@ class MonitoringMuninTest extends DrupalWebTestCase {
    * {@inheritdoc}
    */
   function setUp() {
-    parent::setUp(array('monitoring'));
+    parent::setUp(array('dblog'));
     // @todo Enable monitoring_munin separately, otherwise the class autoloading
     //   does not work.
     module_enable(array('monitoring_munin'));
@@ -48,7 +48,7 @@ class MonitoringMuninTest extends DrupalWebTestCase {
     // Deleting the multigraph must remove it form sensors settings as well.
     monitoring_munin_multigraph_delete('test multigraph');
     monitoring_sensor_manager()->resetCache();
-    $info = monitoring_sensor_info('dblog_404');
+    $info = $this->sensorManager->getSensorInfoByName('dblog_404');
     $munin_settings = $info->getSetting('munin');
     $this->assertTrue(!in_array('test multigraph', $munin_settings['multigraphs']));
   }

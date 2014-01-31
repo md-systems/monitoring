@@ -286,7 +286,7 @@ function monitoring_sensor_settings_form($form, &$form_state, SensorInfo $sensor
 
 function monitoring_sensor_settings_form_validate($form, &$form_state) {
   /** @var SensorConfigurableInterface $sensor */
-  $sensor_info = monitoring_sensor_info($form_state['sensor_name']);
+  $sensor_info = monitoring_sensor_manager()->getSensorInfoByName($form_state['sensor_name']);
   $sensor_class = $sensor_info->getSensorClass();
   $sensor = new $sensor_class($sensor_info);
   $sensor->settingsFormValidate($form, $form_state);

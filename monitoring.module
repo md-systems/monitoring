@@ -29,19 +29,15 @@ function monitoring_sensor_manager() {
 /**
  * Returns monitoring sensor info.
  *
- * @param string $sensor_name
- *   Sensor id.
- *
  * @return \Drupal\monitoring\Sensor\SensorInfo[]
  *   List of SensorInfo instances.
  *
  * @throws \Drupal\monitoring\Sensor\NonExistingSensorException
  *   In case a sensor name is provided, which does not exists.
+ *
+ * @see \Drupal\monitoring\Sensor\SensorManager
  */
-function monitoring_sensor_info($sensor_name = NULL) {
-  if ($sensor_name) {
-    return monitoring_sensor_manager()->getSensorInfoByName($sensor_name);
-  }
+function monitoring_sensor_info() {
   return monitoring_sensor_manager()->getSensorInfo();
 }
 

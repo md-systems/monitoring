@@ -529,7 +529,7 @@ class MonitoringCoreTest extends MonitoringTestBase {
     $this->assertEqual($result->getSensorValue(), 3);
 
     // Test with different db table.
-    $info = monitoring_sensor_info('db_aggregate_test');
+    $info = $this->sensorManager->getSensorInfoByName('db_aggregate_test');
     $this->drupalCreateNode(array('promote' => '1'));
     $this->drupalCreateNode(array('promote' => '0'));
     $this->drupalCreateNode(array('promote' => '0'));

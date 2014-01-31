@@ -327,7 +327,7 @@ class MonitoringApiTest extends MonitoringTestBase {
       ),
     );
     monitoring_sensor_manager()->resetCache();
-    $info = monitoring_sensor_info('test_sensor');
+    $info = $this->sensorManager->getSensorInfoByName('test_sensor');
     $this->assertEqual('Overridden sensor', $info->getLabel());
     $this->assertEqual(1, $info->getSetting('caching_time'));
     $this->assertEqual('example value', $info->getSetting('new setting'));
