@@ -148,13 +148,13 @@ class MonitoringServicesTest extends MonitoringTestBase {
     // result which is not cached we might not get the same values.
     if ($sensor_info->getCachingTime()) {
       $result = monitoring_sensor_run($sensor_info->getName());
-      $this->assertEqual($response_result['status'], $result->getSensorStatus());
-      $this->assertEqual($response_result['value'], $result->getSensorValue());
-      $this->assertEqual($response_result['expected_value'], $result->getSensorExpectedValue());
+      $this->assertEqual($response_result['status'], $result->getStatus());
+      $this->assertEqual($response_result['value'], $result->getValue());
+      $this->assertEqual($response_result['expected_value'], $result->getExpectedValue());
       $this->assertEqual($response_result['numeric_value'], $result->toNumber());
-      $this->assertEqual($response_result['message'], $result->getSensorMessage());
+      $this->assertEqual($response_result['message'], $result->getMessage());
       $this->assertEqual($response_result['timestamp'], $result->getTimestamp());
-      $this->assertEqual($response_result['execution_time'], $result->getSensorExecutionTime());
+      $this->assertEqual($response_result['execution_time'], $result->getExecutionTime());
     }
 
     if (isset($response_result['sensor_info'])) {

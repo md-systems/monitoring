@@ -88,7 +88,7 @@ class SensorEnabledModules extends SensorConfigurable {
       ->fields('system')
       ->execute()
       ->fetchAllAssoc('name');
-    $result->setSensorExpectedValue(0);
+    $result->setExpectedValue(0);
     $delta = 0;
 
     $monitoring_enabled_modules = array();
@@ -120,7 +120,7 @@ class SensorEnabledModules extends SensorConfigurable {
         $info = unserialize($module_data[$non_installed_module]->info);
         $non_installed_modules_info[] = $info['name'] . ' (' . $non_installed_module . ')';
       }
-      $result->addSensorStatusMessage('Following modules are expected to be installed: @modules', array('@modules' => implode(', ', $non_installed_modules_info)));
+      $result->addStatusMessage('Following modules are expected to be installed: @modules', array('@modules' => implode(', ', $non_installed_modules_info)));
     }
 
     // In case we do not allow additional modules check for modules installed
@@ -133,9 +133,9 @@ class SensorEnabledModules extends SensorConfigurable {
         $info = unserialize($module_data[$unexpected_module]->info);
         $unexpected_modules_info[] = $info['name'] . ' (' . $unexpected_module . ')';
       }
-      $result->addSensorStatusMessage('Following modules are NOT expected to be installed: @modules', array('@modules' => implode(', ', $unexpected_modules_info)));
+      $result->addStatusMessage('Following modules are NOT expected to be installed: @modules', array('@modules' => implode(', ', $unexpected_modules_info)));
     }
 
-    $result->setSensorValue($delta);
+    $result->setValue($delta);
   }
 }

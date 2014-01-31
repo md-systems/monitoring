@@ -446,11 +446,11 @@ function monitoring_sensor_settings_key($sensor_name) {
 function monitoring_sensor_result_save(SensorResultInterface $result) {
   $values = array(
     'sensor_name' => $result->getSensorName(),
-    'sensor_status' => $result->getSensorStatus(),
-    'sensor_message' => $result->getSensorMessage(),
-    'sensor_value' => $result->getSensorValue(),
+    'sensor_status' => $result->getStatus(),
+    'sensor_message' => $result->getMessage(),
+    'sensor_value' => $result->getValue(),
     'timestamp' => $result->getTimestamp(),
-    'execution_time' => $result->getSensorExecutionTime(),
+    'execution_time' => $result->getExecutionTime(),
   );
   $result_entity = entity_create('monitoring_sensor_result', $values);
   entity_save('monitoring_sensor_result', $result_entity);
@@ -689,7 +689,7 @@ function monitoring_value_types() {
  *   Formatted time interval.
  */
 function monitoring_value_label_callback_interval(SensorResultInterface $result) {
-  return format_interval($result->getSensorValue());
+  return format_interval($result->getValue());
 }
 
 /**
@@ -702,7 +702,7 @@ function monitoring_value_label_callback_interval(SensorResultInterface $result)
  *   TRUE or FALSE strings.
  */
 function monitoring_value_label_callback_bool(SensorResultInterface $result) {
-  return $result->getSensorValue() ? 'TRUE' : 'FALSE';
+  return $result->getValue() ? 'TRUE' : 'FALSE';
 }
 
 /**
@@ -722,8 +722,8 @@ function monitoring_value_label_callback_commerce_currency(SensorResultInterface
     }
     // commerce_currency_format() uses @placeholders and runs the price through
     // check_plain(), that can cause double encoding, so decode entities again.
-    return html_entity_decode(commerce_currency_format($result->getSensorValue(), $currency, NULL, FALSE), ENT_QUOTES);
+    return html_entity_decode(commerce_currency_format($result->getValue(), $currency, NULL, FALSE), ENT_QUOTES);
   }
 
-  return $result->getSensorValue();
+  return $result->getValue();
 }

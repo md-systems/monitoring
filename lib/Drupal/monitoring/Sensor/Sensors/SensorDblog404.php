@@ -33,7 +33,7 @@ class SensorDblog404 extends SensorDatabaseAggregator {
     parent::runSensor($result);
     $query_result = $this->fetchObject();
     if (!empty($query_result) && !empty($query_result->message)) {
-      $result->addSensorStatusMessage($query_result->message);
+      $result->addStatusMessage($query_result->message);
     }
   }
 }

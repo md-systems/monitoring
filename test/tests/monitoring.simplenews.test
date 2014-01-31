@@ -32,7 +32,7 @@ class MonitoringSimplenewsTest extends MonitoringTestBase {
 
     // No spool items - status OK.
     $result = $this->runSensor('simplenews_pending');
-    $this->assertEqual($result->getSensorValue(), 0);
+    $this->assertEqual($result->getValue(), 0);
 
     // Crate a spool item in state pending.
     simplenews_save_spool(array(
@@ -43,7 +43,7 @@ class MonitoringSimplenewsTest extends MonitoringTestBase {
       'data' => array('data' => 'data'),
     ));
     $result = $this->runSensor('simplenews_pending');
-    $this->assertEqual($result->getSensorValue(), 1);
+    $this->assertEqual($result->getValue(), 1);
 
   }
 

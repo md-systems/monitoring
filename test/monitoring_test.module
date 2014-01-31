@@ -199,9 +199,9 @@ function monitoring_test_endpoint() {
   try {
     $result = monitoring_sensor_run($sensor_name);
     drupal_json_output(array(
-      'sensor_value' => $result->getSensorValue(),
-      'sensor_message' => $result->getSensorMessage(),
-      'sensor_status' => $result->getSensorStatus(),
+      'sensor_value' => $result->getValue(),
+      'sensor_message' => $result->getMessage(),
+      'sensor_status' => $result->getStatus(),
     ));
   }
   catch (InvalidArgumentException $e) {

@@ -41,7 +41,7 @@ class SensorVariable extends SensorConfigurable {
    * {@inheritdoc}
    */
   public function runSensor(SensorResultInterface $result) {
-    $result->setSensorValue(variable_get($this->info->getSetting('variable_name'), $this->info->getSetting('variable_default_value')));
-    $result->setSensorExpectedValue($this->info->getSetting('variable_value'));
+    $result->setValue(variable_get($this->info->getSetting('variable_name'), $this->info->getSetting('variable_default_value')));
+    $result->setExpectedValue($this->info->getSetting('variable_value'));
   }
 }

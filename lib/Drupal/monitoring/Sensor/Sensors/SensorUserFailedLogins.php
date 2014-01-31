@@ -32,10 +32,10 @@ class SensorUserFailedLogins extends SensorDatabaseAggregator {
     foreach ($this->getQueryResult()->fetchAll() as $row) {
       $records_count += $row->records_count;
       $variables = unserialize($row->variables);
-      $result->addSensorStatusMessage('@user: @count', array('@user' => $variables['%user'], '@count' => $row->records_count));
+      $result->addStatusMessage('@user: @count', array('@user' => $variables['%user'], '@count' => $row->records_count));
     }
 
-    $result->setSensorValue($records_count);
+    $result->setValue($records_count);
   }
 
 }

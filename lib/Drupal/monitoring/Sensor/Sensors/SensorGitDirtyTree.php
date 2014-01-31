@@ -22,17 +22,17 @@ class SensorGitDirtyTree extends SensorConfigurable implements SensorExtendedInf
    */
   public function runSensor(SensorResultInterface $result) {
     $this->cmdOutput = trim(shell_exec($this->buildCMD()));
-    $result->setSensorExpectedValue(0);
+    $result->setExpectedValue(0);
 
     if (!empty($this->cmdOutput)) {
-      $result->setSensorValue(count(explode("\n", $this->cmdOutput)));
-      $result->addSensorStatusMessage('Files in unexpected state');
-      $result->setSensorStatus(SensorResultInterface::STATUS_CRITICAL);
+      $result->setValue(count(explode("\n", $this->cmdOutput)));
+      $result->addStatusMessage('Files in unexpected state');
+      $result->setStatus(SensorResultInterface::STATUS_CRITICAL);
     }
     else {
-      $result->setSensorValue(0);
-      $result->addSensorStatusMessage('Git repository clean');
-      $result->setSensorStatus(SensorResultInterface::STATUS_OK);
+      $result->setValue(0);
+      $result->addStatusMessage('Git repository clean');
+      $result->setStatus(SensorResultInterface::STATUS_OK);
     }
   }
 

@@ -47,7 +47,7 @@ class SensorDisappearedSensors extends SensorConfigurable {
       $form['clear_missing_sensors_wrapper']['info'] = array(
         '#type' => 'item',
         '#title' => t('Sensor message'),
-        '#markup' => $result->getSensorMessage(),
+        '#markup' => $result->getMessage(),
       );
       $form['clear_missing_sensors_wrapper']['clear_missing_sensor'] = array(
         '#type' => 'submit',
@@ -116,7 +116,7 @@ class SensorDisappearedSensors extends SensorConfigurable {
    *   The current sensor info.
    */
   protected function checkForMissingSensors(SensorResultInterface $result, $available_sensors, $sensor_info) {
-    $result->setSensorStatus(SensorResultInterface::STATUS_OK);
+    $result->setStatus(SensorResultInterface::STATUS_OK);
 
     $sensors_to_remove = array();
     // Check for missing sensors.
@@ -125,8 +125,8 @@ class SensorDisappearedSensors extends SensorConfigurable {
         // If sensor is missing and was not disabled prior to go missing do
         // escalate to critical status.
         if (!empty($available_sensor['enabled'])) {
-          $result->setSensorStatus(SensorResultInterface::STATUS_CRITICAL);
-          $result->addSensorStatusMessage('Missing sensor @name', array('@name' => $available_sensor['name']));
+          $result->setStatus(SensorResultInterface::STATUS_CRITICAL);
+          $result->addStatusMessage('Missing sensor @name', array('@name' => $available_sensor['name']));
         }
         // If sensor is missing but was disabled, add it to the remove list.
         else {

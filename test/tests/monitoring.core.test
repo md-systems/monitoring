@@ -37,19 +37,19 @@ class MonitoringCoreTest extends MonitoringTestBase {
     variable_set('cron_last', REQUEST_TIME - $time_shift);
     $result = $this->runSensor('core_cron_last_run_age');
     $this->assertTrue($result->isWarning());
-    $this->assertEqual($result->getSensorValue(), $time_shift);
+    $this->assertEqual($result->getValue(), $time_shift);
 
     $time_shift = (60 * 60 * 24 * 3 + 1);
     variable_set('cron_last', REQUEST_TIME - $time_shift);
     $result = $this->runSensor('core_cron_last_run_age');
     $this->assertTrue($result->isCritical());
-    $this->assertEqual($result->getSensorValue(), $time_shift);
+    $this->assertEqual($result->getValue(), $time_shift);
 
     drupal_cron_run();
 
     $result = $this->runSensor('core_cron_last_run_age');
     $this->assertTrue($result->isOk());
-    $this->assertEqual($result->getSensorValue(), 0);
+    $this->assertEqual($result->getValue(), 0);
 
     // ======= Cron safe threshold (poormanscron) tests ======= //
 
@@ -66,13 +66,13 @@ class MonitoringCoreTest extends MonitoringTestBase {
     $queue->createItem(array());
     $queue->createItem(array());
     $result = $this->runSensor('core_queue_monitoring_test');
-    $this->assertEqual($result->getSensorValue(), 2);
+    $this->assertEqual($result->getValue(), 2);
 
     // ======= SensorCoreRequirements tests ======= //
 
     $result = $this->runSensor('core_requirements_monitoring_test');
     $this->assertTrue($result->isOk());
-    $this->assertEqual($result->getSensorMessage(), 'Requirements check OK');
+    $this->assertEqual($result->getMessage(), 'Requirements check OK');
 
     // Set basic requirements saying that all is ok.
     $requirements = array(
@@ -100,7 +100,7 @@ class MonitoringCoreTest extends MonitoringTestBase {
     $result = $this->runSensor('core_requirements_monitoring_test');
     // We expect OK status as REQUIREMENT_ERROR is set by excluded requirement.
     $this->assertTrue($result->isOk());
-    $this->assertEqual($result->getSensorMessage(), 'requirement1, requirement1 description');
+    $this->assertEqual($result->getMessage(), 'requirement1, requirement1 description');
 
     // Add warning state.
     $requirements['requirement2'] = array(
@@ -113,7 +113,7 @@ class MonitoringCoreTest extends MonitoringTestBase {
     // Now the sensor should have escalated to the requirement in warning state.
     $result = $this->runSensor('core_requirements_monitoring_test');
     $this->assertTrue($result->isWarning());
-    $this->assertEqual($result->getSensorMessage(), 'requirement2, requirement2 description');
+    $this->assertEqual($result->getMessage(), 'requirement2, requirement2 description');
 
     // Add error state.
     $requirements['requirement3'] = array(
@@ -126,22 +126,22 @@ class MonitoringCoreTest extends MonitoringTestBase {
     // Now the sensor should have escalated to the requirement in critical state.
     $result = $this->runSensor('core_requirements_monitoring_test');
     $this->assertTrue($result->isCritical());
-    $this->assertEqual($result->getSensorMessage(), 'requirement3, requirement3 description');
+    $this->assertEqual($result->getMessage(), 'requirement3, requirement3 description');
 
     // ======= Watchdog 404 in last 24 hours tests ======= //
 
     watchdog('page not found', 'not/found');
     $result = $this->runSensor('dblog_404');
     $this->assertTrue($result->isOk());
-    $this->assertEqual($result->getSensorMessage(), '1 watchdog events in 1 day, not/found');
-    $this->assertEqual($result->getSensorValue(), 1);
+    $this->assertEqual($result->getMessage(), '1 watchdog events in 1 day, not/found');
+    $this->assertEqual($result->getValue(), 1);
 
     for ($i = 1; $i <= 20; $i++) {
       watchdog('page not found', 'not/found');
     }
 
     $result = monitoring_sensor_run('dblog_404', TRUE);
-    $this->assertEqual($result->getSensorValue(), 21);
+    $this->assertEqual($result->getValue(), 21);
     $this->assertTrue($result->isWarning());
 
     for ($i = 0; $i <= 100; $i++) {
@@ -149,7 +149,7 @@ class MonitoringCoreTest extends MonitoringTestBase {
     }
 
     $result = monitoring_sensor_run('dblog_404', TRUE);
-    $this->assertEqual($result->getSensorValue(), 101);
+    $this->assertEqual($result->getValue(), 101);
     $this->assertTrue($result->isCritical());
 
     // ======= SensorImageMissingStyle tests ======= //
@@ -168,8 +168,8 @@ class MonitoringCoreTest extends MonitoringTestBase {
       ));
 
     $result = $this->runSensor('dblog_image_missing_style');
-    $this->assertEqual(6, $result->getSensorValue());
-    $this->assertTrue(strpos($result->getSensorMessage(), 'public://portrait-pictures/redmouse.jpeg') !== FALSE);
+    $this->assertEqual(6, $result->getValue());
+    $this->assertTrue(strpos($result->getMessage(), 'public://portrait-pictures/redmouse.jpeg') !== FALSE);
     $this->assertTrue($result->isWarning());
 
     // ======= Watchdog sensor tests ======= //
@@ -180,7 +180,7 @@ class MonitoringCoreTest extends MonitoringTestBase {
     // Run sensor and test the output.
     $severities = monitoring_event_severities();
     $result = $this->runSensor('dblog_event_severity_' . $severities[WATCHDOG_ALERT]);
-    $this->assertEqual($result->getSensorValue(), 1);
+    $this->assertEqual($result->getValue(), 1);
 
     // ======= SensorUserFailedLogins tests ======= //
 
@@ -189,9 +189,9 @@ class MonitoringCoreTest extends MonitoringTestBase {
     watchdog('user', 'Login attempt failed for %user.', array('%user' => 'user2'), WATCHDOG_NOTICE);
 
     $result = $this->runSensor('user_failed_logins');
-    $this->assertEqual($result->getSensorValue(), 3);
-    $this->assertTrue(strpos($result->getSensorMessage(), 'user1: 2') !== FALSE);
-    $this->assertTrue(strpos($result->getSensorMessage(), 'user2: 1') !== FALSE);
+    $this->assertEqual($result->getValue(), 3);
+    $this->assertTrue(strpos($result->getMessage(), 'user1: 2') !== FALSE);
+    $this->assertTrue(strpos($result->getMessage(), 'user2: 1') !== FALSE);
 
     // ======= Sensor user_session_logouts tests ======= //
 
@@ -200,8 +200,8 @@ class MonitoringCoreTest extends MonitoringTestBase {
     watchdog('user', 'Session closed for %name.', array('%user' => 'user2'), WATCHDOG_NOTICE);
 
     $result = $this->runSensor('user_session_logouts');
-    $this->assertEqual($result->getSensorValue(), 3);
-    $this->assertEqual($result->getSensorMessage(), '3 logouts in 1 day');
+    $this->assertEqual($result->getValue(), 3);
+    $this->assertEqual($result->getMessage(), '3 logouts in 1 day');
 
     // ======= SensorGitDirtyTree tests ======= //
 
@@ -215,7 +215,7 @@ class MonitoringCoreTest extends MonitoringTestBase {
     // The verbose output should contain the cmd output.
     $this->assertTrue(strpos($result->getVerboseOutput(), 'dummy output') !== FALSE);
     // Two lines of cmd output.
-    $this->assertEqual($result->getSensorValue(), 2);
+    $this->assertEqual($result->getValue(), 2);
 
     // Now echo empty string
     monitoring_sensor_settings_save('monitoring_git_dirty_tree', array(
@@ -225,22 +225,22 @@ class MonitoringCoreTest extends MonitoringTestBase {
     $result = monitoring_sensor_run('monitoring_git_dirty_tree', TRUE);
     $this->assertTrue($result->isOk());
     // The message should say that it is ok.
-    $this->assertTrue(strpos($result->getSensorMessage(), 'Git repository clean') !== FALSE);
+    $this->assertTrue(strpos($result->getMessage(), 'Git repository clean') !== FALSE);
 
     // ======= Active sessions count tests ======= //
     // Create and login a user to have data in the sessions table.
     $test_user = $this->drupalCreateUser();
     $this->drupalLogin($test_user);
     $result = monitoring_sensor_run('user_sessions_authenticated', TRUE);
-    $this->assertEqual($result->getSensorValue(), 1);
+    $this->assertEqual($result->getValue(), 1);
     $result = monitoring_sensor_run('user_sessions_all', TRUE);
-    $this->assertEqual($result->getSensorValue(), 1);
+    $this->assertEqual($result->getValue(), 1);
     // Logout the user to see if sensors responded to the change.
     $this->drupalLogout();
     $result = monitoring_sensor_run('user_sessions_authenticated', TRUE);
-    $this->assertEqual($result->getSensorValue(), 0);
+    $this->assertEqual($result->getValue(), 0);
     $result = monitoring_sensor_run('user_sessions_all', TRUE);
-    $this->assertEqual($result->getSensorValue(), 0);
+    $this->assertEqual($result->getValue(), 0);
 
     // ======= node sensors tests ======= //
 
@@ -253,16 +253,16 @@ class MonitoringCoreTest extends MonitoringTestBase {
     // Make sure that sensors for the new node types are available.
     $this->sensorManager->resetCache();
     $result = $this->runSensor('node_new_' . $type1->type);
-    $this->assertEqual($result->getSensorValue(), 2);
+    $this->assertEqual($result->getValue(), 2);
     // Test for the SensorDatabaseAggregator custom message.
-    $this->assertEqual($result->getSensorMessage(), format_string('@count @unit in @time_interval', array(
-      '@count' => $result->getSensorValue(),
+    $this->assertEqual($result->getMessage(), format_string('@count @unit in @time_interval', array(
+      '@count' => $result->getValue(),
       '@unit' => strtolower($result->getSensorInfo()->getValueLabel()),
       '@time_interval' => format_interval($result->getSensorInfo()->getTimeIntervalValue()),
     )));
 
     $result = $this->runSensor('node_new_all');
-    $this->assertEqual($result->getSensorValue(), 3);
+    $this->assertEqual($result->getValue(), 3);
   }
 
   /**
@@ -288,7 +288,7 @@ class MonitoringCoreTest extends MonitoringTestBase {
     // critical status.
     $result = $this->runSensor('monitoring_disappeared_sensors');
     $this->assertTrue($result->isCritical());
-    $this->assertEqual($result->getSensorMessage(), 'Missing sensor comment_new');
+    $this->assertEqual($result->getMessage(), 'Missing sensor comment_new');
 
     // Enable the comment module to test the correct procedure of removing
     // sensors.
@@ -370,8 +370,8 @@ class MonitoringCoreTest extends MonitoringTestBase {
     // The sensor should escalate to CRITICAL.
     $result = $this->runSensor('monitoring_enabled_modules');
     $this->assertTrue($result->isCritical());
-    $this->assertEqual($result->getSensorMessage(), '2 modules delta, expected 0, Following modules are expected to be installed: Book (book), Contact (contact)');
-    $this->assertEqual($result->getSensorValue(), 2);
+    $this->assertEqual($result->getMessage(), '2 modules delta, expected 0, Following modules are expected to be installed: Book (book), Contact (contact)');
+    $this->assertEqual($result->getValue(), 2);
 
     // The default setting is not to allow additional modules. Enable comment
     // and the sensor should escalate to CRITICAL.
@@ -385,8 +385,8 @@ class MonitoringCoreTest extends MonitoringTestBase {
     module_enable(array('comment'));
     $result = $this->runSensor('monitoring_enabled_modules');
     $this->assertTrue($result->isCritical());
-    $this->assertEqual($result->getSensorMessage(), '1 modules delta, expected 0, Following modules are NOT expected to be installed: Comment (comment)');
-    $this->assertEqual($result->getSensorValue(), 1);
+    $this->assertEqual($result->getMessage(), '1 modules delta, expected 0, Following modules are NOT expected to be installed: Comment (comment)');
+    $this->assertEqual($result->getValue(), 1);
 
     // Allow additional, the sensor should not escalate.
     $this->drupalPost('admin/config/system/monitoring/sensors/monitoring_enabled_modules', array(
@@ -414,8 +414,8 @@ class MonitoringCoreTest extends MonitoringTestBase {
     module_enable(array('comment'));
     $result = $this->runSensor('monitoring_enabled_modules');
     $this->assertTrue($result->isCritical());
-    $this->assertEqual($result->getSensorMessage(), '1 modules delta, expected 0, Following modules are NOT expected to be installed: Comment (comment)');
-    $this->assertEqual($result->getSensorValue(), 1);
+    $this->assertEqual($result->getMessage(), '1 modules delta, expected 0, Following modules are NOT expected to be installed: Comment (comment)');
+    $this->assertEqual($result->getValue(), 1);
 
     // Allow additional modules and run the sensor - it should not escalate now.
     $settings = monitoring_sensor_settings_get('monitoring_enabled_modules');
@@ -432,8 +432,8 @@ class MonitoringCoreTest extends MonitoringTestBase {
     module_disable(array('comment'));
     $result = $this->runSensor('monitoring_enabled_modules');
     $this->assertTrue($result->isCritical());
-    $this->assertEqual($result->getSensorMessage(), '1 modules delta, expected 0, Following modules are expected to be installed: Comment (comment)');
-    $this->assertEqual($result->getSensorValue(), 1);
+    $this->assertEqual($result->getMessage(), '1 modules delta, expected 0, Following modules are expected to be installed: Comment (comment)');
+    $this->assertEqual($result->getValue(), 1);
   }
 
   /**
@@ -451,7 +451,7 @@ class MonitoringCoreTest extends MonitoringTestBase {
     watchdog('test_type', $this->randomName());
     watchdog('other_test_type', $this->randomName());
     $result = $this->runSensor('watchdog_aggregate_test');
-    $this->assertEqual($result->getSensorValue(), 2);
+    $this->assertEqual($result->getValue(), 2);
 
     // Aggregate by watchdog message.
     monitoring_sensor_settings_save('watchdog_aggregate_test', array(
@@ -463,7 +463,7 @@ class MonitoringCoreTest extends MonitoringTestBase {
     watchdog($this->randomName(), 'another_test_message');
     watchdog($this->randomName(), 'another_test_message');
     $result = $this->runSensor('watchdog_aggregate_test');
-    $this->assertEqual($result->getSensorValue(), 1);
+    $this->assertEqual($result->getValue(), 1);
 
     // Aggregate by watchdog severity.
     monitoring_sensor_settings_save('watchdog_aggregate_test', array(
@@ -476,7 +476,7 @@ class MonitoringCoreTest extends MonitoringTestBase {
     watchdog($this->randomName(), $this->randomName(), array(), WATCHDOG_CRITICAL);
     watchdog($this->randomName(), $this->randomName(), array(), WATCHDOG_CRITICAL);
     $result = $this->runSensor('watchdog_aggregate_test');
-    $this->assertEqual($result->getSensorValue(), 4);
+    $this->assertEqual($result->getValue(), 4);
 
     // Aggregate by watchdog location.
     monitoring_sensor_settings_save('watchdog_aggregate_test', array(
@@ -490,7 +490,7 @@ class MonitoringCoreTest extends MonitoringTestBase {
       ->condition('type', 'test_type')
       ->execute();
     $result = $this->runSensor('watchdog_aggregate_test');
-    $this->assertEqual($result->getSensorValue(), 2);
+    $this->assertEqual($result->getValue(), 2);
 
     // Filter for time period.
     monitoring_sensor_settings_save('watchdog_aggregate_test', array(
@@ -505,7 +505,7 @@ class MonitoringCoreTest extends MonitoringTestBase {
       ->execute();
     $count_latest = db_query('SELECT COUNT(*) FROM {watchdog} WHERE timestamp > :timestamp', array(':timestamp' => REQUEST_TIME - 10))->fetchField();
     $result = $this->runSensor('watchdog_aggregate_test');
-    $this->assertEqual($result->getSensorValue(), $count_latest);
+    $this->assertEqual($result->getValue(), $count_latest);
 
     // Test for thresholds and statuses.
     monitoring_sensor_settings_save('watchdog_aggregate_test', array(
@@ -515,18 +515,18 @@ class MonitoringCoreTest extends MonitoringTestBase {
     ));
     $result = $this->runSensor('watchdog_aggregate_test');
     $this->assertTrue($result->isOk());
-    $this->assertEqual($result->getSensorValue(), 0);
+    $this->assertEqual($result->getValue(), 0);
 
     watchdog('test_watchdog_aggregate_sensor', 'testing');
     watchdog('test_watchdog_aggregate_sensor', 'testing');
     $result = $this->runSensor('watchdog_aggregate_test');
     $this->assertTrue($result->isWarning());
-    $this->assertEqual($result->getSensorValue(), 2);
+    $this->assertEqual($result->getValue(), 2);
 
     watchdog('test_watchdog_aggregate_sensor', 'testing');
     $result = $this->runSensor('watchdog_aggregate_test');
     $this->assertTrue($result->isCritical());
-    $this->assertEqual($result->getSensorValue(), 3);
+    $this->assertEqual($result->getValue(), 3);
 
     // Test with different db table.
     $info = $this->sensorManager->getSensorInfoByName('db_aggregate_test');
@@ -542,7 +542,7 @@ class MonitoringCoreTest extends MonitoringTestBase {
 
     // Based on default sensor settings we should get the promoted node.
     $result = $this->runSensor('db_aggregate_test');
-    $this->assertEqual($result->getSensorValue(), 1);
+    $this->assertEqual($result->getValue(), 1);
 
     // Test with settings updated.
     $settings = monitoring_sensor_settings_get('db_aggregate_test');
@@ -552,7 +552,7 @@ class MonitoringCoreTest extends MonitoringTestBase {
     monitoring_sensor_settings_save('db_aggregate_test', $settings);
     $result = $this->runSensor('db_aggregate_test');
     // There should be two nodes with promote 0 and created in last 24 hours.
-    $this->assertEqual($result->getSensorValue(), 2);
+    $this->assertEqual($result->getValue(), 2);
 
     // Test support for configurable fields, create a taxonomy reference field.
     $type = $this->drupalCreateContentType();
@@ -672,7 +672,7 @@ class MonitoringCoreTest extends MonitoringTestBase {
     monitoring_sensor_settings_save('db_aggregate_test', $settings);
     $result = $this->runSensor('db_aggregate_test');
     // There should be three nodes with that reference.
-    $this->assertEqual($result->getSensorValue(), 3);
+    $this->assertEqual($result->getValue(), 3);
 
     // Update the sensor to look for nodes with a reference to term1 in the
     // first field and term2 in the second.
@@ -684,7 +684,7 @@ class MonitoringCoreTest extends MonitoringTestBase {
     monitoring_sensor_settings_save('db_aggregate_test', $settings);
     $result = $this->runSensor('db_aggregate_test');
     // There should be one nodes with those references.
-    $this->assertEqual($result->getSensorValue(), 1);
+    $this->assertEqual($result->getValue(), 1);
   }
 
   /**

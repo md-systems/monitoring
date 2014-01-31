@@ -202,7 +202,7 @@ class SensorDatabaseAggregator extends SensorThresholds implements SensorExtende
       $records_count = 0;
     }
 
-    $result->setSensorValue($records_count);
+    $result->setValue($records_count);
   }
 
   /**

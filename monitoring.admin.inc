@@ -140,18 +140,18 @@ function monitoring_reports_sensors_overview() {
 
       $row['data']['label'] = '<span title="' . $sensor_info->getDescription() . '">' . $sensor_info->getLabel() . '</span>';
       $row['data']['sensor_status'] = array(
-        'data' => $sensor_result->getSensorStatusLabel(),
+        'data' => $sensor_result->getStatusLabel(),
         'class' => array('status', 'having-dropbutton'),
       );
 
       $row['data']['timestamp'] = format_interval($called_before);
       $row['data']['execution_time'] = array(
-        'data' => $sensor_result->getSensorExecutionTime() . 'ms',
+        'data' => $sensor_result->getExecutionTime() . 'ms',
         'class' => array('execution-time'),
       );
-      $row['data']['sensor_status_message'] = truncate_utf8(strip_tags($sensor_result->getSensorMessage()), 200, TRUE, TRUE);
+      $row['data']['sensor_status_message'] = truncate_utf8(strip_tags($sensor_result->getMessage()), 200, TRUE, TRUE);
 
-      $row['class'] = array('monitoring-sensor-' . $sensor_name, 'monitoring-' . strtolower($sensor_result->getSensorStatus()));
+      $row['class'] = array('monitoring-sensor-' . $sensor_name, 'monitoring-' . strtolower($sensor_result->getStatus()));
 
       $links = array();
       $links['details'] = array('title' => t('Details'), 'href' => 'admin/reports/monitoring/sensors/' . $sensor_name);
@@ -177,12 +177,12 @@ function monitoring_reports_sensors_overview() {
 
       $rows[] = $row;
 
-      $status_overview[$sensor_result->getSensorStatus()]++;
-      $total_execution_time += $sensor_result->getSensorExecutionTime();
+      $status_overview[$sensor_result->getStatus()]++;
+      $total_execution_time += $sensor_result->getExecutionTime();
       if (!$sensor_result->isCached()) {
-        $non_cached_execution_time += $sensor_result->getSensorExecutionTime();
+        $non_cached_execution_time += $sensor_result->getExecutionTime();
       }
-      if ($sensor_result->getSensorStatus() == SensorResultInterface::STATUS_OK) {
+      if ($sensor_result->getStatus() == SensorResultInterface::STATUS_OK) {
         $ok_row_count++;
       }
       else {
@@ -335,20 +335,20 @@ function monitoring_sensor_details($form, &$form_state, SensorInfo $sensor_info)
   $form['sensor_result']['status'] = array(
     '#type' => 'item',
     '#title' => t('Status'),
-    '#markup' => $result->getSensorStatusLabel(),
+    '#markup' => $result->getStatusLabel(),
   );
 
   $form['sensor_result']['message'] = array(
     '#type' => 'item',
     '#title' => t('Message'),
-    '#markup' => $result->getSensorMessage(),
+    '#markup' => $result->getMessage(),
   );
 
 
   $form['sensor_result']['execution_time'] = array(
     '#type' => 'item',
     '#title' => t('Execution time'),
-    '#markup' => $result->getSensorExecutionTime() . 'ms',
+    '#markup' => $result->getExecutionTime() . 'ms',
   );
 
   if ($result->isCached()) {

@@ -45,15 +45,15 @@ class TestSensor extends SensorThresholds implements SensorExtendedInfoInterface
     }
 
     if (isset($this->testSensorResultData['sensor_value'])) {
-      $result->setSensorValue($this->testSensorResultData['sensor_value']);
+      $result->setValue($this->testSensorResultData['sensor_value']);
     }
 
     if (!empty($this->testSensorResultData['sensor_status'])) {
-      $result->setSensorStatus($this->testSensorResultData['sensor_status']);
+      $result->setStatus($this->testSensorResultData['sensor_status']);
     }
 
     if (!empty($this->testSensorResultData['sensor_message'])) {
-      $result->addSensorStatusMessage($this->testSensorResultData['sensor_message']);
+      $result->addStatusMessage($this->testSensorResultData['sensor_message']);
     }
   }
 

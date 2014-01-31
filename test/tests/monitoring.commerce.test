@@ -47,8 +47,8 @@ class MonitoringCommerceTest extends MonitoringTestBase {
     // Sensor commerce_order_turnover_chf testing, verify default configuration.
     $result = $this->runSensor('commerce_order_turnover_chf');
     $this->assertEqual($result->getSensorInfo()->getValueLabel(), 'CHF');
-    $this->assertEqual($result->getSensorValue(), 3);
-    $this->assertEqual($result->getSensorMessage(), 'CHF 3.00 in 1 day');
+    $this->assertEqual($result->getValue(), 3);
+    $this->assertEqual($result->getMessage(), 'CHF 3.00 in 1 day');
 
     // Now only consider completed orders.
     $account = $this->drupalCreateUser(array('administer monitoring'));
@@ -64,13 +64,13 @@ class MonitoringCommerceTest extends MonitoringTestBase {
     $this->assertTrue(in_array('completed', $conditions['status']['value']));
 
     $result = $this->runSensor('commerce_order_turnover_chf');
-    $this->assertEqual($result->getSensorValue(), 1000);
-    $this->assertEqual($result->getSensorMessage(), "CHF 1'000.00 in 1 day");
+    $this->assertEqual($result->getValue(), 1000);
+    $this->assertEqual($result->getMessage(), "CHF 1'000.00 in 1 day");
 
     // Sensor commerce_order_turnover_tnd testing.
     $result = $this->runSensor('commerce_order_turnover_tnd');
-    $this->assertEqual($result->getSensorValue(), 10);
-    $this->assertEqual($result->getSensorMessage(), '10.000  TND in 1 day');
+    $this->assertEqual($result->getValue(), 10);
+    $this->assertEqual($result->getMessage(), '10.000  TND in 1 day');
 
     // Sensor commerce_order_turnover_total testing.
     $edit = array(
@@ -83,8 +83,8 @@ class MonitoringCommerceTest extends MonitoringTestBase {
     $this->drupalPost('admin/config/system/monitoring/sensors/commerce_order_turnover_total', $edit, t('Save'));
     monitoring_sensor_manager()->resetCache();
     $result = $this->runSensor('commerce_order_turnover_total');
-    $this->assertEqual($result->getSensorValue(), 1013);
-    $this->assertEqual($result->getSensorMessage(), "CHF 1'013.00 in 1 day");
+    $this->assertEqual($result->getValue(), 1013);
+    $this->assertEqual($result->getMessage(), "CHF 1'013.00 in 1 day");
   }
 
   public function testOrderStatusSensors() {
@@ -93,11 +93,11 @@ class MonitoringCommerceTest extends MonitoringTestBase {
     $this->createEmptyOrderWithPrice('completed');
 
     $result = $this->runSensor('commerce_order_status_pending');
-    $this->assertEqual($result->getSensorValue(), 2);
-    $this->assertEqual($result->getSensorMessage(), '2 orders in 1 day');
+    $this->assertEqual($result->getValue(), 2);
+    $this->assertEqual($result->getMessage(), '2 orders in 1 day');
     $result = $this->runSensor('commerce_order_status_completed');
-    $this->assertEqual($result->getSensorValue(), 1);
-    $this->assertEqual($result->getSensorMessage(), '1 orders in 1 day');
+    $this->assertEqual($result->getValue(), 1);
+    $this->assertEqual($result->getMessage(), '1 orders in 1 day');
   }
 
   /**

@@ -39,7 +39,7 @@ class SensorImageMissingStyle extends SensorDatabaseAggregator {
     if (!empty($query_result)) {
       $variables = unserialize($query_result->variables);
       if (isset($variables['%source_image_path'])) {
-        $result->addSensorStatusMessage($variables['%source_image_path']);
+        $result->addStatusMessage($variables['%source_image_path']);
         $this->sourceImagePath = $variables['%source_image_path'];
       }
     }
@@ -53,7 +53,7 @@ class SensorImageMissingStyle extends SensorDatabaseAggregator {
     $verbose = parent::resultVerbose($result, $as_array);
 
     // If non found, no reason to query file_managed table.
-    if ($result->getSensorValue() == 0) {
+    if ($result->getValue() == 0) {
       return $verbose;
     }
 
@@ -70,7 +70,7 @@ class SensorImageMissingStyle extends SensorDatabaseAggregator {
     }
 
     if (empty($message)) {
-      $message = t('File @file record not found in the file_managed table.', array('@file' => $result->getSensorMessage()));
+      $message = t('File @file record not found in the file_managed table.', array('@file' => $result->getMessage()));
     }
 
     if ($as_array) {

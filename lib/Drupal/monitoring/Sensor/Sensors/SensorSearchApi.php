@@ -23,7 +23,7 @@ class SensorSearchApi extends SensorThresholds {
 
     $status = search_api_index_status($index);
 
-    $result->setSensorValue($status['total'] - $status['indexed']);
+    $result->setValue($status['total'] - $status['indexed']);
   }
 
 }

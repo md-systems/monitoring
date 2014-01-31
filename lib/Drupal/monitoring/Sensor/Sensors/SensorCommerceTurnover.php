@@ -62,7 +62,7 @@ class SensorCommerceTurnover extends SensorDatabaseAggregator {
 
     // Convert the amount into a decimal for either the configured currency
     // or the default if none is configured.
-    $result->setSensorValue(commerce_currency_amount_to_decimal($sensor_value, $currency_code ? $currency_code : commerce_default_currency()));
+    $result->setValue(commerce_currency_amount_to_decimal($sensor_value, $currency_code ? $currency_code : commerce_default_currency()));
   }
 
   /**

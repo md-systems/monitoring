@@ -93,13 +93,13 @@ class SensorCoreRequirements extends Sensor {
 
     $severity = $this->getHighestSeverity($requirements);
     if ($severity == REQUIREMENT_ERROR) {
-      $result->setSensorStatus(SensorResultInterface::STATUS_CRITICAL);
+      $result->setStatus(SensorResultInterface::STATUS_CRITICAL);
     }
     elseif ($severity == REQUIREMENT_WARNING) {
-      $result->setSensorStatus(SensorResultInterface::STATUS_WARNING);
+      $result->setStatus(SensorResultInterface::STATUS_WARNING);
     }
     else {
-      $result->setSensorStatus(SensorResultInterface::STATUS_OK);
+      $result->setStatus(SensorResultInterface::STATUS_OK);
     }
 
     if (!empty($requirements)) {
@@ -110,21 +110,21 @@ class SensorCoreRequirements extends Sensor {
         }
 
         if (!empty($requirement['title'])) {
-          $result->addSensorStatusMessage($requirement['title']);
+          $result->addStatusMessage($requirement['title']);
         }
 
         if (!empty($requirement['description'])) {
-          $result->addSensorStatusMessage($requirement['description']);
+          $result->addStatusMessage($requirement['description']);
         }
 
         if (!empty($requirement['value'])) {
-          $result->addSensorStatusMessage($requirement['value']);
+          $result->addStatusMessage($requirement['value']);
         }
       }
     }
     // In case no requirements returned, it is assumed that all is okay.
     else {
-      $result->addSensorStatusMessage('Requirements check OK');
+      $result->addStatusMessage('Requirements check OK');
     }
   }
 }

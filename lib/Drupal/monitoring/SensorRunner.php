@@ -185,8 +185,8 @@ class SensorRunner implements \IteratorAggregate {
       } catch (\Exception $e) {
         // In case the sensor execution results in an exception, mark it as
         // critical and set the sensor status message.
-        $result->setSensorStatus(SensorResultInterface::STATUS_CRITICAL);
-        $result->setSensorMessage(get_class($e) . ': ' . $e->getMessage());
+        $result->setStatus(SensorResultInterface::STATUS_CRITICAL);
+        $result->setMessage(get_class($e) . ': ' . $e->getMessage());
         // Log the error to watchdog.
         watchdog_exception('monitoring_exception', $e);
         // @todo Improve logging by e.g. integrating with past or save the
@@ -194,7 +194,7 @@ class SensorRunner implements \IteratorAggregate {
       }
 
       $timer = timer_stop($sensor_info->getName());
-      $result->setSensorExecutionTime($timer['time']);
+      $result->setExecutionTime($timer['time']);
 
       // Capture verbose output if requested and if we are able to do so.
       if ($this->verbose && $sensor_info->isExtendedInfo()) {
@@ -205,8 +205,8 @@ class SensorRunner implements \IteratorAggregate {
         $result->compile();
       }
       catch (\Exception $e) {
-        $result->setSensorStatus(SensorResultInterface::STATUS_CRITICAL);
-        $result->setSensorMessage(get_class($e) . ': ' . $e->getMessage());
+        $result->setStatus(SensorResultInterface::STATUS_CRITICAL);
+        $result->setMessage(get_class($e) . ': ' . $e->getMessage());
       }
     }
 
@@ -234,7 +234,7 @@ class SensorRunner implements \IteratorAggregate {
       }
 
       // Check if we need to log the result.
-      if ($this->needsLogging($result, $old_status, $result->getSensorStatus())) {
+      if ($this->needsLogging($result, $old_status, $result->getStatus())) {
         monitoring_sensor_result_save($result);
       }
     }
@@ -281,11 +281,11 @@ class SensorRunner implements \IteratorAggregate {
       if ($definition->getCachingTime() && !$result->isCached()) {
         $data = array(
           'name' => $result->getSensorName(),
-          'sensor_status' => $result->getSensorStatus(),
-          'sensor_message' => $result->getSensorMessage(),
-          'sensor_expected_value' => $result->getSensorExpectedValue(),
-          'sensor_value' => $result->getSensorValue(),
-          'execution_time' => $result->getSensorExecutionTime(),
+          'sensor_status' => $result->getStatus(),
+          'sensor_message' => $result->getMessage(),
+          'sensor_expected_value' => $result->getExpectedValue(),
+          'sensor_value' => $result->getValue(),
+          'execution_time' => $result->getExecutionTime(),
           'timestamp' => $result->getTimestamp(),
         );
         cache_set($this->getSensorCid($result->getSensorName()), $data, 'cache', REQUEST_TIME + $definition->getCachingTime());

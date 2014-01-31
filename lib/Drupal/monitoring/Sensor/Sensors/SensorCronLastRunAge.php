@@ -27,7 +27,7 @@ class SensorCronLastRunAge extends SensorThresholds {
    */
   public function runSensor(SensorResultInterface $result) {
     $last_cron_run_before = REQUEST_TIME - variable_get('cron_last', 0);
-    $result->setSensorValue($last_cron_run_before);
-    $result->addSensorStatusMessage('@time ago', array('@time' => format_interval($last_cron_run_before)));
+    $result->setValue($last_cron_run_before);
+    $result->addStatusMessage('@time ago', array('@time' => format_interval($last_cron_run_before)));
   }
 }

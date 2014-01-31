@@ -271,9 +271,9 @@ function monitoring_drush_result_output_table(array $results, $show_exec_time = 
 function monitoring_drush_result_output_table_single(SensorResultInterface $result) {
   $rows[] = array(dt('Name'), $result->getSensorInfo()->getName());
   $rows[] = array(dt('Label'), $result->getSensorInfo()->getLabel());
-  $rows[] = array(dt('Status'), $result->getSensorStatusLabel());
-  $rows[] = array(dt('Message'), $result->getSensorMessage());
-  $rows[] = array(dt('Execution time'), $result->getSensorExecutionTime() . 'ms');
+  $rows[] = array(dt('Status'), $result->getStatusLabel());
+  $rows[] = array(dt('Message'), $result->getMessage());
+  $rows[] = array(dt('Execution time'), $result->getExecutionTime() . 'ms');
   $rows[] = array(dt('Result age'), format_interval(time() - $result->getTimestamp()));
 
   // Add the verbose output if requested.
@@ -301,13 +301,13 @@ function monitoring_drush_result_output_table_multiple(array $results, $show_exe
   foreach ($results as $result) {
     $rows[$result->getSensorName()] = array(
       format_string("@label\n(@name)", array('@label' => truncate_utf8($result->getSensorInfo()->getLabel(), 40, TRUE, TRUE), '@name' => $result->getSensorName())),
-      $result->getSensorStatusLabel(),
-      truncate_utf8($result->getSensorMessage(), 40, TRUE, TRUE),
+      $result->getStatusLabel(),
+      truncate_utf8($result->getMessage(), 40, TRUE, TRUE),
       format_interval(time() - $result->getTimestamp()),
     );
 
     if ($show_exec_time) {
-      $rows[$result->getSensorName()][] = $result->getSensorExecutionTime() . 'ms';
+      $rows[$result->getSensorName()][] = $result->getExecutionTime() . 'ms';
     }
   }
 

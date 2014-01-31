@@ -84,7 +84,7 @@ class SensorResult implements SensorResultInterface {
   /**
    * {@inheritdoc}
    */
-  public function getSensorStatus() {
+  public function getStatus() {
     return $this->getResultData('sensor_status');
   }
 
@@ -92,7 +92,7 @@ class SensorResult implements SensorResultInterface {
   /**
    * {@inheritdoc}
    */
-  public function getSensorStatusLabel() {
+  public function getStatusLabel() {
     $labels = array(
       self::STATUS_CRITICAL => t('Critical'),
       self::STATUS_WARNING => t('Warning'),
@@ -106,14 +106,14 @@ class SensorResult implements SensorResultInterface {
   /**
    * {@inheritdoc}
    */
-  public function getSensorMessage() {
+  public function getMessage() {
     return $this->getResultData('sensor_message');
   }
 
   /**
    * {@inheritdoc}
    */
-  public function setSensorMessage($message, array $variables = array()) {
+  public function setMessage($message, array $variables = array()) {
     $this->sensorMessage = array(
       'message' => $message,
       'variables' => $variables,
@@ -123,7 +123,7 @@ class SensorResult implements SensorResultInterface {
   /**
    * {@inheritdoc}
    */
-  public function addSensorStatusMessage($message, array $variables = array()) {
+  public function addStatusMessage($message, array $variables = array()) {
     $this->statusMessages[] = array(
       'message' => $message,
       'variables' => $variables,
@@ -137,20 +137,20 @@ class SensorResult implements SensorResultInterface {
 
     // If the status is UNKNOWN we do the value assessment.
     $threshold_message = NULL;
-    if ($this->getSensorStatus() == SensorResultInterface::STATUS_UNKNOWN) {
+    if ($this->getStatus() == SensorResultInterface::STATUS_UNKNOWN) {
       if ($this->getSensorInfo()->isDefiningThresholds()) {
         $threshold_message = $this->assessThresholds();
       }
-      elseif ($this->getSensorExpectedValue() !== NULL) {
+      elseif ($this->getExpectedValue() !== NULL) {
         $this->assessComparison();
       }
     }
 
     if ($this->getSensorInfo()->getValueType() == 'bool') {
-      $msg_expected = $this->getSensorExpectedValue() ? 'TRUE' : 'FALSE';
+      $msg_expected = $this->getExpectedValue() ? 'TRUE' : 'FALSE';
     }
     else {
-      $msg_expected = $this->getSensorExpectedValue();
+      $msg_expected = $this->getExpectedValue();
     }
 
     // Set the default message variables.
@@ -169,7 +169,7 @@ class SensorResult implements SensorResultInterface {
       $messages = array();
 
       // Set the sensor message.
-      if ($this->getSensorValue() !== NULL) {
+      if ($this->getValue() !== NULL) {
 
         // If the sensor defines time interval we append the info to the
         // message.
@@ -186,7 +186,7 @@ class SensorResult implements SensorResultInterface {
       }
 
       // Set the expected value message if the sensor did not match.
-      if ($this->isCritical() && $this->getSensorExpectedValue() !== NULL) {
+      if ($this->isCritical() && $this->getExpectedValue() !== NULL) {
         $messages[] = format_string('expected !expected', $default_variables);
       }
       // Set the threshold message if there is any.
@@ -209,11 +209,11 @@ class SensorResult implements SensorResultInterface {
    * Performs comparison of expected and actual sensor values.
    */
   protected function assessComparison() {
-    if ($this->getSensorValue() != $this->getSensorExpectedValue()) {
-      $this->setSensorStatus(SensorResultInterface::STATUS_CRITICAL);
+    if ($this->getValue() != $this->getExpectedValue()) {
+      $this->setStatus(SensorResultInterface::STATUS_CRITICAL);
     }
     else {
-      $this->setSensorStatus(SensorResultInterface::STATUS_OK);
+      $this->setStatus(SensorResultInterface::STATUS_OK);
     }
   }
 
@@ -225,10 +225,10 @@ class SensorResult implements SensorResultInterface {
    */
   protected function assessThresholds() {
     $thresholds = new Thresholds($this->sensorInfo);
-    $matched_threshold = $thresholds->getMatchedThreshold($this->getSensorValue());
+    $matched_threshold = $thresholds->getMatchedThreshold($this->getValue());
 
     // Set sensor status based on matched threshold.
-    $this->setSensorStatus($matched_threshold);
+    $this->setStatus($matched_threshold);
     return $thresholds->getStatusMessage();
   }
 
@@ -265,58 +265,58 @@ class SensorResult implements SensorResultInterface {
       // @todo This assumption will no longer work when non-english messages
       // supported.
       $label = drupal_strtolower($label);
-      return format_string('!value !label', array('!value' => $this->getSensorValue(), '!label' => $label));
+      return format_string('!value !label', array('!value' => $this->getValue(), '!label' => $label));
     }
 
-    return format_string('Value !value', array('!value' => $this->getSensorValue()));
+    return format_string('Value !value', array('!value' => $this->getValue()));
   }
 
   /**
    * {@inheritdoc}
    */
-  public function getSensorValue() {
+  public function getValue() {
     return $this->getResultData('sensor_value');
   }
 
   /**
    * {@inheritdoc}
    */
-  public function getSensorExpectedValue() {
+  public function getExpectedValue() {
     return $this->getResultData('sensor_expected_value');
   }
 
   /**
    * {@inheritdoc}
    */
-  public function getSensorExecutionTime() {
+  public function getExecutionTime() {
     return round($this->getResultData('execution_time'), 2);
   }
 
   /**
    * {@inheritdoc}
    */
-  public function setSensorStatus($sensor_status) {
+  public function setStatus($sensor_status) {
     $this->setResultData('sensor_status', $sensor_status);
   }
 
   /**
    * {@inheritdoc}
    */
-  public function setSensorValue($sensor_value) {
+  public function setValue($sensor_value) {
     $this->setResultData('sensor_value', $sensor_value);
   }
 
   /**
    * {@inheritdoc}
    */
-  public function setSensorExpectedValue($sensor_value) {
+  public function setExpectedValue($sensor_value) {
     $this->setResultData('sensor_expected_value', $sensor_value);
   }
 
   /**
    * {@inheritdoc}
    */
-  public function setSensorExecutionTime($execution_time) {
+  public function setExecutionTime($execution_time) {
     $this->setResultData('execution_time', $execution_time);
   }
 
@@ -325,7 +325,7 @@ class SensorResult implements SensorResultInterface {
    */
   public function toNumber() {
 
-    $sensor_value = $this->getSensorValue();
+    $sensor_value = $this->getValue();
 
     if (is_numeric($sensor_value)) {
       return $sensor_value;
@@ -343,7 +343,7 @@ class SensorResult implements SensorResultInterface {
    *   Check result.
    */
   public function isWarning() {
-    return $this->getSensorStatus() == SensorResultInterface::STATUS_WARNING;
+    return $this->getStatus() == SensorResultInterface::STATUS_WARNING;
   }
 
   /**
@@ -353,7 +353,7 @@ class SensorResult implements SensorResultInterface {
    *   Check result.
    */
   public function isCritical() {
-    return $this->getSensorStatus() == SensorResultInterface::STATUS_CRITICAL;
+    return $this->getStatus() == SensorResultInterface::STATUS_CRITICAL;
   }
 
   /**
@@ -363,7 +363,7 @@ class SensorResult implements SensorResultInterface {
    *   Check result.
    */
   public function isUnknown() {
-    return $this->getSensorStatus() == SensorResultInterface::STATUS_UNKNOWN;
+    return $this->getStatus() == SensorResultInterface::STATUS_UNKNOWN;
   }
 
   /**
@@ -373,7 +373,7 @@ class SensorResult implements SensorResultInterface {
    *   Check result.
    */
   public function isOk() {
-    return $this->getSensorStatus() == SensorResultInterface::STATUS_OK;
+    return $this->getStatus() == SensorResultInterface::STATUS_OK;
   }
 
   /**
@@ -393,12 +393,12 @@ class SensorResult implements SensorResultInterface {
   public function toArray() {
     return array(
       'sensor_name' => $this->getSensorName(),
-      'value' => $this->getSensorValue(),
-      'expected_value' => $this->getSensorExpectedValue(),
+      'value' => $this->getValue(),
+      'expected_value' => $this->getExpectedValue(),
       'numeric_value' => $this->toNumber(),
-      'status' => $this->getSensorStatus(),
-      'message' => $this->getSensorMessage(),
-      'execution_time' => $this->getSensorExecutionTime(),
+      'status' => $this->getStatus(),
+      'message' => $this->getMessage(),
+      'execution_time' => $this->getExecutionTime(),
       'timestamp' => $this->getTimestamp(),
     );
   }

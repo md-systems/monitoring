@@ -27,12 +27,12 @@ class SensorElysiaCron extends SensorThresholds {
     // In case we are querying for last_run, the value is the seconds ago.
     if ($this->info->getSetting('metric') == 'last_run') {
       $value = REQUEST_TIME - $value;
-      $result->addSensorStatusMessage('@time ago', array('@time' => format_interval($value)));
+      $result->addStatusMessage('@time ago', array('@time' => format_interval($value)));
     }
     else {
-      $result->addSensorStatusMessage('at @time', array('@time' => format_date($value)));
+      $result->addStatusMessage('at @time', array('@time' => format_date($value)));
     }
 
-    $result->setSensorValue($value);
+    $result->setValue($value);
   }
 }

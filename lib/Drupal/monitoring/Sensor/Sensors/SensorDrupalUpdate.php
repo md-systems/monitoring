@@ -21,7 +21,7 @@ class SensorDrupalUpdate extends Sensor {
     $type = $this->info->getSetting('type');
     $status = $this->calculateStatus($type);
 
-    $result->setSensorStatus($status);
+    $result->setStatus($status);
 
     $available = update_get_available();
     $project_data = update_calculate_project_data($available);
@@ -45,15 +45,15 @@ class SensorDrupalUpdate extends Sensor {
     $status = $this->getStatusText($info['status']);
 
     if ($status == 'unknown') {
-      $result->addSensorStatusMessage('Core update status unknown');
+      $result->addStatusMessage('Core update status unknown');
       // Do not escalate in case the status is unknown.
-      $result->setSensorStatus(SensorResultInterface::STATUS_INFO);
+      $result->setStatus(SensorResultInterface::STATUS_INFO);
     }
     elseif ($status == 'current') {
-      $result->addSensorStatusMessage('Core up to date');
+      $result->addStatusMessage('Core up to date');
     }
     else {
-      $result->addSensorStatusMessage('Core (@current) - @status - latest @latest', array(
+      $result->addStatusMessage('Core (@current) - @status - latest @latest', array(
         '@status' => $status,
         '@current' => isset($info['existing_version']) ? $info['existing_version'] : NULL,
         '@latest' => isset($info['latest_version']) ? $info['latest_version'] : NULL,
@@ -83,13 +83,13 @@ class SensorDrupalUpdate extends Sensor {
       $status = $this->getStatusText($info['status']);
 
       if ($status == 'unknown') {
-        $result->addSensorStatusMessage('Module @module (@current) - no releases found', array(
+        $result->addStatusMessage('Module @module (@current) - no releases found', array(
           '@module' => $info['info']['name'],
           '@current' => isset($info['existing_version']) ? $info['existing_version'] : NULL,
         ));
       }
       else {
-        $result->addSensorStatusMessage('Module @module (@current) - @status - recommended @recommended - latest @latest', array(
+        $result->addStatusMessage('Module @module (@current) - @status - recommended @recommended - latest @latest', array(
           '@module' => $info['info']['name'],
           '@status' => $status,
           '@current' => isset($info['existing_version']) ? $info['existing_version'] : NULL,
@@ -100,7 +100,7 @@ class SensorDrupalUpdate extends Sensor {
     }
 
     if ($uptodate) {
-      $result->addSensorStatusMessage('All modules up to date');
+      $result->addStatusMessage('All modules up to date');
     }
   }
 

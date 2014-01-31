@@ -19,6 +19,6 @@ class SensorSimplenewsPending extends SensorThresholds {
    */
   public function runSensor(SensorResultInterface $result) {
     module_load_include('inc', 'simplenews', 'includes/simplenews.mail');
-    $result->setSensorValue(simplenews_count_spool(array('status' => SIMPLENEWS_SPOOL_PENDING)));
+    $result->setValue(simplenews_count_spool(array('status' => SIMPLENEWS_SPOOL_PENDING)));
   }
 }

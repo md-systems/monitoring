@@ -161,7 +161,7 @@ class MonitoringUITest extends MonitoringTestBase {
     $this->assertText('1 druplicons in 1 day, falls below 2');
     $this->assertText(t('Execution time'));
     // The sensor is cached, so we have the same cached execution time.
-    $this->assertText($result->getSensorExecutionTime() . 'ms');
+    $this->assertText($result->getExecutionTime() . 'ms');
     $this->assertText(t('Cache information'));
     $this->assertText('Executed now, valid for 1 hour');
     $this->assertRaw(t('Run again'));

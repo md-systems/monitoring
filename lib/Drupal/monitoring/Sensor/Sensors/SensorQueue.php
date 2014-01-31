@@ -20,6 +20,6 @@ class SensorQueue extends SensorThresholds {
   public function runSensor(SensorResultInterface $result) {
     /** @var \DrupalQueueInterface $queue */
     $queue = \DrupalQueue::get($this->info->getSetting('queue'));
-    $result->setSensorValue($queue->numberOfItems());
+    $result->setValue($queue->numberOfItems());
   }
 }

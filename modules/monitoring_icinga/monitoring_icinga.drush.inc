@@ -47,11 +47,11 @@ function monitoring_icinga_drush_callback($sensor_name = NULL) {
   $output = '';
 
   foreach ($results as $result) {
-    $message = iconv('utf-8', 'ASCII', truncate_utf8(strip_tags($result->getSensorMessage()), 124, TRUE, TRUE));
+    $message = iconv('utf-8', 'ASCII', truncate_utf8(strip_tags($result->getMessage()), 124, TRUE, TRUE));
     $service_description = monitoring_icinga_service_description($result->getSensorInfo());
 
     // Map INFO status to OK.
-    $status = $result->getSensorStatus();
+    $status = $result->getStatus();
     if ($status == SensorResultInterface::STATUS_INFO) {
       $status = SensorResultInterface::STATUS_OK;
     }
@@ -87,10 +87,10 @@ function monitoring_icinga_active_check($sensor_name) {
     return $statuses[SensorResultInterface::STATUS_CRITICAL];
   }
 
-  drush_print(iconv('utf-8', 'ASCII', $result->getSensorMessage()));
+  drush_print(iconv('utf-8', 'ASCII', $result->getMessage()));
 
   // Map INFO status to OK.
-  $status = $result->getSensorStatus();
+  $status = $result->getStatus();
   if ($status == SensorResultInterface::STATUS_INFO) {
     $status = SensorResultInterface::STATUS_OK;
   }

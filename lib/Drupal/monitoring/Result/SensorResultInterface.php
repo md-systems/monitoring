@@ -25,14 +25,14 @@ interface SensorResultInterface {
    * @return string
    *   Sensor status.
    */
-  function getSensorStatus();
+  function getStatus();
   /**
    * Gets a human readable label for the sensor status.
    *
    * @return string
    *   Sensor status label.
    */
-  function getSensorStatusLabel();
+  function getStatusLabel();
 
   /**
    * Sets sensor status.
@@ -40,7 +40,7 @@ interface SensorResultInterface {
    * @param string $status
    *   One of SensorResultInterface::STATUS_* constants.
    */
-  function setSensorStatus($status);
+  function setStatus($status);
 
   /**
    * Gets compiled sensor status message.
@@ -48,7 +48,7 @@ interface SensorResultInterface {
    * @return string
    *   Sensor status message.
    */
-  function getSensorMessage();
+  function getMessage();
 
   /**
    * Sets the result message.
@@ -61,7 +61,7 @@ interface SensorResultInterface {
    * @param array $variables
    *   Dynamic values to be replaced for placeholders in the message.
    */
-  function setSensorMessage($message, array $variables = array());
+  function setMessage($message, array $variables = array());
 
   /**
    * Adds sensor status message.
@@ -71,7 +71,7 @@ interface SensorResultInterface {
    * @param array $variables
    *   Dynamic values to be replaced for placeholders in the message.
    */
-  function addSensorStatusMessage($message, array $variables = array());
+  function addStatusMessage($message, array $variables = array());
 
   /**
    * Will compile added messages and deal with status.
@@ -87,14 +87,14 @@ interface SensorResultInterface {
    * @return mixed
    *   Whatever value the sensor is supposed to return.
    */
-  function getSensorValue();
+  function getValue();
 
   /**
    * Sets sensor value.
    *
    * @param mixed $value
    */
-  function setSensorValue($value);
+  function setValue($value);
 
   /**
    * Gets the sensor expected value.
@@ -102,7 +102,7 @@ interface SensorResultInterface {
    * @return mixed
    *   Whatever value the sensor is supposed to return.
    */
-  function getSensorExpectedValue();
+  function getExpectedValue();
 
   /**
    * Sets sensor expected value.
@@ -115,14 +115,14 @@ interface SensorResultInterface {
    *
    * @param mixed $value
    */
-  function setSensorExpectedValue($value);
+  function setExpectedValue($value);
 
   /**
    * Get sensor execution time.
    *
    * @return double
    */
-  function getSensorExecutionTime();
+  function getExecutionTime();
 
   /**
    * Sets sensor execution time.
@@ -130,7 +130,7 @@ interface SensorResultInterface {
    * @param double $time
    *   Sensor execution time.
    */
-  function setSensorExecutionTime($time);
+  function setExecutionTime($time);
 
   /**
    * Casts/processes the sensor value into numeric representation.
