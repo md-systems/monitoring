@@ -106,7 +106,7 @@ class MonitoringUITest extends MonitoringTestBase {
 
     // Run the test_sensor and update the timestamp in the cache to make the
     // result the oldest.
-    monitoring_sensor_run('test_sensor');
+    $this->runSensor('test_sensor');
     $cid = 'monitoring_sensor_result:test_sensor';
     $cache = cache_get($cid);
     $cache->data['timestamp'] = $cache->data['timestamp'] - 1000;
@@ -152,6 +152,7 @@ class MonitoringUITest extends MonitoringTestBase {
 
     // Make sure that all relevant information is displayed.
     // @todo: Assert position/order.
+    // Cannot use $this->runSensor() as the cache needs to remain.
     $result = monitoring_sensor_run('db_aggregate_test');
     $this->assertText(t('Description'));
     $this->assertText($sensor_info->getDescription());

@@ -140,7 +140,7 @@ class MonitoringCoreTest extends MonitoringTestBase {
       watchdog('page not found', 'not/found');
     }
 
-    $result = monitoring_sensor_run('dblog_404', TRUE);
+    $result = $this->runSensor('dblog_404');
     $this->assertEqual($result->getValue(), 21);
     $this->assertTrue($result->isWarning());
 
@@ -148,7 +148,7 @@ class MonitoringCoreTest extends MonitoringTestBase {
       watchdog('page not found', 'not/found/another');
     }
 
-    $result = monitoring_sensor_run('dblog_404', TRUE);
+    $result = $this->runSensor('dblog_404');
     $this->assertEqual($result->getValue(), 101);
     $this->assertTrue($result->isCritical());
 
@@ -222,7 +222,7 @@ class MonitoringCoreTest extends MonitoringTestBase {
       'enabled' => TRUE,
       'cmd' => 'echo ""',
     ));
-    $result = monitoring_sensor_run('monitoring_git_dirty_tree', TRUE);
+    $result = $this->runSensor('monitoring_git_dirty_tree');
     $this->assertTrue($result->isOk());
     // The message should say that it is ok.
     $this->assertTrue(strpos($result->getMessage(), 'Git repository clean') !== FALSE);
@@ -231,15 +231,15 @@ class MonitoringCoreTest extends MonitoringTestBase {
     // Create and login a user to have data in the sessions table.
     $test_user = $this->drupalCreateUser();
     $this->drupalLogin($test_user);
-    $result = monitoring_sensor_run('user_sessions_authenticated', TRUE);
+    $result = $this->runSensor('user_sessions_authenticated');
     $this->assertEqual($result->getValue(), 1);
-    $result = monitoring_sensor_run('user_sessions_all', TRUE);
+    $result = $this->runSensor('user_sessions_all');
     $this->assertEqual($result->getValue(), 1);
     // Logout the user to see if sensors responded to the change.
     $this->drupalLogout();
-    $result = monitoring_sensor_run('user_sessions_authenticated', TRUE);
+    $result = $this->runSensor('user_sessions_authenticated');
     $this->assertEqual($result->getValue(), 0);
-    $result = monitoring_sensor_run('user_sessions_all', TRUE);
+    $result = $this->runSensor('user_sessions_all');
     $this->assertEqual($result->getValue(), 0);
 
     // ======= node sensors tests ======= //

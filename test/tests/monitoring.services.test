@@ -147,6 +147,7 @@ class MonitoringServicesTest extends MonitoringTestBase {
     // If the result is cached test also for the result values. In case of
     // result which is not cached we might not get the same values.
     if ($sensor_info->getCachingTime()) {
+      // Cannot use $this->runSensor() as the cache needs to remain.
       $result = monitoring_sensor_run($sensor_info->getName());
       $this->assertEqual($response_result['status'], $result->getStatus());
       $this->assertEqual($response_result['value'], $result->getValue());

@@ -88,7 +88,7 @@ class MonitoringApiTest extends MonitoringTestBase {
       'execution_time' => 1,
     );
     variable_set('test_sensor_result_data', $test_sensor_result_data);
-    $result = monitoring_sensor_run('test_sensor');
+    $result = $this->runSensor('test_sensor');
 
     $this->assertTrue($result->getExecutionTime() > 0);
     $this->assertEqual($result->getStatus(), $test_sensor_result_data['sensor_status']);
@@ -347,7 +347,7 @@ class MonitoringApiTest extends MonitoringTestBase {
     $settings = monitoring_sensor_settings_get('test_sensor');
     $settings['result_logging'] = TRUE;
     monitoring_sensor_settings_save('test_sensor', $settings);
-    monitoring_sensor_run('test_sensor', TRUE);
+    $this->runSensor('test_sensor');
 
     $logs = $this->loadSensorData('test_sensor');
     $this->assertEqual(count($logs), 1);
@@ -361,7 +361,7 @@ class MonitoringApiTest extends MonitoringTestBase {
     $settings = monitoring_sensor_settings_get('test_sensor');
     $settings['result_logging'] = FALSE;
     monitoring_sensor_settings_save('test_sensor', $settings);
-    monitoring_sensor_run('test_sensor', TRUE);
+    $this->runSensor('test_sensor');
     $logs = $this->loadSensorData('test_sensor');
     $this->assertEqual(count($logs), 1);
 
@@ -370,7 +370,7 @@ class MonitoringApiTest extends MonitoringTestBase {
       'sensor_status' => SensorResultInterface::STATUS_WARNING,
     );
     variable_set('test_sensor_result_data', $test_sensor_result_data);
-    monitoring_sensor_run('test_sensor', TRUE);
+    $this->runSensor('test_sensor');
     $logs = $this->loadSensorData('test_sensor');
     $this->assertEqual(count($logs), 2);
     $log = array_pop($logs);
@@ -382,7 +382,7 @@ class MonitoringApiTest extends MonitoringTestBase {
     $settings = monitoring_sensor_settings_get('test_sensor');
     $settings['result_logging'] = FALSE;
     monitoring_sensor_settings_save('test_sensor', $settings);
-    monitoring_sensor_run('test_sensor', TRUE);
+    $this->runSensor('test_sensor');
     $logs = $this->loadSensorData('test_sensor');
     $this->assertEqual(count($logs), 3);
 
@@ -393,7 +393,7 @@ class MonitoringApiTest extends MonitoringTestBase {
     $settings['result_logging'] = TRUE;
     monitoring_sensor_settings_save('test_sensor', $settings);
     $logs = $this->loadSensorData('test_sensor');
-    monitoring_sensor_run('test_sensor', TRUE);
+    $this->runSensor('test_sensor');
     $this->assertEqual(count($logs), 3);
 
   }
