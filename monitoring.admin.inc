@@ -159,9 +159,6 @@ function monitoring_reports_sensors_overview() {
       if ($sensor_info->getCachingTime() && user_access('monitoring force run')) {
         $links['force_execution'] = array('title' => t('Force execution'), 'href' => 'monitoring/sensors/force/' . $sensor_name);
       }
-      if (user_access('monitoring verbose')) {
-        $links['log'] = array('title' => t('Log'), 'href' => 'admin/reports/monitoring/sensors/' . $sensor_name . '/log');
-      }
       if ($sensor_info->isConfigurable() && user_access('administer monitoring')) {
         $links['settings'] = array('title' => t('Settings'), 'href' => 'admin/config/system/monitoring/sensors/' . $sensor_name,
           'query' => array('destination' => 'admin/reports/monitoring'));
