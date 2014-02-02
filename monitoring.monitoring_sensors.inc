@@ -419,6 +419,18 @@ function monitoring_system_monitoring_sensor_info() {
 
   // === Variables === //
 
+  $info['core_theme_default'] = array(
+    'label' => 'Default theme',
+    'description' => 'Site default theme',
+    'sensor_class' => 'Drupal\monitoring\Sensor\Sensors\SensorVariable',
+    'numeric' => FALSE,
+    'settings' => array(
+      'variable_name' => 'theme_default',
+      'variable_value' => 'bartik',
+      'variable_default_value' => 'bartik',
+    ),
+  );
+
   $info['core_maintenance_mode'] = array(
     'label' => 'Maintenance mode',
     'description' => 'Site maintenance mode',
