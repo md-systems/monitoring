@@ -48,9 +48,9 @@ class SensorImageMissingStyle extends SensorDatabaseAggregator {
   /**
    * {@inheritdoc}
    */
-  public function resultVerbose(SensorResultInterface $result, $as_array = FALSE) {
+  public function resultVerbose(SensorResultInterface $result) {
 
-    $verbose = parent::resultVerbose($result, $as_array);
+    $verbose = parent::resultVerbose($result);
 
     // If non found, no reason to query file_managed table.
     if ($result->getValue() == 0) {
@@ -73,12 +73,7 @@ class SensorImageMissingStyle extends SensorDatabaseAggregator {
       $message = t('File @file record not found in the file_managed table.', array('@file' => $result->getMessage()));
     }
 
-    if ($as_array) {
-      $verbose['message'] = $message;
-    }
-    else {
-      $verbose .=  ' ' . $message;
-    }
+    $verbose .=  ' ' . $message;
 
     return $verbose;
   }
