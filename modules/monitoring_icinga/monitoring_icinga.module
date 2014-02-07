@@ -63,7 +63,7 @@ function monitoring_icinga_service_description(SensorInfo $sensor_info) {
 }
 
 /**
- * Helper function to get icinga status mappings.
+ * Get icinga status mappings.
  *
  * @return array
  *   Mapped statuses.

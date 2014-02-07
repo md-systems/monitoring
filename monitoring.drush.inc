@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Monitoring base drush file.
+ * Drush support for monitoring.
  */
 
 use Drupal\monitoring\Result\SensorResultInterface;
@@ -16,6 +16,13 @@ define('MONITORING_DRUSH_SENSOR_STATUS_OK', 0);
 
 /**
  * Implements hook_drush_command().
+ *
+ * Provides commands:
+ * - monitoring-info
+ * - monitoring-run
+ * - monitoring-enable
+ * - monitoring-disable
+ * - monitoring-purge-settings
  */
 function monitoring_drush_command() {
   $items = array();
@@ -96,7 +103,9 @@ function monitoring_drush_command() {
 }
 
 /**
- * Provides info about available sensors.
+ * Drush callback to get available sensors info.
+ *
+ * Shows either all sensors as a table or a specific one.
  *
  * @param string $sensor_name
  *   Sensor name for which to print info.
@@ -132,7 +141,7 @@ function monitoring_drush_info_all() {
 }
 
 /**
- * Prints detailed info about the sensor.
+ * Prints detailed info about the given sensor $sensor_name.
  *
  * @param string $sensor_name
  *   Sensor name for which to print info.

@@ -5,7 +5,7 @@
  */
 
 /**
- * Simplenews sensor tests.
+ * Tests for simplenews sensor.
  */
 class MonitoringSimplenewsTest extends MonitoringTestBase {
 

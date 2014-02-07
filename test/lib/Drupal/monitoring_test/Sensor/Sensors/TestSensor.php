@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Test sensor to report status as provided by external arguments.
+ * Contains \Drupal\monitoring_test\Sensor\Sensors\TestSensor.
  */
 
 namespace Drupal\monitoring_test\Sensor\Sensors;
@@ -16,7 +16,7 @@ use Drupal\monitoring\Sensor\SensorThresholds;
 
 
 /**
- * Class TestSensor
+ * Test sensor to report status as provided by external arguments.
  */
 class TestSensor extends SensorThresholds implements SensorExtendedInfoInterface {
 

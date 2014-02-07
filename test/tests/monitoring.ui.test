@@ -8,7 +8,7 @@ use Drupal\monitoring\Result\SensorResultInterface;
 use Drupal\monitoring\SensorRunner;
 
 /**
- * Tests the Monitoring UI.
+ * Tests for the Monitoring UI.
  */
 class MonitoringUITest extends MonitoringTestBase {
 

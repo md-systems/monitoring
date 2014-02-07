@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Contains Drupal\monitoring\Sensor\Sensors\SensorDatabaseAggregator
+ * Contains \Drupal\monitoring\Sensor\Sensors\SensorDatabaseAggregator.
  */
 
 namespace Drupal\monitoring\Sensor\Sensors;
@@ -17,7 +17,7 @@ use Drupal\monitoring\Sensor\SensorThresholds;
  *
  * Provides basic query build logic and generic verbosity.
  *
- * Settings:
+ * Defines sensor settings:
  * - table: Name of the table to query on.
  * - conditions: A list of conditions to apply to the query.
  *   - field: Name of the field to filter on. Configurable fields are supported
@@ -26,6 +26,8 @@ use Drupal\monitoring\Sensor\SensorThresholds;
  *   - operator: Any of the supported operators.
  * - time_interval_field: Timestamp field name
  * - time_interval_value: Number of seconds defining the period
+ *
+ * Adds time interval to sensor settings form.
  */
 class SensorDatabaseAggregator extends SensorThresholds implements SensorExtendedInfoInterface {
 
@@ -106,7 +108,7 @@ class SensorDatabaseAggregator extends SensorThresholds implements SensorExtende
   }
 
   /**
-   * Helper function to get fetched object from the executed query.
+   * Get fetched object from the executed query.
    *
    * Multiple calls to executedQuery->fetchObjects() resulted in second call
    * returning false value.

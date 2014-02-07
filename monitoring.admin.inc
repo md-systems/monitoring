@@ -187,7 +187,7 @@ function monitoring_reports_sensors_overview() {
       }
     }
 
-    // Add special class if all sensors of a category are ok.
+    // Add special css class if all sensors of a category are ok.
     if ($ok_row_count >= 0) {
       $index = count($rows) - $ok_row_count - 1;
       $rows[$index]['class'][] = 'sensor-category-ok';
@@ -281,6 +281,9 @@ function monitoring_sensor_settings_form($form, &$form_state, SensorInfo $sensor
   return $form;
 }
 
+/**
+ * Validate sensor settings form.
+ */
 function monitoring_sensor_settings_form_validate($form, &$form_state) {
   /** @var SensorConfigurableInterface $sensor */
   $sensor_info = monitoring_sensor_manager()->getSensorInfoByName($form_state['sensor_name']);
@@ -289,12 +292,18 @@ function monitoring_sensor_settings_form_validate($form, &$form_state) {
   $sensor->settingsFormValidate($form, $form_state);
 }
 
+/**
+ * Submit sensor settings form.
+ */
 function monitoring_sensor_settings_form_submit($form, &$form_state) {
   $form_key = monitoring_sensor_settings_key($form_state['sensor_name']);
   monitoring_sensor_settings_save($form_state['sensor_name'], $form_state['values'][$form_key]);
   drupal_set_message(t('Sensor settings saved.'));
 }
 
+/**
+ * Services sensor details form.
+ */
 function monitoring_sensor_details($form, &$form_state, SensorInfo $sensor_info) {
   $form_state['sensor_name'] = $sensor_info->getName();
 
@@ -434,6 +443,9 @@ function monitoring_sensor_details($form, &$form_state, SensorInfo $sensor_info)
   return $form;
 }
 
+/**
+ * Submit sensor details form.
+ */
 function monitoring_sensor_details_submit($form, &$form_state) {
   SensorRunner::resetCache(array($form_state['sensor_name']));
   drupal_set_message(t('Sensor force run executed.'));
@@ -456,6 +468,8 @@ function monitoring_force_execution($sensor_name = NULL) {
 
 /**
  * Monitoring settings form.
+ *
+ * Configure logging.
  */
 function monitoring_settings_form($form, &$form_state) {
   $form['monitoring_sensor_call_logging'] = array(

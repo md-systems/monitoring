@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Contains Drupal\monitoring\Sensor\Sensors\SensorSimplenewsPending
+ * Contains \Drupal\monitoring\Sensor\Sensors\SensorSimplenewsPending.
  */
 
 namespace Drupal\monitoring\Sensor\Sensors;
@@ -10,7 +10,11 @@ use Drupal\monitoring\Result\SensorResultInterface;
 use Drupal\monitoring\Sensor\SensorThresholds;
 
 /**
- * Monitors pending items in the simplenews spool.
+ * Monitors pending items in the simplenews mail spool.
+ *
+ * Once all is processed, the value should be 0.
+ *
+ * @see simplenews_count_spool()
  */
 class SensorSimplenewsPending extends SensorThresholds {
 

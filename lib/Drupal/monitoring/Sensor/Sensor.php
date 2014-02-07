@@ -2,14 +2,15 @@
 
 /**
  * @file
- * Abstract implementation of the SensorInterface.
+ * Contains \Drupal\monitoring\Sensor\Sensor.
  */
 
 namespace Drupal\monitoring\Sensor;
 
 /**
- * Abstract implementation of the SensorInterface providing generic
- * sensor functionality. To create a custom sensor use extend this class.
+ * Abstract SensorInterface implementation with common behaviour.
+ *
+ * @todo more
  */
 abstract class Sensor implements SensorInterface {
 

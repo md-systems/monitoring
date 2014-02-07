@@ -9,6 +9,13 @@ namespace Drupal\monitoring\Sensor;
 
 /**
  * Manages sensor definitions and settings.
+ *
+ * Provides list of enabled sensors.
+ * Sensors can be listed by category.
+ *
+ * Maintains a (non persistent) info cache.
+ * Enables and disables sensors.
+ *
  */
 class SensorManager {
 
@@ -148,7 +155,7 @@ class SensorManager {
       $settings['enabled'] = FALSE;
       monitoring_sensor_settings_save($sensor_name, $settings);
       // @todo - the following part is SensorDisappearedSensors specific. We need
-      // to move it into the sensor somehow.
+      //   to move it into the sensor somehow.
       $available_sensors = variable_get('monitoring_available_sensors', array());
       $available_sensors[$sensor_name]['enabled'] = FALSE;
       $available_sensors[$sensor_name]['name'] = $sensor_name;
@@ -159,8 +166,14 @@ class SensorManager {
   /**
    * Loads sensor info from hooks.
    *
+   * Instantiates a SensorInfo for each sensor with merged settings.
+   * Creates also instances for disabled sensors.
+   *
    * @return \Drupal\monitoring\Sensor\SensorInfo[]
    *   List of SensorInfo instances.
+   *
+   * @see hook_monitoring_sensor_info()
+   * @see hook_monitoring_sensor_info_alter()
    */
   protected function loadSensorInfo() {
     $info = array();
@@ -215,7 +228,7 @@ class SensorManager {
     }
 
     // Support variable overrides.
-    // @todo This will change in https://drupal.org/node/2170955.
+    // @todo This might change in https://drupal.org/node/2170955.
     $info = drupal_array_merge_deep($info, variable_get('monitoring_sensor_info', array()));
 
     // Convert the arrays into SensorInfo objects.
@@ -242,8 +255,7 @@ class SensorManager {
    */
   protected function mergeSettings($sensor_name, array $default_settings) {
     $saved_settings = monitoring_sensor_settings_get($sensor_name);
-    $default_settings = $this->mergeSettingsArrays(array($default_settings, $saved_settings));
-    return $default_settings;
+    return $this->mergeSettingsArrays(array($default_settings, $saved_settings));
   }
 
   /**
@@ -297,7 +309,7 @@ class SensorManager {
    *   The array to check.
    *
    * @return bool
-   *   TRUE if the array has no values that are themself arrays.
+   *   TRUE if the array has no values that are arrays again.
    */
   protected function isFlatArray($array) {
     foreach ($array as $value) {

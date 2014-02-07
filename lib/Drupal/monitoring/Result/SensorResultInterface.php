@@ -10,6 +10,8 @@ use Drupal\monitoring\Sensor\SensorInfo;
 
 /**
  * Container for sensor result.
+ *
+ * @todo more
  */
 interface SensorResultInterface {
 
@@ -43,7 +45,9 @@ interface SensorResultInterface {
   function setStatus($status);
 
   /**
-   * Gets compiled sensor status message.
+   * Gets sensor status message.
+   *
+   * Must not be called on an uncompiled result.
    *
    * @return string
    *   Sensor status message.
@@ -51,30 +55,42 @@ interface SensorResultInterface {
   function getMessage();
 
   /**
-   * Sets the result message.
+   * Sets the final result message.
    *
-   * As opposed to addResultMessage() this sets the only message and removes any
-   * messages previously added.
+   * If this is set, then the compilation will not extend the message in any
+   * way and the sensor completely responsible for making sure that all
+   * relevant information like the sensor value is part of the message.
    *
    * @param string $message
    *   Message to be set.
    * @param array $variables
    *   Dynamic values to be replaced for placeholders in the message.
+   *
+   * @see self::addStatusMessage()
    */
   function setMessage($message, array $variables = array());
 
   /**
    * Adds sensor status message.
    *
+   * Multiple status messages can be added to a single result and will be added
+   * to the final status message.
+   *
    * @param string $message
    *   Message to be set.
    * @param array $variables
    *   Dynamic values to be replaced for placeholders in the message.
+   *
+   * @see self::setMessage()
    */
   function addStatusMessage($message, array $variables = array());
 
   /**
-   * Will compile added messages and deal with status.
+   * Compiles added status messages sets the status.
+   *
+   * If the status is STATUS_UNKNOWN, this will attempt to set the status
+   * based on expected value and threshold configurations. See
+   * \Drupal\monitoring\Sensor\SensorInterface::runSensor() for details.
    *
    * @throws \Drupal\monitoring\Sensor\SensorCompilationException
    *   Thrown if an error occurs during the sensor result compilation.
@@ -112,6 +128,8 @@ interface SensorResultInterface {
    *
    * In case an interval is expected, do not set the expected value, thresholds
    * are used instead.
+   *
+   * The expected value is not considered when thresholds are configured.
    *
    * @param mixed $value
    */

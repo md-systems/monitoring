@@ -1,13 +1,13 @@
 <?php
 /**
  * @file
- * Entity class for the sensor result.
+ * Contains \Drupal\monitoring\Entity\SensorResultEntity.
  */
 
 namespace Drupal\monitoring\Entity;
 
 /**
- * Entity representation of the sensor result.
+ * The monitoring_sensor_result entity class.
  */
 class SensorResultEntity extends \Entity {
 

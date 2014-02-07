@@ -83,7 +83,7 @@ function monitoring_munin_graph_settings($form, &$form_state) {
       ),
     );
     // @todo - we need to provide such setting either for single graph or multi
-    // definition.
+    //   definition.
 //    $form[$sensor_name]['graph_args'] = array(
 //      '#type' => 'textfield',
 //      '#title' => t('Graph arguments'),

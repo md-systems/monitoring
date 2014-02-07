@@ -5,7 +5,7 @@
  */
 
 /**
- * Search API sensor tests.
+ * Tests for search API sensor.
  */
 class MonitoringSearchAPITest extends MonitoringTestBase {
 

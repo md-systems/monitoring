@@ -10,8 +10,9 @@ use Drupal\monitoring\Result\SensorResultInterface;
 
 
 /**
- * Extends the SensorDatabaseAggregator generic class to capture missing
- * image style error.
+ * Monitors image derivate creation errors from dblog.
+ *
+ * Displays image derivate with highest occurrence as message.
  */
 class SensorImageMissingStyle extends SensorDatabaseAggregator {
 
@@ -19,10 +20,9 @@ class SensorImageMissingStyle extends SensorDatabaseAggregator {
 
   /**
    * {@inheritdoc}
-   *
-   * Extends the watchdog query.
    */
   public function buildQuery() {
+    // Extends the watchdog query.
     $query = parent::buildQuery();
     $query->addField('watchdog', 'variables');
     $query->groupBy('variables');

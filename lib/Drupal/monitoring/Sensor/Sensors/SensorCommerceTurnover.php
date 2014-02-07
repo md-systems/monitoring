@@ -8,8 +8,9 @@ namespace Drupal\monitoring\Sensor\Sensors;
 use Drupal\monitoring\Result\SensorResultInterface;
 
 /**
- * Extends the SensorDatabaseAggregator generic class to provide commerce
- * turnover stats.
+ * Monitors commerce order turnover stats.
+ *
+ * Based on SensorDatabaseAggregator using commerce_order table.
  */
 class SensorCommerceTurnover extends SensorDatabaseAggregator {
 

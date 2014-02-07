@@ -9,8 +9,9 @@ namespace Drupal\monitoring\Sensor\Sensors;
 use Drupal\monitoring\Result\SensorResultInterface;
 
 /**
- * Extends the SensorDatabaseAggregator generic class to capture 404
- * page with highest occurrence.
+ * Monitors 404 page errors from dblog.
+ *
+ * Displays URL with highest occurrence as message.
  */
 class SensorDblog404 extends SensorDatabaseAggregator {
 
@@ -20,6 +21,7 @@ class SensorDblog404 extends SensorDatabaseAggregator {
   public function buildQuery() {
     $query = parent::buildQuery();
     $query->addField('watchdog', 'message');
+    // The message is the requested 404 URL.
     $query->groupBy('message');
     $query->orderBy('records_count', 'DESC');
     $query->range(0, 1);

@@ -1,13 +1,16 @@
 <?php
 /**
  * @file
- * Contains Drupal\monitoring\Sensor\SensorThresholds.
+ * Contains \Drupal\monitoring\Sensor\SensorThresholds.
  */
 
 namespace Drupal\monitoring\Sensor;
 
 /**
- * Provides configuration form for Sensor providing thresholds.
+ * Provides configuration form for Sensor with thresholds.
+ *
+ * Sensors may provide thresholds that apply by default.
+ * Threshold values are validated for sequence.
  */
 abstract class SensorThresholds extends SensorConfigurable implements SensorThresholdsInterface {
 

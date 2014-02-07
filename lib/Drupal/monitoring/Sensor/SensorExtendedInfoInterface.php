@@ -10,6 +10,8 @@ use Drupal\monitoring\Result\SensorResultInterface;
 
 /**
  * Sensor Extended Info interface.
+ *
+ * Implemented by sensors with verbose information.
  */
 interface SensorExtendedInfoInterface {
 

@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Contains \Drupal\monitoring\Views\Handler\Field\SensorName
+ * Contains \Drupal\monitoring\Views\Handler\Field\SensorName.
  */
 
 namespace Drupal\monitoring\Views\Handler\Field;
@@ -11,7 +11,7 @@ use Drupal\monitoring\Entity\SensorResultEntity;
 use Drupal\monitoring\Sensor\NonExistingSensorException;
 
 /**
- * Views handler to output sensor name.
+ * Views handler to output sensor label and name.
  */
 class SensorName extends \views_handler_field_entity {
 

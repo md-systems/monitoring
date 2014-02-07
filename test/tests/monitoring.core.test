@@ -5,7 +5,7 @@
  */
 
 /**
- * Cron sensor tests.
+ * Tests for cron sensor.
  */
 class MonitoringCoreTest extends MonitoringTestBase {
 

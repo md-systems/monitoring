@@ -9,7 +9,9 @@ namespace Drupal\monitoring\Sensor\Sensors;
 use Drupal\monitoring\Result\SensorResultInterface;
 
 /**
- * Aggregates user failed login watchdog messages.
+ * Monitors user failed login from dblog messages.
+ *
+ * Helps to identify bots or brute force attacks.
  */
 class SensorUserFailedLogins extends SensorDatabaseAggregator {
 

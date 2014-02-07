@@ -5,7 +5,7 @@
  */
 
 /**
- * Cron sensor tests.
+ * Tests for commerce order turnover sensor.
  */
 class MonitoringCommerceTest extends MonitoringTestBase {
 
@@ -101,7 +101,7 @@ class MonitoringCommerceTest extends MonitoringTestBase {
   }
 
   /**
-   * Helper to create an order for testing purposes.
+   * Create an order for testing purposes.
    *
    * The value of the total amount of the resulting order will be 1 (100 in db).
    *

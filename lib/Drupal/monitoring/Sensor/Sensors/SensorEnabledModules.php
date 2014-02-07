@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Contains Drupal\monitoring\Sensor\Sensors\SensorEnabledModules
+ * Contains \Drupal\monitoring\Sensor\Sensors\SensorEnabledModules.
  */
 
 namespace Drupal\monitoring\Sensor\Sensors;
@@ -10,7 +10,7 @@ use Drupal\monitoring\Result\SensorResultInterface;
 use Drupal\monitoring\Sensor\SensorConfigurable;
 
 /**
- * Monitoring installed modules.
+ * Monitors installed modules.
  */
 class SensorEnabledModules extends SensorConfigurable {
 

@@ -5,7 +5,7 @@
  */
 
 /**
- * Elysia sensor tests.
+ * Tests for elysia sensor.
  */
 class MonitoringElysiaTest extends MonitoringTestBase {
 

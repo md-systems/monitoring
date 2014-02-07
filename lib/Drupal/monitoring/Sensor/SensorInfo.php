@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Contains Drupal\monitoring\Sensor\SensorInfo class.
+ * Contains \Drupal\monitoring\Sensor\SensorInfo.
  */
 
 namespace Drupal\monitoring\Sensor;
@@ -9,7 +9,9 @@ namespace Drupal\monitoring\Sensor;
 use Drupal\monitoring\Result\SensorResultInterface;
 
 /**
- * Helper class to deal with sensor info.
+ * Represents a sensor info as defined in hook_monitoring_sensor_info().
+ *
+ * @todo more
  */
 class SensorInfo {
 

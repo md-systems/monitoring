@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Generic variable sensor.
+ * Drupal\monitoring\Sensor\Sensors\SensorVariable.
  */
 
 namespace Drupal\monitoring\Sensor\Sensors;
@@ -12,7 +12,9 @@ use Drupal\monitoring\Sensor\SensorConfigurable;
 use Drupal\monitoring\Result\SensorResultInterface;
 
 /**
- * Generic sensor that checks for the variable value.
+ * Monitors a variable value.
+ *
+ * @see variable_get()
  */
 class SensorVariable extends SensorConfigurable {
 

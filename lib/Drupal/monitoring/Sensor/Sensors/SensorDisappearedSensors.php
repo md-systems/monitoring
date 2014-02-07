@@ -10,7 +10,7 @@ use Drupal\monitoring\Result\SensorResultInterface;
 use Drupal\monitoring\Sensor\SensorConfigurable;
 
 /**
- * Checks for sensors that disappeared without prior being disabled.
+ * Monitors if sensors disappeared without prior being disabled.
  *
  * It stores the list of available sensors and their enabled/disabled status
  * and compares it to the current sensor info retrieved via

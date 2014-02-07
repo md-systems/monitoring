@@ -2,16 +2,18 @@
 
 /**
  * @file
- * Configurable sensor abstract class.
+ * Contains \Drupal\monitoring\Sensor\SensorConfigurable.
  */
 
 namespace Drupal\monitoring\Sensor;
 
 /**
+ * Configurable sensor abstract class.
+ *
  * Sensor extension providing generic functionality for custom
  * sensor settings.
  *
- * Note that settings are specific to a sensor and a service.
+ * Custom sensor settings need to be implemented in an extending class.
  */
 abstract class SensorConfigurable extends Sensor implements SensorConfigurableInterface {
 

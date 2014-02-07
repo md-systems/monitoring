@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Contains \Drupal\monitoring\Sensor\Sensors\SensorDrupalUpdate
+ * Contains \Drupal\monitoring\Sensor\Sensors\SensorDrupalUpdate.
  */
 
 namespace Drupal\monitoring\Sensor\Sensors;
@@ -11,6 +11,8 @@ use Drupal\monitoring\Sensor\Sensor;
 
 /**
  * Monitors for available updates of Drupal core and installed contrib modules.
+ *
+ * Based on drupal core update module.
  */
 class SensorDrupalUpdate extends Sensor {
 

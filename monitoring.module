@@ -10,7 +10,6 @@ use Drupal\monitoring\Sensor\SensorInfo;
 use Drupal\monitoring\Result\SensorResultInterface;
 use Drupal\monitoring\Sensor\SensorManager;
 use Drupal\monitoring\SensorRunner;
-use Symfony\Component\DependencyInjection\Exception\InvalidArgumentException;
 
 /**
  * Returns an instance of the sensor manager.
@@ -117,6 +116,9 @@ function monitoring_sensor_run($sensor_name, $force_run = FALSE, $verbose = FALS
  *   Thrown if the requested sensor does not exist.
  * @throws \Drupal\monitoring\Sensor\DisabledSensorException
  *   Thrown if any of the passed sensor names is not enabled.
+ *
+ * @see \Drupal\monitoring\Sensor\SensorManager
+ * @see \Drupal\monitoring\SensorRunner
  */
 function monitoring_sensor_run_multiple($sensor_names = array(), $force_run = FALSE, $verbose = FALSE) {
   $sensors_info = array();
@@ -316,6 +318,10 @@ function monitoring_permission() {
 
 /**
  * Implements hook_services_resources().
+ *
+ * Offer services resources:
+ * - sensor-info: Available sensors info
+ * - sensor-result: Available sensor results
  */
 function monitoring_services_resources() {
 
@@ -422,7 +428,7 @@ function monitoring_sensor_settings_get($sensor_name) {
 }
 
 /**
- * Helper to build the sensor settings key.
+ * Build the sensor settings key.
  *
  * @param string $sensor_name
  *   Sensor name.
@@ -548,7 +554,7 @@ function theme_monitoring_config_box($variables) {
 }
 
 /**
- * Helper function to get config code with dynamic vars.
+ * Get config code with dynamic variables.
  *
  * @param string $module
  *   Module name.
@@ -623,7 +629,7 @@ function monitoring_host_key() {
 /**
  * Submit callback to clear the disappeared sensors list.
  *
- * @see SensorDisappearedSensors::settingsForm()
+ * @see \Drupal\monitoring\Sensor\Sensors\SensorDisappearedSensors::settingsForm()
  */
 function monitoring_clear_missing_sensor_submit($form, &$form_state) {
   $available_sensors = array();
@@ -640,19 +646,22 @@ function monitoring_clear_missing_sensor_submit($form, &$form_state) {
 
 /**
  * Implements hook_modules_enabled().
+ *
+ * Enabling modules can change the available sensors, reset the cache to make
+ * sure that the list is up to date.
  */
 function monitoring_modules_enabled($modules) {
-  // Enabling modules can change the available sensors, reset the cache to make
-  // sure that the list is up to date.
   monitoring_sensor_manager()->resetCache();
 }
 
 /**
- * Implements hook_modules_enabled().
+ * Implements hook_modules_disabled().
+ *
+ * Disabling modules can change the available sensors, reset the cache to make
+ * sure that the list is up to date.
  */
 function monitoring_modules_disabled($modules) {
-  // Disabling modules can change the available sensors, reset the cache to make
-  // sure that the list is up to date.
+  //
   monitoring_sensor_manager()->resetCache();
 }
 
@@ -660,9 +669,11 @@ function monitoring_modules_disabled($modules) {
  * Gets available value types definitions.
  *
  * @return array
- *   Value type definitions.
+ *   Value type definitions, consisting of a label and an optional
+ *   formatter_callback.
  */
 function monitoring_value_types() {
+  // @todo Allow extension of those types throgh a hook or plugin system.
   return array(
     'time_interval' => array(
       'label' => 'Seconds',
@@ -680,20 +691,22 @@ function monitoring_value_types() {
 }
 
 /**
- * Time interval value formatter.
+ * Formatter for time interval value.
  *
  * @param \Drupal\monitoring\Result\SensorResultInterface $result
  *   Result object for which to get the formatted value.
  *
  * @return string
  *   Formatted time interval.
+ *
+ * @see format_interval()
  */
 function monitoring_value_label_callback_interval(SensorResultInterface $result) {
   return format_interval($result->getValue());
 }
 
 /**
- * Boolean value formatter.
+ * Formatter for boolean value (TRUE, FALSE).
  *
  * @param \Drupal\monitoring\Result\SensorResultInterface $result
  *   Result object for which to get the formatted value.
@@ -706,13 +719,16 @@ function monitoring_value_label_callback_bool(SensorResultInterface $result) {
 }
 
 /**
- * Commerce currency amount value formatter.
+ * Formatter for commerce currency amount value.
  *
  * @param \Drupal\monitoring\Result\SensorResultInterface $result
  *   Result object for which to get the formatted value.
  *
  * @return string
  *   Formatted amount.
+ *
+ * @see commerce_default_currency()
+ * @see commerce_currency_format()
  */
 function monitoring_value_label_callback_commerce_currency(SensorResultInterface $result) {
   if (module_exists('commerce')) {

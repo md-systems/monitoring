@@ -2,11 +2,11 @@
 
 /**
  * @file
- * Contains functions to set up necessary dependencies for demo and tests.
+ * Set up dependencies for demo and tests.
  */
 
 /**
- * Create search_api default index.
+ * Creates search_api default index.
  *
  * This is copied from search_api_install() where the code will not run in case
  * of active batch process which is the case of running tests.
@@ -126,7 +126,7 @@ function monitoring_setup_search_api() {
 }
 
 /**
- * Creates comment for testing purposes.
+ * Creates comments for testing purposes.
  *
  * @param object $node
  *   Node to which the comment belongs.
@@ -148,7 +148,7 @@ function _monitoring_setup_create_comment($node, $settings = array()) {
 }
 
 /**
- * Creates node for testing purposes.
+ * Creates nodes for testing purposes.
  *
  * @param array $settings
  *   Node data.

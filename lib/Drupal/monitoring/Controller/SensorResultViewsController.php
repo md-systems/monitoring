@@ -1,13 +1,13 @@
 <?php
 /**
  * @file
- * Contains Drupal\monitoring\Controller\SensorResultViewsController
+ * Contains \Drupal\monitoring\Controller\SensorResultViewsController.
  */
 
 namespace Drupal\monitoring\Controller;
 
 /**
- * Handles views for Translation Server entity.
+ * Views controller for the monitoring_sensor_result entity.
  */
 class SensorResultViewsController extends \EntityDefaultViewsController {
 

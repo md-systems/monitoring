@@ -9,7 +9,7 @@ use Drupal\monitoring\Sensor\DisabledSensorException;
 use Drupal\monitoring\Sensor\NonExistingSensorException;
 
 /**
- * Monitoring API tests.
+ * Tests for Monitoring API.
  */
 class MonitoringApiTest extends MonitoringTestBase {
 

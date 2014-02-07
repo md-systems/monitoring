@@ -9,6 +9,8 @@ namespace Drupal\monitoring\Sensor;
 /**
  * Base interface defining implicit operations for a monitoring sensor exposing
  * custom settings.
+ *
+ * @todo more
  */
 interface SensorConfigurableInterface {
 

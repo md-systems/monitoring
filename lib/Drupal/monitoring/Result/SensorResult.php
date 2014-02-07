@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Contains Drupal\monitoring\Result\SensorResult
+ * Contains \Drupal\monitoring\Result\SensorResult.
  */
 
 namespace Drupal\monitoring\Result;
@@ -11,7 +11,12 @@ use Drupal\monitoring\Sensor\SensorInfo;
 use Drupal\monitoring\Sensor\Thresholds;
 
 /**
- * Provides generic container for the sensor result.
+ * Generic container for the sensor result.
+ *
+ * @todo more
+ *
+ * @see \Drupal\monitoring\Sensor\SensorInfo
+ * @see \Drupal\monitoring\SensorRunner
  */
 class SensorResult implements SensorResultInterface {
 
@@ -31,6 +36,8 @@ class SensorResult implements SensorResultInterface {
 
   /**
    * Instantiates a sensor result object.
+   *
+   * By default, the sensor status is STATUS_UNKNOWN with empty message.
    *
    * @param SensorInfo $sensor_info
    *   Sensor info object.
@@ -134,13 +141,17 @@ class SensorResult implements SensorResultInterface {
    * {@inheritdoc}
    */
   public function compile() {
-
-    // If the status is UNKNOWN we do the value assessment.
+    // If the status is unknown we do the value assessment through
+    // configurable thresholds.
     $threshold_message = NULL;
-    if ($this->getStatus() == SensorResultInterface::STATUS_UNKNOWN) {
+    if ($this->isUnknown()) {
       if ($this->getSensorInfo()->isDefiningThresholds()) {
         $threshold_message = $this->assessThresholds();
       }
+      // If there are no thresholds, look for an expected value and compare it.
+      // A sensor can not have both, as an expected value implies and exact
+      // match and then thresholds are not needed.
+      // @todo Check expected value first?
       elseif ($this->getExpectedValue() !== NULL) {
         $this->assessComparison();
       }
@@ -153,22 +164,28 @@ class SensorResult implements SensorResultInterface {
       $msg_expected = $this->getExpectedValue();
     }
 
-    // Set the default message variables.
-    $default_variables = array(
-      '@sensor' => $this->getSensorName(),
-      '!formatted_value' => $this->getFormattedValue(),
-      '@time' => $this->getTimestamp(),
-      '!expected' => $msg_expected,
-      '!time_interval' => format_interval($this->getSensorInfo()->getTimeIntervalValue()),
-    );
-
     if (!empty($this->sensorMessage)) {
+      // A message has been set by the sensor, use that as is and only do
+      // placeholder replacements with the provided variables.
       $message = format_string($this->sensorMessage['message'], $this->sensorMessage['variables']);
     }
     else {
+
+      // No message has been provided, attempt to build one.
+
+      // Set the default message variables.
+      $default_variables = array(
+        '@sensor' => $this->getSensorName(),
+        '!formatted_value' => $this->getFormattedValue(),
+        '@time' => $this->getTimestamp(),
+        '!expected' => $msg_expected,
+        '!time_interval' => format_interval($this->getSensorInfo()->getTimeIntervalValue()),
+      );
+
+      // Build an array of message parts.
       $messages = array();
 
-      // Set the sensor message.
+      // Add the sensor value if provided.
       if ($this->getValue() !== NULL) {
 
         // If the sensor defines time interval we append the info to the
@@ -194,6 +211,7 @@ class SensorResult implements SensorResultInterface {
         $messages[] = $threshold_message;
       }
 
+      // Append all status messages which were added by the sensor.
       foreach ($this->statusMessages as $msg) {
         $messages[] = format_string($msg['message'], array_merge($default_variables, $msg['variables']));
       }
@@ -202,7 +220,6 @@ class SensorResult implements SensorResultInterface {
     }
 
     $this->setResultData('sensor_message', $message);
-
   }
 
   /**
@@ -218,10 +235,14 @@ class SensorResult implements SensorResultInterface {
   }
 
   /**
-   * Helper method to deal with thresholds.
+   * Deal with thresholds.
+   *
+   * Set the sensor value  based on threshold configuration.
    *
    * @return string
    *   The message associated with the threshold.
+   *
+   * @see \Drupal\monitoring\Sensor\Thresholds
    */
   protected function assessThresholds() {
     $thresholds = new Thresholds($this->sensorInfo);
@@ -229,6 +250,7 @@ class SensorResult implements SensorResultInterface {
 
     // Set sensor status based on matched threshold.
     $this->setStatus($matched_threshold);
+    // @todo why not just set the status message?
     return $thresholds->getStatusMessage();
   }
 
@@ -324,7 +346,6 @@ class SensorResult implements SensorResultInterface {
    * {@inheritdoc}
    */
   public function toNumber() {
-
     $sensor_value = $this->getValue();
 
     if (is_numeric($sensor_value)) {
@@ -337,40 +358,28 @@ class SensorResult implements SensorResultInterface {
   }
 
   /**
-   * Helper method to check the warning state.
-   *
-   * @return bool
-   *   Check result.
+   * {@inheritdoc}
    */
   public function isWarning() {
     return $this->getStatus() == SensorResultInterface::STATUS_WARNING;
   }
 
   /**
-   * Helper method to check the critical state.
-   *
-   * @return bool
-   *   Check result.
+   * {@inheritdoc}
    */
   public function isCritical() {
     return $this->getStatus() == SensorResultInterface::STATUS_CRITICAL;
   }
 
   /**
-   * Helper method to check the unknown state.
-   *
-   * @return bool
-   *   Check result.
+   * {@inheritdoc}
    */
   public function isUnknown() {
     return $this->getStatus() == SensorResultInterface::STATUS_UNKNOWN;
   }
 
   /**
-   * Helper method to check the OK state.
-   *
-   * @return bool
-   *   Check result.
+   * {@inheritdoc}
    */
   public function isOk() {
     return $this->getStatus() == SensorResultInterface::STATUS_OK;

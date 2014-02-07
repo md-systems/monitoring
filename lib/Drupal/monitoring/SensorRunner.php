@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Contains Drupal\monitoring\SensorRunner
+ * Contains \Drupal\monitoring\SensorRunner.
  */
 
 namespace Drupal\monitoring;
@@ -11,7 +11,9 @@ use Drupal\monitoring\Sensor\DisabledSensorException;
 use Drupal\monitoring\Sensor\SensorInfo;
 
 /**
- * Sensor runner helper class to instantiate and run requested sensors.
+ * Instantiate and run requested sensors.
+ *
+ * @todo more
  */
 class SensorRunner implements \IteratorAggregate {
 
@@ -135,7 +137,7 @@ class SensorRunner implements \IteratorAggregate {
   }
 
   /**
-   * Runs sensors.
+   * Runs the defined sensors.
    *
    * @return \Drupal\monitoring\Result\SensorResultInterface[]
    *   Array of sensor results.
@@ -156,7 +158,7 @@ class SensorRunner implements \IteratorAggregate {
   }
 
   /**
-   * Main runner method.
+   * Run a single given sensor.
    *
    * @param SensorInfo $sensor_info
    *   Sensor info
@@ -215,7 +217,7 @@ class SensorRunner implements \IteratorAggregate {
   }
 
   /**
-   * Helper method to log results if needed.
+   * Log results if needed.
    *
    * @param \Drupal\monitoring\Result\SensorResultInterface[] $results
    *   Results to be saved.
@@ -269,7 +271,7 @@ class SensorRunner implements \IteratorAggregate {
   }
 
   /**
-   * Helper method to cache results.
+   * Cache results if caching applies.
    *
    * @param \Drupal\monitoring\Result\SensorResultInterface[] $results
    *   Results to be cached.

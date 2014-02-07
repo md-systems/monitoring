@@ -14,9 +14,9 @@ use Drupal\monitoring\Result\SensorResultInterface;
 
 
 /**
- * Class SensorCronLastRunAge
- *
  * Monitors the last cron run time.
+ *
+ * Based on the drupal core variable cron_last.
  */
 class SensorCronLastRunAge extends SensorThresholds {
 

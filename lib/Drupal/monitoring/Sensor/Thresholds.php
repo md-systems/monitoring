@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Contains Drupal\monitoring\Sensor\Thresholds.
+ * Contains \Drupal\monitoring\Sensor\Thresholds.
  */
 
 namespace Drupal\monitoring\Sensor;
@@ -9,7 +9,9 @@ namespace Drupal\monitoring\Sensor;
 use Drupal\monitoring\Result\SensorResultInterface;
 
 /**
- * Helper class to determine status based on thresholds.
+ * Determine status based on thresholds during sensor run.
+ *
+ * @see \Drupal\monitoring\Result\SensorResult::assessThresholds
  */
 class Thresholds {
 

@@ -7,7 +7,7 @@
 use Drupal\monitoring\Sensor\SensorInfo;
 
 /**
- * Cron sensor tests.
+ * Tests for cron sensor.
  */
 class MonitoringServicesTest extends MonitoringTestBase {
 
@@ -131,7 +131,7 @@ class MonitoringServicesTest extends MonitoringTestBase {
   }
 
   /**
-   * Helper to do sensor result assertions.
+   * Do sensor result assertions.
    *
    * @param array $response_result
    *   Result received via response.
@@ -164,7 +164,7 @@ class MonitoringServicesTest extends MonitoringTestBase {
   }
 
   /**
-   * Helper to do the request.
+   * Do the request.
    *
    * @param string $action
    *   Action to perform.

@@ -47,6 +47,8 @@ function monitoring_test_queue_worker() {
 
 /**
  * Implements monitoring_MODULE_monitoring_sensor_info().
+ *
+ * @see \MonitoringApiTest::testAPI()
  */
 function monitoring_monitoring_test_monitoring_sensor_info() {
   $info = array(
@@ -176,7 +178,7 @@ function monitoring_monitoring_test_monitoring_sensor_info() {
   );
 
   // In case we have testing_sensor_info data we add it as a new sensor.
-  // See MonitoringApiTest::testAPI() for usage.
+  // @see \MonitoringApiTest::testAPI()
   $testing_sensor_info = variable_get('monitoring_test_sensor_info');
   if (!empty($testing_sensor_info)) {
     $info['test_sensor_info'] = $testing_sensor_info;

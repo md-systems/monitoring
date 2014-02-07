@@ -2,13 +2,13 @@
 
 /**
  * @file
- * Monitoring Sensor Call controller class.
+ * Contains \Drupal\monitoring\Controller\SensorResultController.
  */
 
 namespace Drupal\monitoring\Controller;
 
 /**
- * Controller class for monitoring_sensor_result.
+ * Controller class for the monitoring_sensor_result entity.
  */
 class SensorResultController extends \EntityAPIController {
 

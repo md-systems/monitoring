@@ -2,13 +2,13 @@
 
 /**
  * @file
- * Monitoring sensor call metadata controller.
+ * Contains \Drupal\monitoring\Controller\SensorResultMetadataController.
  */
 
 namespace Drupal\monitoring\Controller;
 
 /**
- * Controller class for the Entity Metadata.
+ * Metadata controller class for the monitoring_sensor_result entity.
  */
 class SensorResultMetadataController extends \EntityDefaultMetadataController {
 

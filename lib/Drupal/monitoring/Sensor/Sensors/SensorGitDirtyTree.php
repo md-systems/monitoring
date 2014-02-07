@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Contains \Drupal\monitoring\Sensor\Sensors\SensorGitDirtyTree
+ * Contains \Drupal\monitoring\Sensor\Sensors\SensorGitDirtyTree.
  */
 
 namespace Drupal\monitoring\Sensor\Sensors;
@@ -11,7 +11,14 @@ use Drupal\monitoring\Sensor\SensorConfigurable;
 use Drupal\monitoring\Sensor\SensorExtendedInfoInterface;
 
 /**
- * Monitors the repository for dirty files.
+ * Monitors the git repository for dirty files.
+ *
+ * Tracks both changed and untracked files.
+ * Also supports git submodules.
+ *
+ * Limitations:
+ * - Does not work as long as submodules are not initialized.
+ * - Does not check branch / tag.
  */
 class SensorGitDirtyTree extends SensorConfigurable implements SensorExtendedInfoInterface {
 
@@ -46,7 +53,7 @@ class SensorGitDirtyTree extends SensorConfigurable implements SensorExtendedInf
   }
 
   /**
-   * Helper to build the command to be passed into shell_exec().
+   * Build the command to be passed into shell_exec().
    *
    * @return string
    *   Shell command.

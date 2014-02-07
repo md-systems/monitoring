@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Contains Drupal\monitoring\Sensor\Sensors\SensorElysiaCron
+ * Contains \Drupal\monitoring\Sensor\Sensors\SensorElysiaCron.
  */
 
 namespace Drupal\monitoring\Sensor\Sensors;
@@ -10,7 +10,7 @@ use Drupal\monitoring\Result\SensorResultInterface;
 use Drupal\monitoring\Sensor\SensorThresholds;
 
 /**
- * Elysia cron sensor class.
+ * Monitors elysia cron channels for last execution.
  */
 class SensorElysiaCron extends SensorThresholds {
 
@@ -18,6 +18,7 @@ class SensorElysiaCron extends SensorThresholds {
    * {@inheritdoc}
    */
   public function runSensor(SensorResultInterface $result) {
+    // The channel name.
     $name = $this->info->getSetting('name');
     $query = db_select('elysia_cron', 'e')->fields('e', array($this->info->getSetting('metric')));
     $query->condition('name', $name);
@@ -30,6 +31,7 @@ class SensorElysiaCron extends SensorThresholds {
       $result->addStatusMessage('@time ago', array('@time' => format_interval($value)));
     }
     else {
+      // metric last_execution_time
       $result->addStatusMessage('at @time', array('@time' => format_date($value)));
     }
 
