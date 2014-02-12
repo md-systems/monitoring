@@ -7,20 +7,6 @@
 use Drupal\monitoring\Result\SensorResultInterface;
 
 /**
- * Implements hook_menu().
- */
-function monitoring_test_menu() {
-  $items['monitoring/test_service'] = array(
-    'title' => 'Test',
-    'page callback' => 'monitoring_test_endpoint',
-    'access callback' => TRUE,
-    'type' => MENU_CALLBACK,
-  );
-
-  return $items;
-}
-
-/**
  * Implements of hook_ctools_plugin_api().
  */
 function monitoring_test_ctools_plugin_api($module, $api) {
@@ -185,30 +171,6 @@ function monitoring_monitoring_test_monitoring_sensor_info() {
   }
 
   return $info;
-}
-
-/**
- * Endpoint callback.
- *
- * Purpose of this endpoint is to provide a proof of concept. There is no
- * test coverage for this as it adds no value, use it just for development
- * purposes.
- */
-function monitoring_test_endpoint() {
-  drupal_page_is_cacheable(FALSE);
-
-  $sensor_name = $_GET['sensor'];
-  try {
-    $result = monitoring_sensor_run($sensor_name);
-    drupal_json_output(array(
-      'sensor_value' => $result->getValue(),
-      'sensor_message' => $result->getMessage(),
-      'sensor_status' => $result->getStatus(),
-    ));
-  }
-  catch (InvalidArgumentException $e) {
-    return MENU_NOT_FOUND;
-  }
 }
 
 /**
