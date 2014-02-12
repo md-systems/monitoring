@@ -7,7 +7,6 @@
 
 namespace Drupal\monitoring\Sensor\Sensors;
 
-use Drupal\monitoring\Sensor\Sensor;
 use Drupal\monitoring\Sensor\SensorConfigurable;
 use Drupal\monitoring\Result\SensorResultInterface;
 
@@ -17,8 +16,6 @@ use Drupal\monitoring\Result\SensorResultInterface;
  * @see variable_get()
  */
 class SensorVariable extends SensorConfigurable {
-
-  protected $variable;
 
   /**
    * {@inheritdoc}

@@ -1,5 +1,12 @@
 <?php
+/**
+ * @file
+ * Default views for monitoring admin UI.
+ */
 
+/**
+ * Implements hook_views_default_views().
+ */
 function monitoring_views_default_views() {
 
   $view = new view();

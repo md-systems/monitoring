@@ -9,7 +9,7 @@ namespace Drupal\monitoring\Sensor;
 use Drupal\monitoring\Result\SensorResultInterface;
 
 /**
- * Sensor Extended Info interface.
+ * Interface for a sensor with extended info.
  *
  * Implemented by sensors with verbose information.
  */

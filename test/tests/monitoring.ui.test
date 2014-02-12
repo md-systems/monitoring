@@ -4,7 +4,6 @@
  * Contains \MonitoringUITest.
  */
 
-use Drupal\monitoring\Result\SensorResultInterface;
 use Drupal\monitoring\SensorRunner;
 
 /**
@@ -12,9 +11,7 @@ use Drupal\monitoring\SensorRunner;
  */
 class MonitoringUITest extends MonitoringTestBase {
 
-  protected $profile = 'testing';
-
-  static function getInfo() {
+  public static function getInfo() {
     return array(
       'name' => 'Monitoring UI',
       'description' => 'Monitoring UI tests.',
@@ -25,7 +22,7 @@ class MonitoringUITest extends MonitoringTestBase {
   /**
    * {@inheritdoc}
    */
-  function setUp() {
+  public function setUp() {
     parent::setUp(array('dblog'));
   }
 

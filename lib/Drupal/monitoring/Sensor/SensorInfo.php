@@ -6,8 +6,6 @@
 
 namespace Drupal\monitoring\Sensor;
 
-use Drupal\monitoring\Result\SensorResultInterface;
-
 /**
  * Represents a sensor info as defined in hook_monitoring_sensor_info().
  *
@@ -15,11 +13,26 @@ use Drupal\monitoring\Result\SensorResultInterface;
  */
 class SensorInfo {
 
+  /**
+   * The sensor name.
+   *
+   * @var string
+   */
   protected $sensorName;
+
+  /**
+   * The sensor info array.
+   *
+   * @var array
+   */
   protected $sensorInfo;
 
   /**
    * Instantiates sensor info object.
+   *
+   * Note that sensor_info is unchecked and needs to be well defined.
+   *
+   * @see hook_monitoring_sensor_info().
    *
    * @param string $sensor_name
    *   Sensor name.

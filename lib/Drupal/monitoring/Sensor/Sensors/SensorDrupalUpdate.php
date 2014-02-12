@@ -19,7 +19,7 @@ class SensorDrupalUpdate extends Sensor {
   /**
    * {@inheritdoc}
    */
-  function runSensor(SensorResultInterface $result) {
+  public function runSensor(SensorResultInterface $result) {
     $type = $this->info->getSetting('type');
     $status = $this->calculateStatus($type);
 

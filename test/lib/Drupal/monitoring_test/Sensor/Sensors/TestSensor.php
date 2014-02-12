@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Contains \Drupal\monitoring_test\Sensor\Sensors\TestSensor.
@@ -7,13 +6,10 @@
 
 namespace Drupal\monitoring_test\Sensor\Sensors;
 
-use Drupal\monitoring\Sensor\SensorConfigurable;
 use Drupal\monitoring\Sensor\SensorExtendedInfoInterface;
 use Drupal\monitoring\Sensor\SensorInfo;
-use Drupal\monitoring\Sensor\Thresholds;
 use Drupal\monitoring\Result\SensorResultInterface;
 use Drupal\monitoring\Sensor\SensorThresholds;
-
 
 /**
  * Test sensor to report status as provided by external arguments.
@@ -35,7 +31,7 @@ class TestSensor extends SensorThresholds implements SensorExtendedInfoInterface
     ));
   }
 
-  function runSensor(SensorResultInterface $result) {
+  public function runSensor(SensorResultInterface $result) {
     // Sleep here for a while as running this sensor may result in 0 execution
     // time.
     usleep(1);
@@ -57,7 +53,7 @@ class TestSensor extends SensorThresholds implements SensorExtendedInfoInterface
     }
   }
 
-  function resultVerbose(SensorResultInterface $result) {
+  public function resultVerbose(SensorResultInterface $result) {
     return 'call debug';
   }
 }

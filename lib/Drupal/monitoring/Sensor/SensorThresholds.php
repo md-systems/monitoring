@@ -7,7 +7,7 @@
 namespace Drupal\monitoring\Sensor;
 
 /**
- * Provides configuration form for Sensor with thresholds.
+ * Abstract class providing configuration form for Sensor with thresholds.
  *
  * Sensors may provide thresholds that apply by default.
  * Threshold values are validated for sequence.

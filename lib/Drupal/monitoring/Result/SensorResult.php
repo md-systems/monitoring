@@ -20,11 +20,39 @@ use Drupal\monitoring\Sensor\Thresholds;
  */
 class SensorResult implements SensorResultInterface {
 
+  /**
+   * The sensor info instance.
+   *
+   * @var \Drupal\monitoring\Sensor\SensorInfo
+   */
   protected $sensorInfo;
+
+  /**
+   * If the current result was constructed from a cache.
+   *
+   * @var bool
+   */
   protected $isCached = FALSE;
+
+  /**
+   * The sensor result data.
+   *
+   * @var array
+   */
   protected $data = array();
 
+  /**
+   * Additional status messages from addStatusMessage().
+   *
+   * @var string[]
+   */
   protected $statusMessages = array();
+
+  /**
+   * The main sensor message from setMessage().
+   *
+   * @var string[]
+   */
   protected $sensorMessage = array();
 
   /**

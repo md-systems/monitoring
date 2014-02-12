@@ -6,7 +6,6 @@
 
 namespace Drupal\monitoring\Views\Handler\Field;
 
-
 use Drupal\monitoring\Entity\SensorResultEntity;
 use Drupal\monitoring\Sensor\NonExistingSensorException;
 

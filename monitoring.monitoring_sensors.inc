@@ -1,9 +1,23 @@
 <?php
-
-use Drupal\monitoring\Result\SensorResultInterface;
+/**
+ * @file
+ * Define default sensors for core and contrib modules.
+ *
+ * Default sensors provide sensors for core and contrib modules with
+ * monitoring_MODULE_monitoring_sensor_info()
+ *
+ * The default integration for MODULE is omitted if a module implements
+ * hook_monitoring_sensor_info() on its own.
+ *
+ * @see hook_monitoring_sensor_info()
+ */
 
 /**
- * Implements hook_sensor_info().
+ * Implements hook_monitoring_sensor_info().
+ *
+ * Module unspecific sensors:
+ * - git
+ * - disappearing sensors
  */
 function monitoring_monitoring_sensor_info() {
   $info['monitoring_git_dirty_tree'] = array(

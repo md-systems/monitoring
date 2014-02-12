@@ -9,7 +9,7 @@
  */
 class MonitoringSearchAPITest extends MonitoringTestBase {
 
-  static function getInfo() {
+  public static function getInfo() {
     return array(
       'name' => 'Monitoring search API',
       'description' => 'Search API sensors tests',
@@ -21,7 +21,7 @@ class MonitoringSearchAPITest extends MonitoringTestBase {
   /**
    * {@inheritdoc}
    */
-  function setUp() {
+  public function setUp() {
     parent::setUp(array('search_api', 'search_api_db'));
   }
 

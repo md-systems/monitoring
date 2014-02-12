@@ -7,6 +7,8 @@
 namespace Drupal\monitoring\Sensor;
 
 /**
+ * Interface for a configurable sensor.
+ *
  * Base interface defining implicit operations for a monitoring sensor exposing
  * custom settings.
  *

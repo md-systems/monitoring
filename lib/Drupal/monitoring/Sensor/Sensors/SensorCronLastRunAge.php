@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Contains \Drupal\monitoring\Sensor\Sensors\SensorCronLastRunAge.
@@ -7,11 +6,8 @@
 
 namespace Drupal\monitoring\Sensor\Sensors;
 
-use Drupal\monitoring\Sensor\Sensor;
 use Drupal\monitoring\Sensor\SensorThresholds;
-use Drupal\monitoring\Sensor\Thresholds;
 use Drupal\monitoring\Result\SensorResultInterface;
-
 
 /**
  * Monitors the last cron run time.
@@ -19,8 +15,6 @@ use Drupal\monitoring\Result\SensorResultInterface;
  * Based on the drupal core variable cron_last.
  */
 class SensorCronLastRunAge extends SensorThresholds {
-
-  protected $variable;
 
   /**
    * {@inheritdoc}

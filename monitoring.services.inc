@@ -1,12 +1,10 @@
 <?php
 /**
  * @file
- *   Monitoring remote API resource callbacks.
+ * Monitoring remote API resource callbacks.
  */
 
-use Drupal\monitoring\Result\SensorResultInterface;
 use Drupal\monitoring\Sensor\NonExistingSensorException;
-use Drupal\monitoring\Sensor\SensorInfo;
 
 /**
  * Sensor info resource.

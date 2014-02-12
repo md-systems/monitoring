@@ -12,7 +12,7 @@ class MonitoringMuninTest extends MonitoringTestBase {
   /**
    * {@inheritdoc}
    */
-  static function getInfo() {
+  public static function getInfo() {
     return array(
       'name' => 'Monitoring Munin',
       'description' => 'Monitoring Munin tests.',
@@ -23,7 +23,7 @@ class MonitoringMuninTest extends MonitoringTestBase {
   /**
    * {@inheritdoc}
    */
-  function setUp() {
+  public function setUp() {
     parent::setUp(array('dblog'));
     // @todo Enable monitoring_munin separately, otherwise the class autoloading
     //   does not work.

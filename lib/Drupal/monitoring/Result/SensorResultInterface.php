@@ -9,16 +9,45 @@ namespace Drupal\monitoring\Result;
 use Drupal\monitoring\Sensor\SensorInfo;
 
 /**
- * Container for sensor result.
+ * Interface for a sensor result.
  *
  * @todo more
  */
 interface SensorResultInterface {
 
+  /**
+   * Sensor status OK.
+   *
+   * @var string
+   */
   const STATUS_OK = 'OK';
+
+  /**
+   * Sensor status INFO.
+   *
+   * @var string
+   */
   const STATUS_INFO = 'INFO';
+
+  /**
+   * Sensor status WARNING.
+   *
+   * @var string
+   */
   const STATUS_WARNING = 'WARNING';
+
+  /**
+   * Sensor status CRITICAL.
+   *
+   * @var string
+   */
   const STATUS_CRITICAL = 'CRITICAL';
+
+  /**
+   * Sensor status UNKNOWN.
+   *
+   * @var string
+   */
   const STATUS_UNKNOWN = 'UNKNOWN';
 
   /**
@@ -27,14 +56,15 @@ interface SensorResultInterface {
    * @return string
    *   Sensor status.
    */
-  function getStatus();
+  public function getStatus();
+
   /**
    * Gets a human readable label for the sensor status.
    *
    * @return string
    *   Sensor status label.
    */
-  function getStatusLabel();
+  public function getStatusLabel();
 
   /**
    * Sets sensor status.
@@ -42,7 +72,7 @@ interface SensorResultInterface {
    * @param string $status
    *   One of SensorResultInterface::STATUS_* constants.
    */
-  function setStatus($status);
+  public function setStatus($status);
 
   /**
    * Gets sensor status message.
@@ -52,7 +82,7 @@ interface SensorResultInterface {
    * @return string
    *   Sensor status message.
    */
-  function getMessage();
+  public function getMessage();
 
   /**
    * Sets the final result message.
@@ -68,7 +98,7 @@ interface SensorResultInterface {
    *
    * @see self::addStatusMessage()
    */
-  function setMessage($message, array $variables = array());
+  public function setMessage($message, array $variables = array());
 
   /**
    * Adds sensor status message.
@@ -83,7 +113,7 @@ interface SensorResultInterface {
    *
    * @see self::setMessage()
    */
-  function addStatusMessage($message, array $variables = array());
+  public function addStatusMessage($message, array $variables = array());
 
   /**
    * Compiles added status messages sets the status.
@@ -95,7 +125,7 @@ interface SensorResultInterface {
    * @throws \Drupal\monitoring\Sensor\SensorCompilationException
    *   Thrown if an error occurs during the sensor result compilation.
    */
-  function compile();
+  public function compile();
 
   /**
    * Gets the sensor metric value.
@@ -103,14 +133,14 @@ interface SensorResultInterface {
    * @return mixed
    *   Whatever value the sensor is supposed to return.
    */
-  function getValue();
+  public function getValue();
 
   /**
    * Sets sensor value.
    *
    * @param mixed $value
    */
-  function setValue($value);
+  public function setValue($value);
 
   /**
    * Gets the sensor expected value.
@@ -118,7 +148,7 @@ interface SensorResultInterface {
    * @return mixed
    *   Whatever value the sensor is supposed to return.
    */
-  function getExpectedValue();
+  public function getExpectedValue();
 
   /**
    * Sets sensor expected value.
@@ -133,22 +163,22 @@ interface SensorResultInterface {
    *
    * @param mixed $value
    */
-  function setExpectedValue($value);
+  public function setExpectedValue($value);
 
   /**
-   * Get sensor execution time.
+   * Get sensor execution time in ms.
    *
-   * @return double
+   * @return float
    */
-  function getExecutionTime();
+  public function getExecutionTime();
 
   /**
-   * Sets sensor execution time.
+   * Sets sensor execution time in ms.
    *
-   * @param double $time
-   *   Sensor execution time.
+   * @param float $time
+   *   Sensor execution time in ms
    */
-  function setExecutionTime($time);
+  public function setExecutionTime($time);
 
   /**
    * Casts/processes the sensor value into numeric representation.
@@ -156,7 +186,7 @@ interface SensorResultInterface {
    * @return number
    *   Numeric sensor value.
    */
-  function toNumber();
+  public function toNumber();
 
   /**
    * Determines if data for given result object are cached.
@@ -164,15 +194,15 @@ interface SensorResultInterface {
    * @return boolean
    *   Cached flag.
    */
-  function isCached();
+  public function isCached();
 
   /**
    * The result data timestamp.
    *
    * @return int
-   *   Unix timestamp.
+   *   UNIX timestamp.
    */
-  function getTimestamp();
+  public function getTimestamp();
 
   /**
    * Gets sensor result data as array.
@@ -180,7 +210,7 @@ interface SensorResultInterface {
    * @return array
    *   Sensor result data as array.
    */
-  function toArray();
+  public function toArray();
 
   /**
    * Gets sensor name.

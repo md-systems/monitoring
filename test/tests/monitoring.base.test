@@ -5,7 +5,7 @@
  */
 
 /**
- * Base class for all monitoring tests.
+ * Abstract base class for all monitoring tests.
  */
 abstract class MonitoringTestBase extends DrupalWebTestCase {
 
@@ -26,7 +26,7 @@ abstract class MonitoringTestBase extends DrupalWebTestCase {
   /**
    * {@inheritdoc}
    */
-  function setUp() {
+  public function setUp() {
     $modules = func_get_args();
     if (isset($modules[0]) && is_array($modules[0])) {
       $modules = $modules[0];

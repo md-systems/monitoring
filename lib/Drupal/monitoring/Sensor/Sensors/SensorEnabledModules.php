@@ -18,7 +18,7 @@ class SensorEnabledModules extends SensorConfigurable {
   /**
    * {@inheritdoc}
    */
-  function settingsForm($form, &$form_state) {
+  public function settingsForm($form, &$form_state) {
     $form = parent::settingsForm($form, $form_state);
 
     module_load_include('inc', 'system', 'system.admin');
@@ -82,7 +82,7 @@ class SensorEnabledModules extends SensorConfigurable {
   /**
    * {@inheritdoc}
    */
-  function runSensor(SensorResultInterface $result) {
+  public function runSensor(SensorResultInterface $result) {
     // Load the info from the system table to display the label.
     $module_data = db_select('system')
       ->fields('system')

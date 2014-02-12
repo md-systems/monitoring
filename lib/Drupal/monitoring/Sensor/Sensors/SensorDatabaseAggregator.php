@@ -6,10 +6,8 @@
 
 namespace Drupal\monitoring\Sensor\Sensors;
 
-
 use Drupal\monitoring\Result\SensorResultInterface;
 use Drupal\monitoring\Sensor\SensorExtendedInfoInterface;
-use Drupal\monitoring\Sensor\SensorInfo;
 use Drupal\monitoring\Sensor\SensorThresholds;
 
 /**

@@ -22,6 +22,11 @@ use Drupal\monitoring\Sensor\SensorExtendedInfoInterface;
  */
 class SensorGitDirtyTree extends SensorConfigurable implements SensorExtendedInfoInterface {
 
+  /**
+   * The executed command output.
+   *
+   * @var array
+   */
   protected $cmdOutput;
 
   /**

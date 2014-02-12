@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Set up dependencies for demo and tests.

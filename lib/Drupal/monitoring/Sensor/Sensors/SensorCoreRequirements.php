@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Contains \Drupal\monitoring\Sensor\Sensors\SensorCoreRequirements.
@@ -17,6 +16,11 @@ use Drupal\monitoring\Sensor\Sensor;
  */
 class SensorCoreRequirements extends Sensor {
 
+  /**
+   * Requirements from hook_requirements.
+   *
+   * @var array
+   */
   protected $requirements;
 
   /**

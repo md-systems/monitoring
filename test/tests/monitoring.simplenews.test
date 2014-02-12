@@ -9,7 +9,7 @@
  */
 class MonitoringSimplenewsTest extends MonitoringTestBase {
 
-  static function getInfo() {
+  public static function getInfo() {
     return array(
       'name' => 'Monitoring simplenews',
       'description' => 'Simplenews sensor tests.',
@@ -21,7 +21,7 @@ class MonitoringSimplenewsTest extends MonitoringTestBase {
   /**
    * {@inheritdoc}
    */
-  function setUp() {
+  public function setUp() {
     parent::setUp(array('simplenews'));
   }
 

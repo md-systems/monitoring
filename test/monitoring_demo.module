@@ -4,7 +4,6 @@
  *   Bootstrap file of the monitoring_demo module.
  */
 
-
 /**
  * Implements hook_menu().
  */

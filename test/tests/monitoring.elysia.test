@@ -9,7 +9,7 @@
  */
 class MonitoringElysiaTest extends MonitoringTestBase {
 
-  static function getInfo() {
+  public static function getInfo() {
     return array(
       'name' => 'Monitoring Elysia',
       'description' => 'Elysia sensor tests.',
@@ -21,7 +21,7 @@ class MonitoringElysiaTest extends MonitoringTestBase {
   /**
    * {@inheritdoc}
    */
-  function setUp() {
+  public function setUp() {
     parent::setUp(array('elysia_cron'));
   }
 

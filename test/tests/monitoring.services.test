@@ -11,10 +11,14 @@ use Drupal\monitoring\Sensor\SensorInfo;
  */
 class MonitoringServicesTest extends MonitoringTestBase {
 
-  protected $responseData;
+  /**
+   * User account created.
+   *
+   * @var object
+   */
   protected $servicesAccount;
 
-  static function getInfo() {
+  public static function getInfo() {
     return array(
       'name' => 'Monitoring services',
       'description' => 'Monitoring services tests.',
@@ -26,7 +30,7 @@ class MonitoringServicesTest extends MonitoringTestBase {
   /**
    * {@inheritdoc}
    */
-  function setUp() {
+  public function setUp() {
     parent::setUp(array('dblog', 'services', 'rest_server'));
     $this->servicesAccount = $this->drupalCreateUser(array('monitoring reports'));
   }

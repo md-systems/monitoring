@@ -8,7 +8,6 @@ namespace Drupal\monitoring\Sensor\Sensors;
 
 use Drupal\monitoring\Result\SensorResultInterface;
 
-
 /**
  * Monitors image derivate creation errors from dblog.
  *
@@ -16,6 +15,11 @@ use Drupal\monitoring\Result\SensorResultInterface;
  */
 class SensorImageMissingStyle extends SensorDatabaseAggregator {
 
+  /**
+   * The path of the most failed image.
+   *
+   * @var string
+   */
   protected $sourceImagePath;
 
   /**

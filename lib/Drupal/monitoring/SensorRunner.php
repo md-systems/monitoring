@@ -144,6 +144,8 @@ class SensorRunner implements \IteratorAggregate {
    *
    * @throws \Drupal\monitoring\Sensor\DisabledSensorException
    *   Thrown if any of the passed sensors is not enabled.
+   *
+   * @see \Drupal\monitoring\SensorRunner::runSensor()
    */
   public function runSensors() {
     $results = array();
@@ -168,6 +170,8 @@ class SensorRunner implements \IteratorAggregate {
    *
    * @throws \Drupal\monitoring\Sensor\DisabledSensorException
    *   Thrown if the passed sensor is not enabled.
+   *
+   * @see \Drupal\monitoring\Sensor\SensorInterface::runSensor()
    */
   protected function runSensor(SensorInfo $sensor_info) {
     $sensor = $this->getSensorObject($sensor_info);

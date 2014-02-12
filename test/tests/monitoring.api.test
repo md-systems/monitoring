@@ -13,7 +13,7 @@ use Drupal\monitoring\Sensor\NonExistingSensorException;
  */
 class MonitoringApiTest extends MonitoringTestBase {
 
-  static function getInfo() {
+  public static function getInfo() {
     return array(
       'name' => 'Monitoring API',
       'description' => 'Tests the monitoring API',
@@ -24,7 +24,7 @@ class MonitoringApiTest extends MonitoringTestBase {
   /**
    * {@inheritdoc}
    */
-  function setUp() {
+  public function setUp() {
     parent::setUp(array('dblog'));
   }
 
@@ -333,6 +333,9 @@ class MonitoringApiTest extends MonitoringTestBase {
     $this->assertEqual('example value', $info->getSetting('new setting'));
   }
 
+  /**
+   * Test logging with different settings.
+   */
   function testLogging() {
 
     // First perform tests with the logging strategy in default mode - that is
@@ -399,6 +402,8 @@ class MonitoringApiTest extends MonitoringTestBase {
   }
 
   /**
+   * Test sensor info hook precedence.
+   *
    * Test if custom sensor info hook implementation takes precedence from
    * the local implementation.
    *
@@ -422,6 +427,15 @@ class MonitoringApiTest extends MonitoringTestBase {
     $this->assertFalse(isset($sensor_info['test_sensor_integration']));
   }
 
+  /**
+   * Load sensor log data for a given sensor.
+   *
+   * @param $sensor_name
+   *   The sensor name.
+   *
+   * @return array
+   *   All log records of given sensor.
+   */
   protected function loadSensorData($sensor_name) {
     $query = new EntityFieldQuery();
     $query->entityCondition('entity_type', 'monitoring_sensor_result');

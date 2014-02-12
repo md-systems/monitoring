@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Contains \Drupal\monitoring\Sensor\SensorConfigurable.
@@ -8,7 +7,7 @@
 namespace Drupal\monitoring\Sensor;
 
 /**
- * Configurable sensor abstract class.
+ * Abstract configurable sensor class.
  *
  * Sensor extension providing generic functionality for custom
  * sensor settings.

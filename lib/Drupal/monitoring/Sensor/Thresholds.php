@@ -11,7 +11,7 @@ use Drupal\monitoring\Result\SensorResultInterface;
 /**
  * Determine status based on thresholds during sensor run.
  *
- * @see \Drupal\monitoring\Result\SensorResult::assessThresholds
+ * @see \Drupal\monitoring\Result\SensorResult::assessThresholds()
  */
 class Thresholds {
 

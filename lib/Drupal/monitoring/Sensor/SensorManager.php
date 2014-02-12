@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Contains \Drupal\monitoring\Sensor\SensorManager.
@@ -87,7 +86,7 @@ class SensorManager {
    * @return \Drupal\monitoring\Sensor\SensorInfo[]
    *   Sensor info.
    */
-  function getSensorInfoByCategories($enabled = TRUE) {
+  public function getSensorInfoByCategories($enabled = TRUE) {
     $info_by_categories = array();
     foreach ($this->getSensorInfo() as $sensor_name => $sensor_info) {
       if ($sensor_info->isEnabled() != $enabled) {
@@ -121,7 +120,7 @@ class SensorManager {
    * @throws \Drupal\monitoring\Sensor\NonExistingSensorException
    *   Thrown if the requested sensor does not exist.
    */
-  function enableSensor($sensor_name) {
+  public function enableSensor($sensor_name) {
     $sensor_info = $this->getSensorInfoByName($sensor_name);
     if (!$sensor_info->isEnabled()) {
       $settings = monitoring_sensor_settings_get($sensor_name);
@@ -148,7 +147,7 @@ class SensorManager {
    * @throws \Drupal\monitoring\Sensor\NonExistingSensorException
    *   Thrown if the requested sensor does not exist.
    */
-  function disableSensor($sensor_name) {
+  public function disableSensor($sensor_name) {
     $sensor_info = $this->getSensorInfoByName($sensor_name);
     if ($sensor_info->isEnabled()) {
       $settings = monitoring_sensor_settings_get($sensor_name);

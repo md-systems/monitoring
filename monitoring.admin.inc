@@ -5,9 +5,7 @@
  */
 
 use Drupal\monitoring\Sensor\DisabledSensorException;
-use Drupal\monitoring\Sensor\NonExistingSensorException;
 use Drupal\monitoring\SensorRunner;
-use Drupal\monitoring\Sensor\Sensor;
 use Drupal\monitoring\Sensor\SensorConfigurableInterface;
 use Drupal\monitoring\Result\SensorResultInterface;
 use Drupal\monitoring\Sensor\SensorInfo;
@@ -285,9 +283,10 @@ function monitoring_sensor_settings_form($form, &$form_state, SensorInfo $sensor
  * Validate sensor settings form.
  */
 function monitoring_sensor_settings_form_validate($form, &$form_state) {
-  /** @var SensorConfigurableInterface $sensor */
   $sensor_info = monitoring_sensor_manager()->getSensorInfoByName($form_state['sensor_name']);
   $sensor_class = $sensor_info->getSensorClass();
+  /** @var SensorConfigurableInterface $sensor */
+  // @todo move this to a factory.
   $sensor = new $sensor_class($sensor_info);
   $sensor->settingsFormValidate($form, $form_state);
 }

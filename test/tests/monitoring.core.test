@@ -9,9 +9,7 @@
  */
 class MonitoringCoreTest extends MonitoringTestBase {
 
-  protected $profile = 'testing';
-
-  static function getInfo() {
+  public static function getInfo() {
     return array(
       'name' => 'Monitoring Drupal core',
       'description' => 'Drupal core sensors tests.',
@@ -22,7 +20,7 @@ class MonitoringCoreTest extends MonitoringTestBase {
   /**
    * {@inheritdoc}
    */
-  function setUp() {
+  public function setUp() {
     parent::setUp(array('dblog', 'image', 'taxonomy'));
   }
 

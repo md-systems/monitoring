@@ -23,7 +23,7 @@ class SensorSearchApi extends SensorThresholds {
   /**
    * {@inheritdoc}
    */
-  function runSensor(SensorResultInterface $result) {
+  public function runSensor(SensorResultInterface $result) {
     $indexes = search_api_index_load_multiple(array($this->info->getSetting('index_id')));
     $index = reset($indexes);
 

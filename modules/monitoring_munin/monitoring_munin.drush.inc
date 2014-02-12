@@ -11,7 +11,7 @@ function monitoring_munin_drush_command() {
     'options' => array(
       'get-config' => 'Get munin plugin configuration options.',
     ),
-    'description' => 'Run munin plugins.',
+    'description' => 'Run munin plugin.',
     'examples' => array(
       'drush monitoring-munin' => 'Runs all sensors and outputs results.',
     ),
@@ -21,6 +21,9 @@ function monitoring_munin_drush_command() {
   return $items;
 }
 
+/**
+ * Command callback for munin integration.
+ */
 function monitoring_munin_drush_callback() {
   // We are requested to print munin configuration.
   if (drush_get_option('get-config', FALSE)) {

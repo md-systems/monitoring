@@ -9,7 +9,7 @@
  */
 class MonitoringCommerceTest extends MonitoringTestBase {
 
-  static function getInfo() {
+  public static function getInfo() {
     return array(
       'name' => 'Monitoring commerce',
       'description' => 'Drupal commerce sensors tests.',
@@ -21,12 +21,12 @@ class MonitoringCommerceTest extends MonitoringTestBase {
   /**
    * {@inheritdoc}
    */
-  function setUp() {
+  public function setUp() {
     parent::setUp(array('commerce_order'));
   }
 
   /**
-   * Test commerce sensors.
+   * Test commerce turnover sensors.
    */
   function testTurnoverSensors() {
 
@@ -87,6 +87,9 @@ class MonitoringCommerceTest extends MonitoringTestBase {
     $this->assertEqual($result->getMessage(), "CHF 1'013.00 in 1 day");
   }
 
+  /**
+   * Test commerce order count sensors with different order status.
+   */
   public function testOrderStatusSensors() {
     $this->createEmptyOrderWithPrice('pending');
     $this->createEmptyOrderWithPrice('pending');

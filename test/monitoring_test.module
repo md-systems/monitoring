@@ -1,10 +1,8 @@
 <?php
-
 /**
+ * @file
  * Monitoring test bootstrap file.
  */
-
-use Drupal\monitoring\Result\SensorResultInterface;
 
 /**
  * Implements of hook_ctools_plugin_api().
@@ -19,6 +17,9 @@ function monitoring_test_ctools_plugin_api($module, $api) {
   }
 }
 
+/**
+ * Implements hook_cron_queue_info().
+ */
 function monitoring_test_cron_queue_info() {
   $queues['monitoring_test'] = array(
     'worker callback' => 'monitoring_test_queue_worker',
@@ -27,6 +28,9 @@ function monitoring_test_cron_queue_info() {
   return $queues;
 }
 
+/**
+ * Dummy worker callback for test queue.
+ */
 function monitoring_test_queue_worker() {
 
 }
@@ -183,5 +187,3 @@ function monitoring_test_commerce_currency_info_alter(&$currencies, $langcode) {
   $currencies['CHF']['thousands_separator'] = '\'';
   $currencies['CHF']['code_placement'] = 'before';
 }
-
-

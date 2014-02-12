@@ -7,11 +7,22 @@
 use Drupal\monitoring\Result\SensorResultInterface;
 use Drupal\monitoring\Sensor\DisabledSensorException;
 use Drupal\monitoring\Sensor\NonExistingSensorException;
-use Drupal\monitoring\SensorRunner;
 
+/**
+ * Exit code for a critical sensor status.
+ */
 define('MONITORING_DRUSH_SENSOR_STATUS_CRITICAL', 3);
+/**
+ * Exit code for an unknown sensor status.
+ */
 define('MONITORING_DRUSH_SENSOR_STATUS_UNKNOWN', 2);
+/**
+ * Exit code for a warning sensor status.
+ */
 define('MONITORING_DRUSH_SENSOR_STATUS_WARNING', 1);
+/**
+ * Exit code for a proper run with OK status.
+ */
 define('MONITORING_DRUSH_SENSOR_STATUS_OK', 0);
 
 /**
