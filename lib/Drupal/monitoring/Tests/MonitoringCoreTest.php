@@ -29,16 +29,6 @@ class MonitoringCoreTest extends MonitoringTestBase {
   }
 
   /**
-<<<<<<< HEAD:test/tests/monitoring.core.test
-   * {@inheritdoc}
-   */
-  public function setUp() {
-    parent::setUp(array('dblog', 'image', 'taxonomy'));
-  }
-
-  /**
-=======
->>>>>>> d661aff... fixed lots of tests:lib/Drupal/monitoring/Tests/MonitoringCoreTest.php
    * Tests individual sensors.
    */
   function testSensors() {

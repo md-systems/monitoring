@@ -158,7 +158,9 @@ function _monitoring_munin_result() {
   }
 
   // Run enabled sensors.
-  $runner = new SensorRunner($munin_enabled);
+  /** @var \Drupal\monitoring\SensorRunner $runner */
+  $runner = \Drupal::service('monitoring.sensor_runner');
+  $runner->setSensorInfo($munin_enabled);
   $config = array();
 
   /** @var \Drupal\monitoring\Result\SensorResultInterface $result */

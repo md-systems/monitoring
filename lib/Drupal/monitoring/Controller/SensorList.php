@@ -10,7 +10,8 @@ class SensorList extends ControllerBase {
 
   public function content() {
     $rows = array();
-    $runner = new SensorRunner();
+    /** @var \Drupal\monitoring\SensorRunner $runner */
+    $runner = \Drupal::service('monitoring.sensor_runner');
     $results = $runner->runSensors();
     $status_overview = array(
       SensorResultInterface::STATUS_OK => 0,

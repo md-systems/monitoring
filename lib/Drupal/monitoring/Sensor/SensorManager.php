@@ -127,6 +127,25 @@ class SensorManager {
   }
 
   /**
+   * Saves sensor settings.
+   *
+   * @param string $sensor_name
+   *   The sensor name.
+   * @param $settings
+   *   Settings that should be saved.
+   */
+  public function saveSettings($sensor_name, array $settings) {
+    $saved_settings = (array)\Drupal::config('monitoring.settings')->get($sensor_name);
+    foreach ($settings as $key => $value) {
+      $saved_settings[$key] = $value;
+    }
+
+    \Drupal::config('monitoring.settings')->set($sensor_name, $settings)->save();
+    // After settings save reset the cache.
+    $this->resetCache();
+  }
+
+  /**
    * Enable a sensor.
    *
    * Checks if the sensor is enabled and enables it if not.
@@ -140,9 +159,7 @@ class SensorManager {
   public function enableSensor($sensor_name) {
     $sensor_info = $this->getSensorInfoByName($sensor_name);
     if (!$sensor_info->isEnabled()) {
-      $settings = monitoring_sensor_settings_get($sensor_name);
-      $settings['enabled'] = TRUE;
-      monitoring_sensor_settings_save($sensor_name, $settings);
+      $this->saveSettings($sensor_name, array('enabled' => TRUE));
       // @todo the following part is SensorDisappearedSensors specific. We need
       //   to move it into the sensor somehow.
       $available_sensors = \Drupal::state()->get('monitoring.available_sensors', array());
@@ -167,9 +184,7 @@ class SensorManager {
   public function disableSensor($sensor_name) {
     $sensor_info = $this->getSensorInfoByName($sensor_name);
     if ($sensor_info->isEnabled()) {
-      $settings = monitoring_sensor_settings_get($sensor_name);
-      $settings['enabled'] = FALSE;
-      monitoring_sensor_settings_save($sensor_name, $settings);
+      $this->saveSettings($sensor_name, array('enabled' => FALSE));
       // @todo - the following part is SensorDisappearedSensors specific. We need
       //   to move it into the sensor somehow.
       $available_sensors = \Drupal::state()->get('monitoring.available_sensors', array());
@@ -267,7 +282,7 @@ class SensorManager {
    *   Merged settings.
    */
   protected function mergeSettings($sensor_name, array $default_settings) {
-    $saved_settings = monitoring_sensor_settings_get($sensor_name);
+    $saved_settings = (array)\Drupal::config('monitoring.settings')->get($sensor_name);
     return $this->mergeSettingsArrays(array($default_settings, $saved_settings));
   }
 

@@ -2,3 +2,6 @@ services:
   monitoring.sensor_manager:
     class: Drupal\monitoring\Sensor\SensorManager
     arguments: ['@module_handler']
+  monitoring.sensor_runner:
+    class: Drupal\monitoring\SensorRunner
+    arguments: ['@monitoring.sensor_manager']

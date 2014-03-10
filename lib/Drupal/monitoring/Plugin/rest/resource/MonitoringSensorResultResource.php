@@ -7,8 +7,10 @@
 
 namespace Drupal\monitoring\Plugin\rest\resource;
 
+use Drupal\monitoring\Sensor\DisabledSensorException;
 use Drupal\monitoring\Sensor\NonExistingSensorException;
 use Drupal\monitoring\Sensor\SensorManager;
+use Drupal\monitoring\SensorRunner;
 use Drupal\rest\Plugin\ResourceBase;
 use Drupal\rest\ResourceResponse;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -16,14 +18,14 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Route;
 
 /**
- * Provides a resource for monitoring sensors.
+ * Provides a resource for monitoring sensors results.
  *
  * @RestResource(
- *   id = "monitoring-sensor-info",
- *   label = @Translation("Monitoring sensor info")
+ *   id = "monitoring-sensor-result",
+ *   label = @Translation("Monitoring sensor result")
  * )
  */
-class MonitoringSensorInfoResource extends ResourceBase {
+class MonitoringSensorResultResource extends ResourceBase {
 
   /**
    * The sensor manager.
@@ -32,9 +34,17 @@ class MonitoringSensorInfoResource extends ResourceBase {
    */
   protected $sensorManager;
 
-  public function __construct(array $configuration, $plugin_id, array $plugin_definition, array $serializer_formats, SensorManager $sensor_manager) {
+  /**
+   * The sensor runner.
+   *
+   * @var \Drupal\monitoring\SensorRunner
+   */
+  protected $sensorRunner;
+
+  public function __construct(array $configuration, $plugin_id, array $plugin_definition, array $serializer_formats, SensorManager $sensor_manager, SensorRunner $sensor_runner) {
     parent::__construct($configuration, $plugin_id, $plugin_definition, $serializer_formats);
     $this->sensorManager = $sensor_manager;
+    $this->sensorRunner = $sensor_runner;
   }
 
   /**
@@ -46,7 +56,8 @@ class MonitoringSensorInfoResource extends ResourceBase {
       $plugin_id,
       $plugin_definition,
       $container->getParameter('serializer.formats'),
-      $container->get('monitoring.sensor_manager')
+      $container->get('monitoring.sensor_manager'),
+      $container->get('monitoring.sensor_runner')
     );
   }
 
@@ -90,24 +101,36 @@ class MonitoringSensorInfoResource extends ResourceBase {
    * @throws \Symfony\Component\HttpKernel\Exception\HttpException
    */
   public function get($sensor_name = NULL) {
+    $request = \Drupal::request();
+
     if ($sensor_name) {
       try {
-        $info = $this->sensorManager->getSensorInfoByName($sensor_name);
+        $sensor_info[$sensor_name] = $this->sensorManager->getSensorInfoByName($sensor_name);
+        $this->sensorRunner->setSensorInfo($sensor_info);
+        $result = $this->sensorRunner->runSensors();
+        $response = $result[$sensor_name]->toArray();
+        $response['uri'] = $request->getUriForPath('/monitoring-sensor-result/' . $sensor_name);
+        return new ResourceResponse($response);
       }
       catch (NonExistingSensorException $e) {
         throw new NotFoundHttpException($e->getMessage(), $e);
       }
-      $response = $info->toArray();
-      $response['uri'] = \Drupal::request()->getUriForPath('/monitoring-sensor-info/' . $sensor_name);
-      return new ResourceResponse($response);
+      catch (DisabledSensorException $e) {
+        throw new NotFoundHttpException($e->getMessage(), $e);
+      }
+    }
+    else {
+      $list = array();
+      foreach ($this->sensorRunner->runSensors() as $sensor_name => $sensor_result) {
+        $list[$sensor_name] = $sensor_result->toArray();
+        $list[$sensor_name]['uri'] = $request->getUriForPath('/monitoring-sensor-result/' . $sensor_name);
+        if ($request->get('expand') == 'sensor_info') {
+          $list[$sensor_name]['sensor_info'] = $sensor_result->getSensorInfo()->toArray();
+        }
+      }
+      return new ResourceResponse($list);
     }
 
-    $list = array();
-    foreach ($this->sensorManager->getSensorInfo() as $sensor_name => $sensor_info) {
-      $list[$sensor_name] = $sensor_info->toArray();
-      $list[$sensor_name]['uri'] = \Drupal::request()->getUriForPath('/monitoring-sensor-info/' . $sensor_name);
-    }
-    return new ResourceResponse($list);
   }
 
 }

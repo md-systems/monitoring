@@ -12,6 +12,7 @@ use Drupal\monitoring\Result\SensorResultInterface;
 use Drupal\monitoring\Sensor\DisabledSensorException;
 use Drupal\monitoring\Sensor\SensorInfo;
 use Drupal;
+use Drupal\monitoring\Sensor\SensorManager;
 
 /**
  * Instantiate and run requested sensors.
@@ -39,7 +40,7 @@ class SensorRunner implements \IteratorAggregate {
    *
    * @var \Drupal\monitoring\Sensor\SensorInfo[]
    */
-  protected $sensors = array();
+  protected $sensorInfo = array();
 
   /**
    * Flag to force sensor run.
@@ -67,19 +68,34 @@ class SensorRunner implements \IteratorAggregate {
   /**
    * Constructs a SensorRunner.
    *
-   * @param \Drupal\monitoring\Sensor\SensorInfo[] $sensors
-   *   Associative array of sensor names => sensor info. Only enabled sensors
-   *   may be passed.
+   * @param \Drupal\monitoring\Sensor\SensorManager $sensor_manager
    */
-  public function __construct(array $sensors = array()) {
-    $this->sensors = $sensors;
-    $this->sensorManager = monitoring_sensor_manager();
-    if (empty($sensors)) {
-      $this->sensors = $this->sensorManager->getEnabledSensorInfo();
-    }
+  public function __construct(SensorManager $sensor_manager) {
+    $this->sensorManager = $sensor_manager;
     // @todo LOW Cleanly variable based installation should go into a factory.
     $this->loggingMode = \Drupal::config('monitoring.settings')->get('sensor_call_logging');
     $this->loadCache();
+  }
+
+  /**
+   * Sets the sensor info.
+   *
+   * @param \Drupal\monitoring\Sensor\SensorInfo[] $sensor_info
+   */
+  public function setSensorInfo(array $sensor_info) {
+    $this->sensorInfo = $sensor_info;
+  }
+
+  /**
+   * Gets the sensor info.
+   *
+   * @return \Drupal\monitoring\Sensor\SensorInfo[] $sensor_info
+   */
+  public function getSensorInfo() {
+    if (empty($this->sensorInfo)) {
+      return $this->sensorManager->getEnabledSensorInfo();
+    }
+    return $this->sensorInfo;
   }
 
   /**
@@ -117,7 +133,7 @@ class SensorRunner implements \IteratorAggregate {
   public function loadCache() {
     $cids = array();
     // Only load sensor caches if they define caching.
-    foreach ($this->sensors as $name => $sensor_info) {
+    foreach ($this->getSensorInfo() as $name => $sensor_info) {
       if ($sensor_info->getCachingTime()) {
         $cids[] = $this->getSensorCid($name);
       }
@@ -152,7 +168,7 @@ class SensorRunner implements \IteratorAggregate {
    */
   public function runSensors() {
     $results = array();
-    foreach ($this->sensors as $name => $info) {
+    foreach ($this->getSensorInfo() as $name => $info) {
       if ($result = $this->runSensor($info)) {
         $results[$name] = $result;
       }
