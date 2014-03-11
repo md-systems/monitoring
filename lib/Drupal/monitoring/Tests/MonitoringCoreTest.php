@@ -68,6 +68,9 @@ class MonitoringCoreTest extends MonitoringTestBase {
     \Drupal::state()->set('system.maintenance_mode', TRUE);
     $result = $this->runSensor('core_maintenance_mode');
     $this->assertTrue($result->isCritical());
+    // Switch back to being online as being in maintenance mode would break
+    // tests dealing with UI.
+    \Drupal::state()->set('system.maintenance_mode', FALSE);
 
     // ======= SensorQueue tests ======= //
 
