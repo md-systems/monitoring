@@ -1,15 +1,61 @@
 <?php
+/**
+ * @file
+ *   Contains \Drupal\monitoring\Form\SensorDetailForm.
+ */
 
 namespace Drupal\monitoring\Form;
 
 use Drupal\Core\Form\FormBase;
 use Drupal\monitoring\Sensor\DisabledSensorException;
 use Drupal\monitoring\Sensor\NonExistingSensorException;
+use Drupal\monitoring\Sensor\SensorManager;
 use Drupal\monitoring\SensorRunner;
 use Drupal\views\Views;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
+/**
+ * Sensor detail form controller.
+ */
 class SensorDetailForm extends FormBase {
+
+  /**
+   * Stores the sensor runner.
+   *
+   * @var \Drupal\monitoring\SensorRunner
+   */
+  protected $sensorRunner;
+
+  /**
+   * Stores the sensor manager.
+   *
+   * @var \Drupal\monitoring\Sensor\SensorManager
+   */
+  protected $sensorManager;
+
+  /**
+   * Constructs a \Drupal\monitoring\Form\SensorDetailForm object.
+   *
+   * @param \Drupal\monitoring\SensorRunner $sensor_runner
+   *   The factory for configuration objects.
+   * @param \Drupal\monitoring\Sensor\SensorManager $sensor_manager
+   *   The sensor manager service.
+   */
+  public function __construct(SensorRunner $sensor_runner, SensorManager $sensor_manager) {
+    $this->sensorRunner = $sensor_runner;
+    $this->sensorManager = $sensor_manager;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container) {
+    return new static(
+      $container->get('monitoring.sensor_runner'),
+      $container->get('monitoring.sensor_manager')
+    );
+  }
 
 
   /**
@@ -26,8 +72,10 @@ class SensorDetailForm extends FormBase {
     $form_state['sensor_name'] = $sensor_name;
 
     try {
-      $sensor_info = monitoring_sensor_manager()->getSensorInfoByName($sensor_name);
-      $result = monitoring_sensor_run($sensor_info->getName(), FALSE, TRUE);
+      $sensor_info = $this->sensorManager->getSensorInfoByName($sensor_name);
+      $this->sensorRunner->verbose(TRUE);
+      $results = $this->sensorRunner->runSensors(array($sensor_info));
+      $result = array_shift($results);
     }
     catch (DisabledSensorException $e) {
       throw new NotFoundHttpException();
@@ -178,7 +226,7 @@ class SensorDetailForm extends FormBase {
    * Settings form page title callback.
    */
   public function formTitle($sensor_name) {
-    if ($sensor_info = monitoring_sensor_manager()->getSensorInfoByName($sensor_name)) {
+    if ($sensor_info = $this->sensorManager->getSensorInfoByName($sensor_name)) {
       return $this->t('@label (@category)', array('@category' => $sensor_info->getCategory(), '@label' => $sensor_info->getLabel()));
     }
     return '';

@@ -4,15 +4,52 @@ namespace Drupal\monitoring\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\monitoring\Result\SensorResultInterface;
+use Drupal\monitoring\Sensor\SensorManager;
 use Drupal\monitoring\SensorRunner;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 class SensorList extends ControllerBase {
 
+  /**
+   * Stores the sensor runner.
+   *
+   * @var \Drupal\monitoring\SensorRunner
+   */
+  protected $sensorRunner;
+
+  /**
+   * Stores the sensor manager.
+   *
+   * @var \Drupal\monitoring\Sensor\SensorManager
+   */
+  protected $sensorManager;
+
+  /**
+   * Constructs a \Drupal\monitoring\Form\SensorDetailForm object.
+   *
+   * @param \Drupal\monitoring\SensorRunner $sensor_runner
+   *   The factory for configuration objects.
+   * @param \Drupal\monitoring\Sensor\SensorManager $sensor_manager
+   *   The sensor manager service.
+   */
+  public function __construct(SensorRunner $sensor_runner, SensorManager $sensor_manager) {
+    $this->sensorRunner = $sensor_runner;
+    $this->sensorManager = $sensor_manager;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container) {
+    return new static(
+      $container->get('monitoring.sensor_runner'),
+      $container->get('monitoring.sensor_manager')
+    );
+  }
+
   public function content() {
     $rows = array();
-    /** @var \Drupal\monitoring\SensorRunner $runner */
-    $runner = \Drupal::service('monitoring.sensor_runner');
-    $results = $runner->runSensors();
+    $results = $this->sensorRunner->runSensors();
     $status_overview = array(
       SensorResultInterface::STATUS_OK => 0,
       SensorResultInterface::STATUS_INFO => 0,
@@ -27,7 +64,7 @@ class SensorList extends ControllerBase {
     // Oldest sensor info.
     $oldest_sensor_info = NULL;
 
-    foreach (monitoring_sensor_info_by_categories() as $category => $category_sensor_info) {
+    foreach ($this->sensorManager->getSensorInfoByCategories() as $category => $category_sensor_info) {
 
       // Category grouping row.
       $rows[] = array(

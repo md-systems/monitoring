@@ -1,11 +1,46 @@
 <?php
+/**
+ * @file
+ *   Contains \Drupal\monitoring\Form\SensorOverviewForm.
+ */
 
 namespace Drupal\monitoring\Form;
 
 use Drupal\Core\Form\FormBase;
 use Drupal\monitoring\Sensor\SensorInfo;
+use Drupal\monitoring\Sensor\SensorManager;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
+/**
+ * Sensor overview form controller.
+ */
 class SensorsOverviewForm extends FormBase {
+
+  /**
+   * Stores the sensor manager.
+   *
+   * @var \Drupal\monitoring\Sensor\SensorManager
+   */
+  protected $sensorManager;
+
+  /**
+   * Constructs a \Drupal\monitoring\Form\SensorSettingsForm object.
+   *
+   * @param \Drupal\monitoring\Sensor\SensorManager $sensor_manager
+   *   The sensor manager service.
+   */
+  public function __construct(SensorManager $sensor_manager) {
+    $this->sensorManager = $sensor_manager;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container) {
+    return new static(
+      $container->get('monitoring.sensor_manager')
+    );
+  }
 
   /**
    * {@inheritdoc}
@@ -22,7 +57,7 @@ class SensorsOverviewForm extends FormBase {
     $default_value = array();
 
     /** @var SensorInfo $sensor_info */
-    foreach (monitoring_sensor_info() as $sensor_name => $sensor_info) {
+    foreach ($this->sensorManager->getSensorInfo() as $sensor_name => $sensor_info) {
       $row = array(
         'category' => $sensor_info->getCategory(),
         'label' => $sensor_info->getLabel(),
@@ -75,10 +110,10 @@ class SensorsOverviewForm extends FormBase {
   public function submitForm(array &$form, array &$form_state) {
     foreach ($form_state['values']['sensors'] as $sensor_name => $enabled) {
       if ($enabled) {
-        monitoring_sensor_manager()->enableSensor($sensor_name);
+        $this->sensorManager->enableSensor($sensor_name);
       }
       else {
-        monitoring_sensor_manager()->disableSensor($sensor_name);
+        $this->sensorManager->disableSensor($sensor_name);
       }
     }
     drupal_set_message($this->t('Configuration has been saved.'));

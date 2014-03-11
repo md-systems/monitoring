@@ -1,4 +1,8 @@
 <?php
+/**
+ * @file
+ *   Contains \Drupal\monitoring\Form\SensorSettingsForm.
+ */
 
 namespace Drupal\monitoring\Form;
 
@@ -6,9 +10,41 @@ use Drupal\Core\Form\FormBase;
 use Drupal\monitoring\Sensor\NonExistingSensorException;
 use Drupal\monitoring\Sensor\Sensor;
 use Drupal\monitoring\Sensor\SensorConfigurableInterface;
+use Drupal\monitoring\Sensor\SensorManager;
+use Drupal\monitoring\SensorRunner;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
+/**
+ * Sensor settings form controller.
+ */
 class SensorSettingsForm extends FormBase {
+
+  /**
+   * Stores the sensor manager.
+   *
+   * @var \Drupal\monitoring\Sensor\SensorManager
+   */
+  protected $sensorManager;
+
+  /**
+   * Constructs a \Drupal\monitoring\Form\SensorSettingsForm object.
+   *
+   * @param \Drupal\monitoring\Sensor\SensorManager $sensor_manager
+   *   The sensor manager service.
+   */
+  public function __construct(SensorManager $sensor_manager) {
+    $this->sensorManager = $sensor_manager;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container) {
+    return new static(
+      $container->get('monitoring.sensor_manager')
+    );
+  }
 
   /**
    * {@inheritdoc}
@@ -22,7 +58,7 @@ class SensorSettingsForm extends FormBase {
    */
   public function buildForm(array $form, array &$form_state, $sensor_name = '') {
     try {
-      $sensor_info = monitoring_sensor_manager()->getSensorInfoByName($sensor_name);
+      $sensor_info = $this->sensorManager->getSensorInfoByName($sensor_name);
     }
     catch (NonExistingSensorException $e) {
       throw new NotFoundHttpException();
@@ -69,7 +105,7 @@ class SensorSettingsForm extends FormBase {
     /** @var Sensor $sensor */
     $sensor = $form_state['sensor'];
     $sensor_name = $sensor->getSensorName();
-    monitoring_sensor_settings_save($sensor_name, $form_state['values'][$sensor_name]);
+    $this->sensorManager->saveSettings($sensor_name, $form_state['values'][$sensor_name]);
     drupal_set_message($this->t('Sensor settings saved.'));
   }
 
@@ -77,7 +113,7 @@ class SensorSettingsForm extends FormBase {
    * Settings form page title callback.
    */
   public function formTitle($sensor_name) {
-    if ($sensor_info = monitoring_sensor_manager()->getSensorInfoByName($sensor_name)) {
+    if ($sensor_info = $this->sensorManager->getSensorInfoByName($sensor_name)) {
       return $this->t('@label settings (@category)', array('@category' => $sensor_info->getCategory(), '@label' => $sensor_info->getLabel()));
     }
     return '';
