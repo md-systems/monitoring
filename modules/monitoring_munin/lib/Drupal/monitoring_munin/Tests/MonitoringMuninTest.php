@@ -3,12 +3,17 @@
  * @file
  * Monitoring munin tests.
  */
+
+namespace Drupal\monitoring_munin\Tests;
+
 use Drupal\monitoring\Tests\MonitoringTestBase;
 
 /**
  * Class MonitoringAPITest
  */
 class MonitoringMuninTest extends MonitoringTestBase {
+
+  public static $modules = array('monitoring', 'monitoring_test', 'monitoring_munin', 'dblog');
 
   /**
    * {@inheritdoc}
@@ -19,16 +24,6 @@ class MonitoringMuninTest extends MonitoringTestBase {
       'description' => 'Monitoring Munin tests.',
       'group' => 'Monitoring',
     );
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function setUp() {
-    parent::setUp(array('dblog'));
-    // @todo Enable monitoring_munin separately, otherwise the class autoloading
-    //   does not work.
-    module_enable(array('monitoring_munin'));
   }
 
   /**

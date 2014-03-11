@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\monitoring\Tests;
+namespace Drupal\monitoring_munin\Tests;
 
 use Drupal;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
