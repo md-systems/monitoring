@@ -32,10 +32,8 @@ class MonitoringElysiaTest extends MonitoringTestBase {
 
   /**
    * Tests elysia_cron last execution and last run sensors.
-   *
-   * @todo - enable once we have elysia_cron D8.
    */
-  function dtestElysiaCron() {
+  function testElysiaCron() {
 
     elysia_cron_set('system_cron');
 

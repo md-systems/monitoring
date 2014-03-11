@@ -32,10 +32,8 @@ class MonitoringSearchAPITest extends MonitoringTestBase {
 
   /**
    * Tests individual sensors.
-   *
-   * @todo - enable once we have search_api D8.
    */
-  function dtestSensors() {
+  function testSensors() {
 
     // Create content first to avoid a Division by zero error.
     // @todo: This should be fixed in Search API in theme_search_api_index().

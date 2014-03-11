@@ -404,11 +404,7 @@ class MonitoringCoreTest extends MonitoringTestBase {
     $this->assertEqual($result->getValue(), 1);
 
     // Allow additional, the sensor should not escalate.
-    $this->drupalPostForm('admin/config/system/monitoring/sensors/monitoring_enabled_modules', array(
-      // Do not require contact and book as they are not installed.
-      $form_key . '[allow_additional]' => TRUE,
-    ), t('Save'));
-    monitoring_sensor_manager()->resetCache();
+    monitoring_sensor_manager()->saveSettings('monitoring_enabled_modules', array('allow_additional' => TRUE));
     debug(monitoring_sensor_manager()->getSensorInfoByName('monitoring_enabled_modules')->getSettings());
     debug((array)\Drupal::config('monitoring.settings')->get('monitoring_enabled_modules'));
     $result = $this->runSensor('monitoring_enabled_modules');

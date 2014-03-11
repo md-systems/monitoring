@@ -32,10 +32,8 @@ class MonitoringSimplenewsTest extends MonitoringTestBase {
 
   /**
    * Tests individual sensors.
-   *
-   * @todo - enable once we have simplenews D8.
    */
-  function dtestSensors() {
+  function testSensors() {
 
     // No spool items - status OK.
     $result = $this->runSensor('simplenews_pending');

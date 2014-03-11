@@ -39,10 +39,8 @@ class MonitoringCommerceTest extends MonitoringTestBase {
 
   /**
    * Test commerce turnover sensors.
-   *
-   * @todo - enable once we have commerce D8.
    */
-  function dtestTurnoverSensors() {
+  function testTurnoverSensors() {
 
     // Enable two currencies with different decimal handling, to verify
     // correct rounding. We don't test actual conversion rates as the different
@@ -103,10 +101,8 @@ class MonitoringCommerceTest extends MonitoringTestBase {
 
   /**
    * Test commerce order count sensors with different order status.
-   *
-   * @todo - enable once we have commerce D8.
    */
-  public function dtestOrderStatusSensors() {
+  public function testOrderStatusSensors() {
     $this->createEmptyOrderWithPrice('pending');
     $this->createEmptyOrderWithPrice('pending');
     $this->createEmptyOrderWithPrice('completed');
