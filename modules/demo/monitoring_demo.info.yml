@@ -6,6 +6,8 @@ core: 8.x
 hidden: TRUE
 
 dependencies:
-# Uncomment once the search API is available for D8.monitoring.setup.inc
+# Uncomment once the search API is available for D8.
 # - search_api_db
  - monitoring
+ - rest
+ - hal

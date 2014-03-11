@@ -217,10 +217,10 @@ class MonitoringUITest extends MonitoringTestBase {
     $this->assertEqual(count($rows), 2);
 
     // Test the verbose output.
-    $this->drupalGet('admin/reports/monitoring/sensors/watchdog_aggregate_test');
+    $this->drupalPostForm(NULL, array(), t('Run again'));
     $this->assertText(t('Query'));
     // Check that the query is there by looking for a part of it.
-    $this->assertRaw('(timestamp > :db_condition_placeholder_0)');
+    $this->assertRaw('(severity = :db_condition_placeholder_0) AND (timestamp > :db_condition_placeholder_1)');
     $this->assertText(t('Arguments'));
 
     // Test that accessing a disabled or nisot-existing sensor results in a page

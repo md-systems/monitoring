@@ -77,15 +77,6 @@ class SensorRunner implements \IteratorAggregate {
   }
 
   /**
-   * Sets the sensor info.
-   *
-   * @param \Drupal\monitoring\Sensor\SensorInfo[] $sensor_info
-   */
-  public function setSensorInfo(array $sensor_info) {
-    $this->sensorInfo = $sensor_info;
-  }
-
-  /**
    * Gets the sensor info.
    *
    * @return \Drupal\monitoring\Sensor\SensorInfo[] $sensor_info
@@ -128,11 +119,14 @@ class SensorRunner implements \IteratorAggregate {
 
   /**
    * Loads available sensor results from cache.
+   *
+   * @param \Drupal\monitoring\Sensor\SensorInfo[] $sensors_info
+   *   List of sensor info object that we want to run.
    */
-  public function loadCache() {
+  public function loadCache(array $sensors_info) {
     $cids = array();
     // Only load sensor caches if they define caching.
-    foreach ($this->getSensorInfo() as $name => $sensor_info) {
+    foreach ($sensors_info as $name => $sensor_info) {
       if ($sensor_info->getCachingTime()) {
         $cids[] = $this->getSensorCid($name);
       }
@@ -157,6 +151,8 @@ class SensorRunner implements \IteratorAggregate {
   /**
    * Runs the defined sensableors.
    *
+   * @param \Drupal\monitoring\Sensor\SensorInfo[] $sensors_info
+   *   List of sensor info object that we want to run.
    * @return \Drupal\monitoring\Result\SensorResultInterface[]
    *   Array of sensor results.
    *
@@ -165,10 +161,15 @@ class SensorRunner implements \IteratorAggregate {
    *
    * @see \Drupal\monitoring\SensorRunner::runSensor()
    */
-  public function runSensors() {
-    $this->loadCache();
+  public function runSensors(array $sensors_info = array()) {
+
+    if (empty($sensors_info)) {
+      $sensors_info = $this->sensorManager->getSensorInfo();
+    }
+
+    $this->loadCache($sensors_info);
     $results = array();
-    foreach ($this->getSensorInfo() as $name => $info) {
+    foreach ($sensors_info as $name => $info) {
       if ($result = $this->runSensor($info)) {
         $results[$name] = $result;
       }

@@ -5,6 +5,7 @@ namespace Drupal\monitoring\Form;
 use Drupal\Core\Form\FormBase;
 use Drupal\monitoring\Sensor\DisabledSensorException;
 use Drupal\monitoring\Sensor\NonExistingSensorException;
+use Drupal\monitoring\SensorRunner;
 use Drupal\views\Views;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
@@ -85,7 +86,7 @@ class SensorDetailForm extends FormBase {
       $form['sensor_result']['force_run'] = array(
         '#type' => 'submit',
         '#value' => $this->t('Run now'),
-        '#access' => user_access('monitoring force run'),
+        '#access' => \Drupal::currentUser()->hasPermission('monitoring force run'),
       );
     }
     elseif ($sensor_info->getCachingTime()) {
@@ -98,7 +99,7 @@ class SensorDetailForm extends FormBase {
       $form['sensor_result']['force_run'] = array(
         '#type' => 'submit',
         '#value' => $this->t('Run again'),
-        '#access' => user_access('monitoring force run'),
+        '#access' => \Drupal::currentUser()->hasPermission('monitoring force run'),
       );
     }
     else {
@@ -113,7 +114,7 @@ class SensorDetailForm extends FormBase {
       $form['sensor_result']['verbose'] = array(
         '#type' => 'fieldset',
         '#title' => $this->t('Verbose'),
-        '#access' => user_access('monitoring verbose'),
+        '#access' => \Drupal::currentUser()->hasPermission('monitoring verbose'),
       );
       if ($result->isCached()) {
         $form['sensor_result']['verbose']['output'] = array(
@@ -169,13 +170,8 @@ class SensorDetailForm extends FormBase {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, array &$form_state) {
-    $result = monitoring_sensor_run($form_state['sensor_name'], TRUE);
-    if (!empty($result)) {
-      drupal_set_message($this->t('Sensor force run executed.'));
-    }
-    else {
-      drupal_set_message($this->t('Error executing sensor force run.'), 'error');
-    }
+    SensorRunner::resetCache(array($form_state['sensor_name']));
+    drupal_set_message(t('Sensor force run executed.'));
   }
 
   /**

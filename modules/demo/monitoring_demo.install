@@ -17,6 +17,23 @@ function monitoring_demo_install() {
   // Set the front page to monitoring-demo.
   \Drupal::config('system.site')->set('page.front', 'monitoring-demo')->save();
 
+  // Enable REST API for monitoring resources.
+  $settings = array(
+    'monitoring-sensor-info' => array(
+      'GET' => array(
+        'supported_formats' => array('hal_json'),
+        'supported_auth' => array('cookie'),
+      ),
+    ),
+    'monitoring-sensor-result' => array(
+      'GET' => array(
+        'supported_formats' => array('hal_json'),
+        'supported_auth' => array('cookie'),
+      ),
+    ),
+  );
+  \Drupal::config('rest.settings')->set('resources', $settings)->save();
+
   // Create a few nodes and comments as sample data for some sensors.
   $node = _monitoring_setup_create_node(array('type' => 'article'));
   _monitoring_setup_create_comment(array('entity_id' => $node->id()));

@@ -116,10 +116,9 @@ function monitoring_sensor_run_multiple($sensor_names = array(), $force_run = FA
 
   /** @var \Drupal\Monitoring\SensorRunner $runner */
   $runner = \Drupal::service('monitoring.sensor_runner');
-  $runner->setSensorInfo($sensors_info);
   $runner->verbose($verbose);
   $runner->forceRun($force_run);
-  $results = $runner->runSensors();
+  $results = $runner->runSensors($sensors_info);
   return $results;
 }
 

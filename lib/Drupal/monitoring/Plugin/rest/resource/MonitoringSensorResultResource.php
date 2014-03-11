@@ -106,8 +106,7 @@ class MonitoringSensorResultResource extends ResourceBase {
     if ($sensor_name) {
       try {
         $sensor_info[$sensor_name] = $this->sensorManager->getSensorInfoByName($sensor_name);
-        $this->sensorRunner->setSensorInfo($sensor_info);
-        $result = $this->sensorRunner->runSensors();
+        $result = $this->sensorRunner->runSensors($sensor_info);
         $response = $result[$sensor_name]->toArray();
         $response['uri'] = $request->getUriForPath('/monitoring-sensor-result/' . $sensor_name);
         if ($request->get('expand') == 'sensor_info') {
