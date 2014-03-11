@@ -164,7 +164,7 @@ class SensorRunner implements \IteratorAggregate {
   public function runSensors(array $sensors_info = array()) {
 
     if (empty($sensors_info)) {
-      $sensors_info = $this->sensorManager->getSensorInfo();
+      $sensors_info = $this->sensorManager->getEnabledSensorInfo();
     }
 
     $this->loadCache($sensors_info);

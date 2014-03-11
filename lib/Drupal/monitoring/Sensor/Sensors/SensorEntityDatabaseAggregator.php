@@ -7,6 +7,7 @@
 namespace Drupal\monitoring\Sensor\Sensors;
 
 
+use Drupal\Component\Utility\String;
 use Drupal\monitoring\Result\SensorResultInterface;
 use Drupal;
 
@@ -20,6 +21,14 @@ use Drupal;
 class SensorEntityDatabaseAggregator extends SensorDatabaseAggregatorBase {
 
   /**
+   * Local variable to store the field that is used as aggregate.
+   *
+   * @var string
+   *   Field name.
+   */
+  protected $aggregateField;
+
+  /**
    * Builds the entity aggregate query.
    *
    * @return Drupal\Core\Entity\Query\QueryInterface
@@ -29,7 +38,8 @@ class SensorEntityDatabaseAggregator extends SensorDatabaseAggregatorBase {
     $entity_info = \Drupal::entityManager()->getDefinition($this->getEntityType(), TRUE);
 
     $query = \Drupal::entityQueryAggregate($this->getEntityType());
-    $query->aggregate($entity_info->getKey('id'), 'COUNT');
+    $this->aggregateField = $entity_info->getKey('id');
+    $query->aggregate($this->aggregateField, 'COUNT');
 
     foreach ($this->getConditions() as $condition) {
       $query->condition($condition['field'], $condition['value'], isset($condition['operator']) ? $condition['operator'] : NULL);
@@ -68,7 +78,7 @@ class SensorEntityDatabaseAggregator extends SensorDatabaseAggregatorBase {
    * {@inheritdoc}
    */
   public function resultVerbose(SensorResultInterface $result) {
-    return '';
+    return String::format('Aggregate field @field', array('@field' => $this->aggregateField));
   }
 
   /**
