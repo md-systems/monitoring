@@ -48,12 +48,9 @@ class FrontPage extends ControllerBase {
         'list' => array(
           '#theme' => 'item_list',
           '#items' => array(
-            t('<a href="@url">Uninstall</a> the comment module (prior to it you will have to <a href="@remove_comment_fields_url">remove the comment fields</a>) which makes the corresponding sensor disappear.',
-              array('@url' => url('admin/modules/uninstall'), '@remove_comment_fields_url' => url('admin/reports/fields'))),
-            // Once search API available uncomment the line below and delete the
-            // one above.
-            // t('<a href="@url">Delete</a> a search API index, which makes the corresponding sensor disappear.', array('@url' => url('admin/config/search/search_api'))),
-            t('Visit the <a href="@url">sensors overview page</a> to see the sensor reporting disappeared sensors.', array('@url' => url('admin/reports/monitoring/sensors'))),
+            t('<a href="@url">Uninstall</a> the Database logging module what will make all the watchdog related sensors disappear.',
+              array('@url' => url('admin/modules/uninstall'))),
+            t('Visit the <a href="@url">sensors overview page</a> to see the sensor reporting disappeared sensors.', array('@url' => url('admin/reports/monitoring'))),
           )
         ),
       ),
