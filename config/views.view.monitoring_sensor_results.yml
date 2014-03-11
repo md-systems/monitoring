@@ -335,10 +335,10 @@ display:
           provider: views
       filters: {  }
       sorts:
-        timestamp:
-          id: timestamp
+        record_id:
+          id: record_id
           table: monitoring_sensor_result
-          field: timestamp
+          field: record_id
           relationship: none
           group_type: group
           admin_label: ''
@@ -346,8 +346,7 @@ display:
           exposed: false
           expose:
             label: ''
-          granularity: second
-          plugin_id: date
+          plugin_id: standard
           provider: views
       title: 'Monitoring sensor results'
       header: {  }

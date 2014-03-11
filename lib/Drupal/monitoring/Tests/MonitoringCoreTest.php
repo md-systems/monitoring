@@ -564,7 +564,6 @@ class MonitoringCoreTest extends MonitoringTestBase {
     );
     monitoring_sensor_settings_save('db_aggregate_test', $settings);
     $result = $this->runSensor('db_aggregate_test');
-    debug($result->isCached());
     $this->assertEqual($result->getValue(), '1');
 
     // Test for node type2.
