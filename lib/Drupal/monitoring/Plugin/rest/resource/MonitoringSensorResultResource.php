@@ -110,6 +110,9 @@ class MonitoringSensorResultResource extends ResourceBase {
         $result = $this->sensorRunner->runSensors();
         $response = $result[$sensor_name]->toArray();
         $response['uri'] = $request->getUriForPath('/monitoring-sensor-result/' . $sensor_name);
+        if ($request->get('expand') == 'sensor_info') {
+          $response['sensor_info'] = $result[$sensor_name]->getSensorInfo()->toArray();
+        }
         return new ResourceResponse($response);
       }
       catch (NonExistingSensorException $e) {
@@ -121,11 +124,11 @@ class MonitoringSensorResultResource extends ResourceBase {
     }
     else {
       $list = array();
-      foreach ($this->sensorRunner->runSensors() as $sensor_name => $sensor_result) {
-        $list[$sensor_name] = $sensor_result->toArray();
+      foreach ($this->sensorRunner->runSensors() as $sensor_name => $result) {
+        $list[$sensor_name] = $result->toArray();
         $list[$sensor_name]['uri'] = $request->getUriForPath('/monitoring-sensor-result/' . $sensor_name);
         if ($request->get('expand') == 'sensor_info') {
-          $list[$sensor_name]['sensor_info'] = $sensor_result->getSensorInfo()->toArray();
+          $list[$sensor_name]['sensor_info'] = $result->getSensorInfo()->toArray();
         }
       }
       return new ResourceResponse($list);

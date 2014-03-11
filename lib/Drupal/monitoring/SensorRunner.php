@@ -74,7 +74,6 @@ class SensorRunner implements \IteratorAggregate {
     $this->sensorManager = $sensor_manager;
     // @todo LOW Cleanly variable based installation should go into a factory.
     $this->loggingMode = \Drupal::config('monitoring.settings')->get('sensor_call_logging');
-    $this->loadCache();
   }
 
   /**
@@ -167,6 +166,7 @@ class SensorRunner implements \IteratorAggregate {
    * @see \Drupal\monitoring\SensorRunner::runSensor()
    */
   public function runSensors() {
+    $this->loadCache();
     $results = array();
     foreach ($this->getSensorInfo() as $name => $info) {
       if ($result = $this->runSensor($info)) {
