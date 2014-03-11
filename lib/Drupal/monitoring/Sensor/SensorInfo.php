@@ -206,7 +206,6 @@ class SensorInfo {
   }
 
   /**
-<<<<<<< HEAD
    * Returns all settings.
    *
    * @return array

@@ -409,7 +409,10 @@ class MonitoringCoreTest extends MonitoringTestBase {
       $form_key . '[allow_additional]' => TRUE,
     ), t('Save'));
     monitoring_sensor_manager()->resetCache();
+    debug(monitoring_sensor_manager()->getSensorInfoByName('monitoring_enabled_modules')->getSettings());
+    debug((array)\Drupal::config('monitoring.settings')->get('monitoring_enabled_modules'));
     $result = $this->runSensor('monitoring_enabled_modules');
+    debug($result->toArray());
     $this->assertTrue($result->isOk());
   }
 
