@@ -8,6 +8,7 @@ namespace Drupal\monitoring\Sensor;
 
 use Drupal\Component\Utility\NestedArray;
 use Drupal\Component\Utility\String;
+use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 
 /**
@@ -35,10 +36,16 @@ class SensorManager {
   protected $moduleHandler;
 
   /**
+   * @var \Drupal\Core\Config\ConfigFactoryInterface
+   */
+  protected $config;
+
+  /**
    * Constructes a sensor manager.
    */
-  function __construct(ModuleHandlerInterface $module_handler) {
+  function __construct(ModuleHandlerInterface $module_handler, ConfigFactoryInterface $config) {
     $this->moduleHandler = $module_handler;
+    $this->config = $config;
   }
 
 
@@ -135,12 +142,13 @@ class SensorManager {
    *   Settings that should be saved.
    */
   public function saveSettings($sensor_name, array $settings) {
-    $saved_settings = (array)\Drupal::config('monitoring.settings')->get($sensor_name);
+    $config = $this->config->get('monitoring.settings');
+    $saved_settings = (array) $config->get($sensor_name);
     foreach ($settings as $key => $value) {
       $saved_settings[$key] = $value;
     }
 
-    \Drupal::config('monitoring.settings')->set($sensor_name, $settings)->save();
+    $config->set($sensor_name, $saved_settings)->save();
     // After settings save reset the cache.
     $this->resetCache();
   }
@@ -257,7 +265,7 @@ class SensorManager {
       $value['settings'] = $this->mergeSettings($key, $value['settings']);
     }
 
-    $info = NestedArray::mergeDeep($info, (array)\Drupal::config('monitoring.sensor_info')->get());
+    $info = NestedArray::mergeDeep($info, (array)$this->config->get('monitoring.sensor_info')->get());
 
     // Convert the arrays into SensorInfo objects.
     foreach ($info as $sensor_name => $sensor_info) {
@@ -282,7 +290,7 @@ class SensorManager {
    *   Merged settings.
    */
   protected function mergeSettings($sensor_name, array $default_settings) {
-    $saved_settings = (array)\Drupal::config('monitoring.settings')->get($sensor_name);
+    $saved_settings = (array)$this->config->get('monitoring.settings')->get($sensor_name);
     return $this->mergeSettingsArrays(array($default_settings, $saved_settings));
   }
 

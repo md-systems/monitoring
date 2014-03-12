@@ -9,6 +9,7 @@ namespace Drupal\monitoring\Tests;
 use Drupal\monitoring\Result\SensorResultInterface;
 use Drupal\monitoring\Sensor\DisabledSensorException;
 use Drupal\monitoring\Sensor\NonExistingSensorException;
+use Drupal\monitoring\SensorRunner;
 
 /**
  * Tests for Monitoring API.
@@ -344,25 +345,25 @@ class MonitoringApiTest extends MonitoringUnitTestBase {
       'sensor_status' => SensorResultInterface::STATUS_OK,
     );
     \Drupal::state()->set('monitoring_test.sensor_result_data', $test_sensor_result_data);
-    $settings = monitoring_sensor_settings_get('test_sensor');
-    $settings['result_logging'] = TRUE;
-    monitoring_sensor_settings_save('test_sensor', $settings);
+    monitoring_sensor_manager()->saveSettings('test_senor', array('result_logging' => TRUE));
     $this->runSensor('test_sensor');
 
-    $logs = $this->loadSensorData('test_sensor');
+    $logs = $this->loadSensorLog('test_sensor');
     $this->assertEqual(count($logs), 1);
     $log = array_shift($logs);
-    $this->assertEqual($log->sensor_name, 'test_sensor');
-    $this->assertEqual($log->sensor_status, SensorResultInterface::STATUS_OK);
-    $this->assertEqual($log->sensor_value, 1);
-    $this->assertEqual($log->sensor_message, 'Value 1, test message');
+    $this->assertEqual($log->sensor_name->value, 'test_sensor');
+    $this->assertEqual($log->sensor_status->value, SensorResultInterface::STATUS_OK);
+    $this->assertEqual($log->sensor_value->value, 1);
+    $this->assertEqual($log->sensor_message->value, 'Value 1, test message');
 
     // Set log_calls sensor settings to false - that should prevent logging.
-    $settings = monitoring_sensor_settings_get('test_sensor');
-    $settings['result_logging'] = FALSE;
-    monitoring_sensor_settings_save('test_sensor', $settings);
-    $this->runSensor('test_sensor');
-    $logs = $this->loadSensorData('test_sensor');
+    monitoring_sensor_manager()->saveSettings('test_senor', array('result_logging' => FALSE));
+    debug(\Drupal::config('monitoring.settings')->get('test_sensor'));
+    /** @var SensorRunner $runner */
+    $runner = \Drupal::service('monitoring.sensor_runner');
+    $runner->runSensors(array(monitoring_sensor_manager()->getSensorInfoByName('test_sensor')));
+    //$this->runSensor('test_sensor');
+    $logs = $this->loadSensorLog('test_sensor');
     $this->assertEqual(count($logs), 1);
 
     // Now change the status - that should result in the call being logged.
@@ -371,28 +372,24 @@ class MonitoringApiTest extends MonitoringUnitTestBase {
     );
     \Drupal::state()->set('monitoring_test.sensor_result_data', $test_sensor_result_data);
     $this->runSensor('test_sensor');
-    $logs = $this->loadSensorData('test_sensor');
+    $logs = $this->loadSensorLog('test_sensor');
     $this->assertEqual(count($logs), 2);
     $log = array_pop($logs);
-    $this->assertEqual($log->sensor_status, SensorResultInterface::STATUS_WARNING);
+    $this->assertEqual($log->sensor_status->value, SensorResultInterface::STATUS_WARNING);
 
     // Set the logging strategy to "Log all events".
     \Drupal::config('monitoring.settings')->set('sensor_call_logging', 'all')->save();
     // Running the sensor with 'result_logging' settings FALSE must record the call.
-    $settings = monitoring_sensor_settings_get('test_sensor');
-    $settings['result_logging'] = FALSE;
-    monitoring_sensor_settings_save('test_sensor', $settings);
+    monitoring_sensor_manager()->saveSettings('test_senor', array('result_logging' => FALSE));
     $this->runSensor('test_sensor');
-    $logs = $this->loadSensorData('test_sensor');
+    $logs = $this->loadSensorLog('test_sensor');
     $this->assertEqual(count($logs), 3);
 
     // Set the logging strategy to "No logging".
     \Drupal::config('monitoring.settings')->set('sensor_call_logging', 'none')->save();
     // Despite log_calls TRUE we should not log any call.
-    $settings = monitoring_sensor_settings_get('test_sensor');
-    $settings['result_logging'] = TRUE;
-    monitoring_sensor_settings_save('test_sensor', $settings);
-    $logs = $this->loadSensorData('test_sensor');
+    monitoring_sensor_manager()->saveSettings('test_senor', array('result_logging' => TRUE));
+    $logs = $this->loadSensorLog('test_sensor');
     $this->runSensor('test_sensor');
     $this->assertEqual(count($logs), 3);
 
@@ -433,7 +430,7 @@ class MonitoringApiTest extends MonitoringUnitTestBase {
    * @return array
    *   All log records of given sensor.
    */
-  protected function loadSensorData($sensor_name) {
+  protected function loadSensorLog($sensor_name) {
     $result = \Drupal::entityQuery('monitoring_sensor_result')
       ->condition('sensor_name', $sensor_name)
       ->execute();

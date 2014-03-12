@@ -77,18 +77,6 @@ class SensorRunner implements \IteratorAggregate {
   }
 
   /**
-   * Gets the sensor info.
-   *
-   * @return \Drupal\monitoring\Sensor\SensorInfo[] $sensor_info
-   */
-  public function getSensorInfo() {
-    if (empty($this->sensorInfo)) {
-      return $this->sensorManager->getEnabledSensorInfo();
-    }
-    return $this->sensorInfo;
-  }
-
-  /**
    * Forces to run sensors even there is cached data available.
    *
    * @param bool $force
