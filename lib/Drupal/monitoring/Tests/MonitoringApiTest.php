@@ -380,7 +380,8 @@ class MonitoringApiTest extends MonitoringUnitTestBase {
     // Set the logging strategy to "Log all events".
     \Drupal::config('monitoring.settings')->set('sensor_call_logging', 'all')->save();
     // Running the sensor with 'result_logging' settings FALSE must record the call.
-    monitoring_sensor_manager()->saveSettings('test_senor', array('result_logging' => FALSE));
+    monitoring_sensor_manager()->saveSettings('test_sensor', array('result_logging' => FALSE));
+    $this->container->set('monitoring.sensor_runner', NULL);
     $this->runSensor('test_sensor');
     $logs = $this->loadSensorLog('test_sensor');
     $this->assertEqual(count($logs), 3);
@@ -388,7 +389,8 @@ class MonitoringApiTest extends MonitoringUnitTestBase {
     // Set the logging strategy to "No logging".
     \Drupal::config('monitoring.settings')->set('sensor_call_logging', 'none')->save();
     // Despite log_calls TRUE we should not log any call.
-    monitoring_sensor_manager()->saveSettings('test_senor', array('result_logging' => TRUE));
+    monitoring_sensor_manager()->saveSettings('test_sensor', array('result_logging' => TRUE));
+    $this->container->set('monitoring.sensor_runner', NULL);
     $logs = $this->loadSensorLog('test_sensor');
     $this->runSensor('test_sensor');
     $this->assertEqual(count($logs), 3);
