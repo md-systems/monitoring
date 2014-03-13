@@ -114,16 +114,14 @@ class SensorRunner implements \IteratorAggregate {
   public function loadCache(array $sensors_info) {
     $cids = array();
     // Only load sensor caches if they define caching.
-    foreach ($sensors_info as $name => $sensor_info) {
+    foreach ($sensors_info as $sensor_info) {
       if ($sensor_info->getCachingTime()) {
-        $cids[] = $this->getSensorCid($name);
+        $cids[] = $this->getSensorCid($sensor_info->getName());
       }
     }
     if ($cids) {
       foreach (\Drupal::cache()->getMultiple($cids) as $cache) {
-        if ($cache->expire > REQUEST_TIME) {
-          $this->cache[$cache->data['name']] = $cache->data;
-        }
+        $this->cache[$cache->data['name']] = $cache->data;
       }
     }
   }
@@ -250,7 +248,7 @@ class SensorRunner implements \IteratorAggregate {
       $old_status = NULL;
       // Try to load the previous log result for this sensor.
       if ($last_result = monitoring_sensor_result_last($result->getSensorName())) {
-        $old_status = $last_result->sensor_status;
+        $old_status = $last_result->sensor_status->value;
       }
 
       // Check if we need to log the result.

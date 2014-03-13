@@ -292,7 +292,7 @@ class MonitoringCoreTest extends MonitoringTestBase {
    * We provide a separate test method for the SensorDisappearedSensors as we
    * need to enable and disable additional modules.
    */
-  function NOtestSensorDisappearedSensors() {
+  function testSensorDisappearedSensors() {
 
     $module_handler = \Drupal::moduleHandler();
 
@@ -368,7 +368,7 @@ class MonitoringCoreTest extends MonitoringTestBase {
   /**
    * Tests the UI/settings of the enabled modules sensor.
    */
-  function NOtestSensorInstalledModulesUI() {
+  function testSensorInstalledModulesUI() {
     $account = $this->drupalCreateUser(array('administer monitoring'));
     $this->drupalLogin($account);
     $form_key = 'monitoring_enabled_modules';
@@ -432,7 +432,7 @@ class MonitoringCoreTest extends MonitoringTestBase {
    *
    * We use separate test method as we need to enable/disable modules.
    */
-  function NOtestSensorInstalledModulesAPI() {
+  function testSensorInstalledModulesAPI() {
     // The initial run of the sensor will acknowledge all installed modules as
     // expected and so the status should be OK.
     $result = $this->runSensor('monitoring_enabled_modules');
@@ -468,7 +468,7 @@ class MonitoringCoreTest extends MonitoringTestBase {
   /**
    * Tests the watchdog entries aggregator.
    */
-  function NOtestGenericDBAggregate() {
+  function testGenericDBAggregate() {
 
     // Aggregate by watchdog type.
     monitoring_sensor_settings_save('watchdog_aggregate_test', array(

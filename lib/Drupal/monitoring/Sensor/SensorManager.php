@@ -10,6 +10,7 @@ use Drupal\Component\Utility\NestedArray;
 use Drupal\Component\Utility\String;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
+use Drupal\monitoring\SensorRunner;
 
 /**
  * Manages sensor definitions and settings.
@@ -151,6 +152,8 @@ class SensorManager {
     $config->set($sensor_name, $saved_settings)->save();
     // After settings save reset the cache.
     $this->resetCache();
+    // Changed settings might affect the sensor result.
+    SensorRunner::resetCache(array($sensor_name));
   }
 
   /**

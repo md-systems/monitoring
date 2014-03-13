@@ -357,7 +357,7 @@ class MonitoringApiTest extends MonitoringUnitTestBase {
     $this->assertEqual($log->sensor_message->value, 'Value 1, test message');
 
     // Set log_calls sensor settings to false - that should prevent logging.
-    monitoring_sensor_manager()->saveSettings('test_senor', array('result_logging' => FALSE));
+    monitoring_sensor_manager()->saveSettings('test_sensor', array('result_logging' => FALSE));
     debug(\Drupal::config('monitoring.settings')->get('test_sensor'));
     /** @var SensorRunner $runner */
     $runner = \Drupal::service('monitoring.sensor_runner');

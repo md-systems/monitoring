@@ -425,6 +425,7 @@ function monitoring_sensor_result_last($sensor_name) {
   $result = \Drupal::entityQuery('monitoring_sensor_result')
     ->condition('sensor_name', $sensor_name)
     ->sort('timestamp', 'DESC')
+    ->sort('record_id', 'DESC')
     ->range(0, 1)
     ->execute();
 
