@@ -8,6 +8,8 @@ namespace Drupal\monitoring;
 
 use Drupal\Component\Utility\String;
 use Drupal\Component\Utility\Timer;
+use Drupal\Core\Cache\CacheBackendInterface;
+use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\monitoring\Result\SensorResultInterface;
 use Drupal\monitoring\Sensor\DisabledSensorException;
 use Drupal\monitoring\Sensor\SensorInfo;
@@ -19,7 +21,7 @@ use Drupal\monitoring\Sensor\SensorManager;
  *
  * @todo more
  */
-class SensorRunner implements \IteratorAggregate {
+class SensorRunner {
 
   /**
    * Sensor manager.
@@ -33,7 +35,7 @@ class SensorRunner implements \IteratorAggregate {
    *
    * @var array
    */
-  protected $cache = array();
+  protected $sensorResultCache = array();
 
   /**
    * List of sensors info keyed by sensor name that are meant to run.
@@ -57,52 +59,26 @@ class SensorRunner implements \IteratorAggregate {
   protected $verbose = FALSE;
 
   /**
-   * Result logging mode.
-   *
-   * Possible values: none, on_request, all
-   *
-   * @var string
+   * @var \Drupal\Core\Cache\CacheBackendInterface
    */
-  protected $loggingMode = 'none';
+  protected $cache;
+
+  /**
+   * @var \Drupal\Core\Config\Config
+   */
+  protected $config;
 
   /**
    * Constructs a SensorRunner.
    *
    * @param \Drupal\monitoring\Sensor\SensorManager $sensor_manager
+   * @param \Drupal\Core\Cache\CacheBackendInterface $cache
+   * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
    */
-  public function __construct(SensorManager $sensor_manager) {
+  public function __construct(SensorManager $sensor_manager, CacheBackendInterface $cache, ConfigFactoryInterface $config_factory) {
     $this->sensorManager = $sensor_manager;
-    // @todo LOW Cleanly variable based installation should go into a factory.
-    $this->loggingMode = \Drupal::config('monitoring.settings')->get('sensor_call_logging');
-  }
-
-  /**
-   * Forces to run sensors even there is cached data available.
-   *
-   * @param bool $force
-   */
-  public function forceRun($force = TRUE) {
-    $this->forceRun = $force;
-  }
-
-  /**
-   * Sets flag to collect verbose info.
-   *
-   * @param bool $verbose
-   *   Verbose flag.
-   */
-  public function verbose($verbose = TRUE) {
-    $this->verbose = $verbose;
-  }
-
-  /**
-   * Sets result logging mode.
-   *
-   * @param string $mode
-   *   (NULL, on_request, all)
-   */
-  public function setLoggingMode($mode) {
-    $this->loggingMode = $mode;
+    $this->config = $config_factory->get('monitoring.settings');
+    $this->cache = $cache;
   }
 
   /**
@@ -111,7 +87,7 @@ class SensorRunner implements \IteratorAggregate {
    * @param \Drupal\monitoring\Sensor\SensorInfo[] $sensors_info
    *   List of sensor info object that we want to run.
    */
-  public function loadCache(array $sensors_info) {
+  protected function loadCache(array $sensors_info) {
     $cids = array();
     // Only load sensor caches if they define caching.
     foreach ($sensors_info as $sensor_info) {
@@ -120,18 +96,10 @@ class SensorRunner implements \IteratorAggregate {
       }
     }
     if ($cids) {
-      foreach (\Drupal::cache()->getMultiple($cids) as $cache) {
-        $this->cache[$cache->data['name']] = $cache->data;
+      foreach ($this->cache->getMultiple($cids) as $cache) {
+        $this->sensorResultCache[$cache->data['name']] = $cache->data;
       }
     }
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getIterator() {
-    $results = $this->runSensors();
-    return new \ArrayIterator($results);
   }
 
   /**
@@ -139,6 +107,11 @@ class SensorRunner implements \IteratorAggregate {
    *
    * @param \Drupal\monitoring\Sensor\SensorInfo[] $sensors_info
    *   List of sensor info object that we want to run.
+   * @param bool $force
+   *   Force sensor execution.
+   * @param bool $verbose
+   *   Collect verbose info.
+   *
    * @return \Drupal\monitoring\Result\SensorResultInterface[]
    *   Array of sensor results.
    *
@@ -147,7 +120,10 @@ class SensorRunner implements \IteratorAggregate {
    *
    * @see \Drupal\monitoring\SensorRunner::runSensor()
    */
-  public function runSensors(array $sensors_info = array()) {
+  public function runSensors(array $sensors_info = array(), $force = FALSE, $verbose = FALSE) {
+
+    $this->verbose = $verbose;
+    $this->forceRun = $force;
 
     if (empty($sensors_info)) {
       $sensors_info = $this->sensorManager->getEnabledSensorInfo();
@@ -274,13 +250,14 @@ class SensorRunner implements \IteratorAggregate {
   protected function needsLogging($result, $old_status = NULL, $new_status = NULL) {
     $log_activity = $result->getSensorInfo()->getSetting('result_logging', FALSE);
 
+
     // We log if requested or on status change.
-    if ($this->loggingMode == 'on_request') {
+    if ($this->config->get('sensor_call_logging') == 'on_request') {
       return $log_activity || ($old_status != $new_status);
     }
 
     // We are logging all.
-    if ($this->loggingMode == 'all') {
+    if ($this->config->get('sensor_call_logging') == 'all') {
       return TRUE;
     }
     return FALSE;
@@ -306,7 +283,7 @@ class SensorRunner implements \IteratorAggregate {
           'execution_time' => $result->getExecutionTime(),
           'timestamp' => $result->getTimestamp(),
         );
-        \Drupal::cache()->set(
+        $this->cache->set(
           $this->getSensorCid($result->getSensorName()),
           $data,
           REQUEST_TIME + $definition->getCachingTime(),
@@ -343,8 +320,8 @@ class SensorRunner implements \IteratorAggregate {
   protected function getResultObject(SensorInfo $sensor_info) {
     $result_class = $sensor_info->getResultClass();
 
-    if (!$this->forceRun && isset($this->cache[$sensor_info->getName()])) {
-      $result = new $result_class($sensor_info, $this->cache[$sensor_info->getName()]);
+    if (!$this->forceRun && isset($this->sensorResultCache[$sensor_info->getName()])) {
+      $result = new $result_class($sensor_info, $this->sensorResultCache[$sensor_info->getName()]);
     }
     else {
       $result = new $result_class($sensor_info);
@@ -360,7 +337,7 @@ class SensorRunner implements \IteratorAggregate {
    * @return string
    *   Cache id.
    */
-  protected static function getSensorCid($sensor_name) {
+  protected function getSensorCid($sensor_name) {
     return 'monitoring_sensor_result:' . $sensor_name;
   }
 
@@ -371,17 +348,17 @@ class SensorRunner implements \IteratorAggregate {
    *   (optional) Array of sensors to reset the cache for. An empty array clears
    *   all results, which is the default.
    */
-  public static function resetCache(array $sensor_names = array()) {
+  public function resetCache(array $sensor_names = array()) {
     if (empty($sensor_names)) {
       // No sensor names provided, clear all caches.
-      \Drupal::cache()->deleteTags(array('monitoring_sensor_result'));
+      $this->cache->deleteTags(array('monitoring_sensor_result'));
     }
     else {
       $cids = array();
       foreach ($sensor_names as $sensor_name) {
-        $cids[] = static::getSensorCid($sensor_name);
+        $cids[] = $this->getSensorCid($sensor_name);
       }
-      \Drupal::cache()->deleteMultiple($cids);
+      $this->cache->deleteMultiple($cids);
     }
   }
 

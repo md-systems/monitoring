@@ -163,7 +163,7 @@ function _monitoring_munin_result() {
   $config = array();
 
   /** @var \Drupal\monitoring\Result\SensorResultInterface $result */
-  foreach ($runner as $sensor_name => $result) {
+  foreach ($runner->runSensors() as $sensor_name => $result) {
 
     $munin_settings = $result->getSensorInfo()->getSetting('munin');
     $sensor_name = monitoring_munin_sensor_identifier($sensor_name);

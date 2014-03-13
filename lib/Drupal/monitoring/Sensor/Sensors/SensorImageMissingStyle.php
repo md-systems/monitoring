@@ -71,7 +71,7 @@ class SensorImageMissingStyle extends SensorSimpleDatabaseAggregator {
         ->condition('uri', $this->sourceImagePath)
         ->execute();
     }
-    
+
     if (!empty($query_result)) {
       $file = file_load(array_shift($query_result));
       /** @var Drupal\file\FileUsage\FileUsageInterface $usage */

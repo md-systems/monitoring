@@ -116,9 +116,7 @@ function monitoring_sensor_run_multiple($sensor_names = array(), $force_run = FA
 
   /** @var \Drupal\Monitoring\SensorRunner $runner */
   $runner = \Drupal::service('monitoring.sensor_runner');
-  $runner->verbose($verbose);
-  $runner->forceRun($force_run);
-  $results = $runner->runSensors($sensors_info);
+  $results = $runner->runSensors($sensors_info, $force_run, $verbose);
   return $results;
 }
 
@@ -373,7 +371,7 @@ function monitoring_sensor_settings_save($sensor_name, $values) {
   // After settings save reset the cache.
   monitoring_sensor_manager()->resetCache();
   // Changed settings might affect the sensor result.
-  SensorRunner::resetCache(array($sensor_name));
+  \Drupal::service('monitoring.sensor_runner')->resetCache(array($sensor_name));
 }
 
 /**

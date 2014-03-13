@@ -73,8 +73,7 @@ class SensorDetailForm extends FormBase {
 
     try {
       $sensor_info = $this->sensorManager->getSensorInfoByName($sensor_name);
-      $this->sensorRunner->verbose(TRUE);
-      $results = $this->sensorRunner->runSensors(array($sensor_info));
+      $results = $this->sensorRunner->runSensors(array($sensor_info), FALSE, TRUE);
       $result = array_shift($results);
     }
     catch (DisabledSensorException $e) {
@@ -218,7 +217,7 @@ class SensorDetailForm extends FormBase {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, array &$form_state) {
-    SensorRunner::resetCache(array($form_state['sensor_name']));
+    $this->sensorRunner->resetCache(array($form_state['sensor_name']));
     drupal_set_message(t('Sensor force run executed.'));
   }
 

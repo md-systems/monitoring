@@ -153,7 +153,7 @@ class SensorManager {
     // After settings save reset the cache.
     $this->resetCache();
     // Changed settings might affect the sensor result.
-    SensorRunner::resetCache(array($sensor_name));
+    \Drupal::service('monitoring.sensor_runner')->resetCache(array($sensor_name));
   }
 
   /**

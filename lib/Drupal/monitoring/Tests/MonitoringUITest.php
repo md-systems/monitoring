@@ -120,9 +120,9 @@ class MonitoringUITest extends MonitoringTestBase {
     // result the oldest.
     $this->runSensor('test_sensor');
     $cid = 'monitoring_sensor_result:test_sensor';
-    $cache = \Drupal::cache()->get($cid);
+    $cache = \Drupal::cache('config')->get($cid);
     $cache->data['timestamp'] = $cache->data['timestamp'] - 1000;
-    \Drupal::cache()->set(
+    \Drupal::cache('config')->set(
       $cid,
       $cache->data,
       REQUEST_TIME + 3600,
@@ -337,7 +337,7 @@ class MonitoringUITest extends MonitoringTestBase {
     $this->assertThresholdSettingsUIDefaults('test_sensor_exceeds', $thresholds);
 
     $this->sensorManager->resetCache();
-    SensorRunner::resetCache();
+    \Drupal::service('monitoring.sensor_runner')->resetCache();
     $sensor_result = $this->runSensor('test_sensor_exceeds');
     $this->assertTrue($sensor_result->isOk());
 

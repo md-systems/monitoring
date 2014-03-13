@@ -19,13 +19,21 @@ class ForceRunController extends ControllerBase {
   protected $sensorManager;
 
   /**
+   * @var \Drupal\monitoring\SensorRunner
+   */
+  protected $sensorRunner;
+
+  /**
    * Constructs a \Drupal\monitoring\Form\SensorSettingsForm object.
    *
+   * @param \Drupal\monitoring\SensorRunner $sensor_runner
+   *   The sensor runner service.
    * @param \Drupal\monitoring\Sensor\SensorManager $sensor_manager
    *   The sensor manager service.
    */
-  public function __construct(SensorManager $sensor_manager) {
+  public function __construct(SensorRunner $sensor_runner, SensorManager $sensor_manager) {
     $this->sensorManager = $sensor_manager;
+    $this->sensorRunner = $sensor_runner;
   }
 
   /**
@@ -33,12 +41,13 @@ class ForceRunController extends ControllerBase {
    */
   public static function create(ContainerInterface $container) {
     return new static(
+      $container->get('monitoring.sensor_runner'),
       $container->get('monitoring.sensor_manager')
     );
   }
 
   public function forceRunAll() {
-    SensorRunner::resetCache();
+    $this->sensorRunner->resetCache();
     drupal_set_message($this->t('Force run of all cached sensors executed.'));
     return $this->redirect('monitoring.sensor_list');
   }
@@ -46,7 +55,7 @@ class ForceRunController extends ControllerBase {
   public function forceRunSensor($sensor_name) {
     try {
       $sensor_info = $this->sensorManager->getSensorInfoByName($sensor_name);
-      SensorRunner::resetCache(array($sensor_name));
+      $this->sensorRunner->resetCache(array($sensor_name));
       drupal_set_message($this->t('Force run of the sensor @name executed.', array('@name' => $sensor_info->getLabel())));
     }
     catch (NonExistingSensorException $e) {
