@@ -7,6 +7,7 @@
 namespace Drupal\monitoring\Sensor\Sensors;
 
 use Drupal\monitoring\Result\SensorResultInterface;
+use Drupal;
 
 /**
  * Monitors image derivate creation errors from dblog.
@@ -65,11 +66,17 @@ class SensorImageMissingStyle extends SensorSimpleDatabaseAggregator {
     if (empty($this->sourceImagePath)) {
       $message = t('Source image path is empty, cannot query file_managed table');
     }
-
-    $file = db_query('SELECT * FROM file_managed WHERE uri = :uri', array(':uri' => $this->sourceImagePath))->fetchObject();
-
-    if (!empty($file)) {
-      $message = t('File managed records: <pre>@file_managed</pre>', array('@file_managed' => var_export(file_usage_list($file), TRUE)));
+    else {
+      $query_result = \Drupal::entityQuery('file')
+        ->condition('uri', $this->sourceImagePath)
+        ->execute();
+    }
+    
+    if (!empty($query_result)) {
+      $file = file_load(array_shift($query_result));
+      /** @var Drupal\file\FileUsage\FileUsageInterface $usage */
+      $usage = \Drupal::service('file.usage');
+      $message = t('File managed records: <pre>@file_managed</pre>', array('@file_managed' => var_export($usage->listUsage($file), TRUE)));
     }
 
     if (empty($message)) {
