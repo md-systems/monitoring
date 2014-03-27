@@ -7,7 +7,7 @@
 namespace Drupal\monitoring\Entity;
 
 use Drupal\Core\Entity\ContentEntityBase;
-use Drupal\Core\Entity\EntityStorageControllerInterface;
+use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\FieldDefinition;
 
@@ -39,7 +39,7 @@ class SensorResultEntity extends ContentEntityBase {
   /**
    * {@inheritdoc}
    */
-  public function preSave(EntityStorageControllerInterface $storage_controller, $update = TRUE) {
+  public function preSave(EntityStorageInterface $storage_controller, $update = TRUE) {
     parent::preSave($storage_controller);
     $this->timestamp = REQUEST_TIME;
   }
@@ -74,8 +74,7 @@ class SensorResultEntity extends ContentEntityBase {
       ->setLabel(t('Sensor message'))
       ->setDescription(t('The sensor message reported by the sensor.'));
 
-    // @todo Convert to a "created" field in https://drupal.org/node/2145103.
-    $fields['timestamp'] = FieldDefinition::create('integer')
+    $fields['timestamp'] = FieldDefinition::create('created')
       ->setLabel(t('Timestamp'))
       ->setDescription(t('The time that the sensor was executed.'));
 

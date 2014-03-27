@@ -17,7 +17,7 @@ use Drupal\views\ResultRow;
  *
  * @ingroup views_field_handlers
  *
- * @PluginID("monitoring_sensor_name")
+ * @ViewsField("monitoring_sensor_name")
  */
 class SensorName extends FieldPluginBase {
 
