@@ -1,0 +1,13 @@
+monitoring.sensors_overview_settings:
+  title: 'Monitoring'
+  parent: system.admin_config_system
+  description: 'Monitoring sensors configuration.'
+  route_name: monitoring.sensors_overview_settings
+  menu_name: admin
+
+monitoring.sensor_list:
+  title: 'Monitoring'
+  parent: system.admin_reports
+  description: 'Overview of all enabled monitoring sensors.'
+  route_name: monitoring.sensor_list
+  menu_name: admin
