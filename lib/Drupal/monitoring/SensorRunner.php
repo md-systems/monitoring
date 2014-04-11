@@ -172,7 +172,6 @@ class SensorRunner {
 
     // In case result is not yet cached run sensor.
     if (!$result->isCached()) {
-
       Timer::start($sensor_info->getName());
       try {
         $sensor->runSensor($result);
