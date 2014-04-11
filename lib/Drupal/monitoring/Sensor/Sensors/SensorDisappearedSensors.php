@@ -76,7 +76,7 @@ class SensorDisappearedSensors extends SensorConfigurable {
       // Check for newly added sensors. This is needed as some sensors get
       // enabled by default and not via monitoring_sensor_enable() callback that
       // takes care of updating the available sensors list.
-      if (!in_array($key, $available_sensors)) {
+      if (!isset($available_sensors[$key])) {
         $new_sensors[$key] = array(
           'name' => $key,
           'enabled' => $info->isEnabled(),

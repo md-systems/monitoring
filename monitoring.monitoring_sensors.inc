@@ -242,20 +242,17 @@ function monitoring_dblog_monitoring_sensor_info() {
       $caching_time = 300;
       $critical_threshold = 5;
       $warning_threshold = 1;
-      $enabled = TRUE;
     }
     elseif ($level != WATCHDOG_NOTICE) {
       $caching_time = 900;
       $critical_threshold = 50;
       $warning_threshold = 20;
-      $enabled = TRUE;
     }
     // Disable notice level by default.
     else {
       $caching_time = 900;
       $critical_threshold = NULL;
       $warning_threshold = NULL;
-      $enabled = FALSE;
     }
 
     $info['dblog_event_severity_' . $severities[$level]] = array(
@@ -265,7 +262,6 @@ function monitoring_dblog_monitoring_sensor_info() {
       'value_label' => 'Events',
       'services' => array('database'),
       'settings' => array(
-        'enabled' => $enabled,
         'category' => 'Watchdog',
         'caching_time' => $caching_time,
         'thresholds' => array(
