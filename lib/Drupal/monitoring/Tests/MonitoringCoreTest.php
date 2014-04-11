@@ -303,6 +303,14 @@ class MonitoringCoreTest extends MonitoringTestBase {
     // Run the disappeared sensor - it should not report any problems.
     $result = $this->runSensor('monitoring_disappeared_sensors');
     $this->assertTrue($result->isOk());
+    $log = $this->loadWatchdog();
+    $this->assertEqual(count($log), 1);
+    // @todo - enable once https://drupal.org/node/2238781 fixed.
+    //$this->assertEqual(String::format($log[0]->message, unserialize($log[0]->variables)),
+    //  String::format('@count new sensor/s added: @names', array(
+    //    '@count' => count(monitoring_sensor_manager()->getSensorInfo()),
+    //    '@names' => implode(', ', array_keys(monitoring_sensor_manager()->getSensorInfo()))
+    //  )));
 
     // Uninstall the comment module so that the comment_new sensor goes away.
     $module_handler->uninstall(array('comment'));
@@ -312,6 +320,7 @@ class MonitoringCoreTest extends MonitoringTestBase {
     $result = $this->runSensor('monitoring_disappeared_sensors');
     $this->assertTrue($result->isCritical());
     $this->assertEqual($result->getMessage(), 'Missing sensor comment_new');
+    $this->assertEqual(count($this->loadWatchdog()), 1);
 
     // Install the comment module to test the correct procedure of removing
     // sensors.
@@ -320,6 +329,7 @@ class MonitoringCoreTest extends MonitoringTestBase {
     // Now we should be back to normal.
     $result = $this->runSensor('monitoring_disappeared_sensors');
     $this->assertTrue($result->isOk());
+    $this->assertEqual(count($this->loadWatchdog()), 1);
 
     // Do the correct procedure to remove a sensor - first disable the sensor
     // and then uninstall the comment module.
@@ -329,6 +339,10 @@ class MonitoringCoreTest extends MonitoringTestBase {
     // The sensor should not report any problem this time.
     $result = $this->runSensor('monitoring_disappeared_sensors');
     $this->assertTrue($result->isOk());
+    $log = $this->loadWatchdog();
+    $this->assertEqual(count($log), 2);
+    $this->assertEqual(String::format($log[1]->message, unserialize($log[1]->variables)),
+      String::format('@count new sensor/s removed: @names', array('@count' => 1, '@names' => 'comment_new')));
 
     // === Test the UI === //
     $account = $this->drupalCreateUser(array('administer monitoring'));
@@ -746,6 +760,20 @@ class MonitoringCoreTest extends MonitoringTestBase {
     $term->description = $this->randomName();
     $term->save();
     return $term;
+  }
+
+  /**
+   * Loads watchdog entries by type.
+   *
+   * @param string $type
+   *   Watchdog type.
+   *
+   * @return array
+   *   List of dblog entries.
+   */
+  function loadWatchdog($type = 'monitoring') {
+    return db_query("SELECT * FROM {watchdog} WHERE type = :type", array(':type' => $type))
+      ->fetchAll();
   }
 
 }
