@@ -36,14 +36,13 @@ class SensorDisappearedSensors extends SensorConfigurable {
     $result = monitoring_sensor_run($this->info->getName());
     $form = parent::settingsForm($form, $form_state);
 
-    $form['clear_missing_sensors_wrapper'] = array(
-      '#type' => 'fieldset',
-      '#title' => t('Missing sensors'),
-      '#description' => t('This action will clear the missing sensors and the critical sensor status will go away.'),
-      '#weight' => -10,
-    );
-
     if ($result->isCritical()) {
+      $form['clear_missing_sensors_wrapper'] = array(
+        '#type' => 'fieldset',
+        '#title' => t('Missing sensors'),
+        '#description' => t('This action will clear the missing sensors and the critical sensor status will go away.'),
+        '#weight' => -10,
+      );
       $form['clear_missing_sensors_wrapper']['info'] = array(
         '#type' => 'item',
         '#title' => t('Sensor message'),
@@ -55,12 +54,7 @@ class SensorDisappearedSensors extends SensorConfigurable {
         '#value' => t('Clear missing sensors'),
       );
     }
-    else {
-      $form['clear_missing_sensors_wrapper']['no_missing_sensors_info'] = array(
-        '#type' => 'markup',
-        '#markup' => t('There are no missing sensors.'),
-      );
-    }
+
     return $form;
   }
 

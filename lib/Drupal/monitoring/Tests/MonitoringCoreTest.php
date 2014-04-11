@@ -339,13 +339,13 @@ class MonitoringCoreTest extends MonitoringTestBase {
 
     // We should have the message that no sensors are missing.
     $this->drupalGet('admin/config/system/monitoring/sensors/monitoring_disappeared_sensors');
-    $this->assertText(t('There are no missing sensors.'));
+    $this->assertNoText(t('This action will clear the missing sensors and the critical sensor status will go away.'));
 
     // Disable sensor and the comment module. This is the correct procedure and
     // therefore there should be no missing sensors.
     monitoring_sensor_manager()->disableSensor('comment_new');
     $this->drupalGet('admin/config/system/monitoring/sensors/monitoring_disappeared_sensors');
-    $this->assertText(t('There are no missing sensors.'));
+    $this->assertNoText(t('This action will clear the missing sensors and the critical sensor status will go away.'));
 
     // Install comment module and the comment_new sensor.
     $module_handler->install(array('comment'));
@@ -362,7 +362,7 @@ class MonitoringCoreTest extends MonitoringTestBase {
     $this->drupalPostForm(NULL, array(), t('Clear missing sensors'));
     $this->assertText(t('All missing sensors have been cleared.'));
     $this->drupalGet('admin/config/system/monitoring/sensors/monitoring_disappeared_sensors');
-    $this->assertText(t('There are no missing sensors.'));
+    $this->assertNoText('Missing sensor comment_new');
   }
 
   /**
