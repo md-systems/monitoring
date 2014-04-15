@@ -171,9 +171,15 @@ class SensorManager {
     $sensor_info = $this->getSensorInfoByName($sensor_name);
     if (!$sensor_info->isEnabled()) {
       $this->saveSettings($sensor_name, array('enabled' => TRUE));
-      // @todo the following part is SensorDisappearedSensors specific. We need
-      //   to move it into the sensor somehow.
       $available_sensors = \Drupal::state()->get('monitoring.available_sensors', array());
+
+      if (!isset($available_sensors[$sensor_name])) {
+        // Use the watchdog message as the disappeared sensor does when new
+        // sensors are detected.
+        watchdog('monitoring', '@count new sensor/s added: @names',
+          array('@count' => 1, '@names' => $sensor_name));
+      }
+
       $available_sensors[$sensor_name]['enabled'] = TRUE;
       $available_sensors[$sensor_name]['name'] = $sensor_name;
       \Drupal::state()->set('monitoring.available_sensors', $available_sensors);
@@ -196,8 +202,6 @@ class SensorManager {
     $sensor_info = $this->getSensorInfoByName($sensor_name);
     if ($sensor_info->isEnabled()) {
       $this->saveSettings($sensor_name, array('enabled' => FALSE));
-      // @todo - the following part is SensorDisappearedSensors specific. We need
-      //   to move it into the sensor somehow.
       $available_sensors = \Drupal::state()->get('monitoring.available_sensors', array());
       $available_sensors[$sensor_name]['enabled'] = FALSE;
       $available_sensors[$sensor_name]['name'] = $sensor_name;

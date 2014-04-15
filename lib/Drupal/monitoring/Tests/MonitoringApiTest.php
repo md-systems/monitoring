@@ -32,6 +32,14 @@ class MonitoringApiTest extends MonitoringUnitTestBase {
   }
 
   /**
+   * {@inheritdoc}
+   */
+  public function setUp() {
+    parent::setUp();
+    $this->installSchema('dblog', array('watchdog'));
+  }
+
+  /**
    * Test the base class if info is set and passed correctly.
    */
   function testAPI() {

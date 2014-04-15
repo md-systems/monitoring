@@ -303,14 +303,19 @@ class MonitoringCoreTest extends MonitoringTestBase {
     // Run the disappeared sensor - it should not report any problems.
     $result = $this->runSensor('monitoring_disappeared_sensors');
     $this->assertTrue($result->isOk());
+
     $log = $this->loadWatchdog();
-    $this->assertEqual(count($log), 1);
-    // @todo - enable once https://drupal.org/node/2238781 fixed.
-    //$this->assertEqual(String::format($log[0]->message, unserialize($log[0]->variables)),
-    //  String::format('@count new sensor/s added: @names', array(
-    //    '@count' => count(monitoring_sensor_manager()->getSensorInfo()),
-    //    '@names' => implode(', ', array_keys(monitoring_sensor_manager()->getSensorInfo()))
-    //  )));
+    $this->assertEqual(count($log), 2, 'There should be two log entries: comment_new sensor added, all sensors enabled by default added.');
+    $this->assertEqual(String::format($log[0]->message, unserialize($log[0]->variables)),
+      String::format('@count new sensor/s added: @names', array('@count' => 1, '@names' => 'comment_new')));
+
+    $sensor_info = monitoring_sensor_manager()->getSensorInfo();
+    unset($sensor_info['comment_new']);
+    $this->assertEqual(String::format($log[1]->message, unserialize($log[1]->variables)),
+      String::format('@count new sensor/s added: @names', array(
+        '@count' => count($sensor_info),
+        '@names' => implode(', ', array_keys($sensor_info))
+      )));
 
     // Uninstall the comment module so that the comment_new sensor goes away.
     $module_handler->uninstall(array('comment'));
@@ -320,7 +325,8 @@ class MonitoringCoreTest extends MonitoringTestBase {
     $result = $this->runSensor('monitoring_disappeared_sensors');
     $this->assertTrue($result->isCritical());
     $this->assertEqual($result->getMessage(), 'Missing sensor comment_new');
-    $this->assertEqual(count($this->loadWatchdog()), 1);
+    // There should be no new logs.
+    $this->assertEqual(count($this->loadWatchdog()), 2);
 
     // Install the comment module to test the correct procedure of removing
     // sensors.
@@ -329,7 +335,7 @@ class MonitoringCoreTest extends MonitoringTestBase {
     // Now we should be back to normal.
     $result = $this->runSensor('monitoring_disappeared_sensors');
     $this->assertTrue($result->isOk());
-    $this->assertEqual(count($this->loadWatchdog()), 1);
+    $this->assertEqual(count($this->loadWatchdog()), 2);
 
     // Do the correct procedure to remove a sensor - first disable the sensor
     // and then uninstall the comment module.
@@ -340,8 +346,8 @@ class MonitoringCoreTest extends MonitoringTestBase {
     $result = $this->runSensor('monitoring_disappeared_sensors');
     $this->assertTrue($result->isOk());
     $log = $this->loadWatchdog();
-    $this->assertEqual(count($log), 2);
-    $this->assertEqual(String::format($log[1]->message, unserialize($log[1]->variables)),
+    $this->assertEqual(count($log), 3, 'Removal of comment_new sensor should be logged.');
+    $this->assertEqual(String::format($log[2]->message, unserialize($log[2]->variables)),
       String::format('@count new sensor/s removed: @names', array('@count' => 1, '@names' => 'comment_new')));
 
     // === Test the UI === //
@@ -750,6 +756,9 @@ class MonitoringCoreTest extends MonitoringTestBase {
 
   /**
    * Returns a new term with random properties in vocabulary $vid.
+   *
+   * @param \Drupal\taxonomy\VocabularyInterface $vocabulary
+   *   The vocabulary where the term will belong to.
    *
    * @return \Drupal\taxonomy\TermInterface;
    *   Term object.
