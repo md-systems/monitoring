@@ -583,7 +583,7 @@ function monitoring_system_monitoring_sensor_info() {
 function monitoring_search_api_monitoring_sensor_info() {
   $info = array();
 
-  $indexes = search_api_index_load_multiple(FALSE);
+  $indexes = entity_load_multiple('search_api_index');
 
   if (!empty($indexes)) {
     foreach ($indexes as $index) {
@@ -595,8 +595,7 @@ function monitoring_search_api_monitoring_sensor_info() {
           'category' => 'Search API',
           // Cache for 15 minutes.
           'caching_time' => 900,
-          'index_id' => $index->id,
-          'enabled' => FALSE,
+          'index_id' => $index->id(),
         ),
       );
     }

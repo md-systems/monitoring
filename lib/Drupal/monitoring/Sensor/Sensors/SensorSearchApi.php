@@ -24,13 +24,13 @@ class SensorSearchApi extends SensorThresholds {
    * {@inheritdoc}
    */
   public function runSensor(SensorResultInterface $result) {
-    $indexes = search_api_index_load_multiple(array($this->info->getSetting('index_id')));
-    $index = reset($indexes);
+    /* @var \Drupal\search_api\Index\IndexInterface $index */
+    $index = entity_load('search_api_index', $this->info->getSetting('index_id'));
 
-    $status = search_api_index_status($index);
+    $tracker = $index->getTracker();
 
     // Set amount of unindexed items.
-    $result->setValue($status['total'] - $status['indexed']);
+    $result->setValue($tracker->getRemainingItemsCount());
   }
 
 }
