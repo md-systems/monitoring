@@ -7,7 +7,7 @@
 namespace Drupal\monitoring\Sensor;
 
 use Drupal\monitoring\Result\SensorResultInterface;
-use Drupal\Core\Plugin\PluginInspectionInterface;
+use Drupal\Component\Plugin\PluginInspectionInterface;
 
 /**
  * Interface for a sensor defining basic operations.
