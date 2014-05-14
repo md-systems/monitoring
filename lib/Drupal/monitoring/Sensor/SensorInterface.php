@@ -7,13 +7,15 @@
 namespace Drupal\monitoring\Sensor;
 
 use Drupal\monitoring\Result\SensorResultInterface;
+use Drupal\Core\Plugin\PluginInspectionInterface;
 
 /**
  * Interface for a sensor defining basic operations.
+ * Defines required interface for all the sensor plugins.
  *
  * @todo more
  */
-interface SensorInterface {
+interface SensorInterface extends PluginInspectionInterface {
 
   /**
    * Service setter.

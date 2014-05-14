@@ -6,8 +6,6 @@
 
 namespace Drupal\monitoring\Sensor;
 
-use Drupal\Core\Plugin\PluginInspectionInterface;
-
 /**
  * Abstract SensorInterface implementation with common behaviour.
  *
@@ -16,7 +14,7 @@ use Drupal\Core\Plugin\PluginInspectionInterface;
  *
  * @todo more
  */
-abstract class Sensor extends PluginInspectionInterface implements SensorInterface {
+abstract class Sensor implements SensorInterface {
 
   /**
    * Current sensor info object.
