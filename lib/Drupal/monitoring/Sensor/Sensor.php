@@ -7,10 +7,8 @@
 namespace Drupal\monitoring\Sensor;
 
 /**
- * Abstract SensorInterface implementation with common behaviour.
- *
- * This abstract class extends PluginInspectionInterface and will be extended by
- * monitoring plugins.
+ * Abstract SensorInterface implementation with common behaviour and will be extended by
+ * sensor plugins.
  *
  * @todo more
  */

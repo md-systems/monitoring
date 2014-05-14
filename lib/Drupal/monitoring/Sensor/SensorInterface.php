@@ -10,8 +10,7 @@ use Drupal\monitoring\Result\SensorResultInterface;
 use Drupal\Component\Plugin\PluginInspectionInterface;
 
 /**
- * Interface for a sensor defining basic operations.
- * Defines required interface for all the sensor plugins.
+ * Interface for a sensor plugin defining basic operations.
  *
  * @todo more
  */
