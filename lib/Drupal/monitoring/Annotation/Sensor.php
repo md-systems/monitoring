@@ -24,4 +24,18 @@ class Sensor extends Plugin {
    */
   public $id;
 
+  /**
+   * @ingroup plugin_translatable
+   *
+   * @var \Drupal\Core\Annotation\Translation
+   */
+  public $label;
+
+  /**
+   * @ingroup plugin_translatable
+   *
+   * @var \Drupal\Core\Annotation\Translation (optional)
+   */
+  public $description = '';
+
 }
