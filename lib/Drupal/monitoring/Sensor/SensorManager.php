@@ -11,6 +11,9 @@ use Drupal\Component\Utility\String;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\monitoring\SensorRunner;
+use Drupal\Core\Plugin\DefaultPluginManager;
+use Drupal\Core\Language\LanguageManager;
+use Drupal\Core\Cache\CacheBackendInterface;
 
 /**
  * Manages sensor definitions and settings.
@@ -22,7 +25,7 @@ use Drupal\monitoring\SensorRunner;
  * Enables and disables sensors.
  *
  */
-class SensorManager {
+class SensorManager extends DefaultPluginManager {
 
   /**
    * List of sensor definitions.
@@ -43,12 +46,24 @@ class SensorManager {
 
   /**
    * Constructes a sensor manager.
+   *
+   * @param \Traversable $namespaces
+   *   An object that implements \Traversable which contains the root paths
+   *   keyed by the corresponding namespace to look for plugin implementations.
+   * @param \Drupal\Core\Cache\CacheBackendInterface $cache_backend
+   *   Cache backend instance to use.
+   * @param \Drupal\Core\Language\LanguageManager $language_manager
+   *   The language manager.
+   * @param \Drupal\Core\Extension\ModuleHandlerInterface $module_handler
+   *   The module handler to invoke the alter hook with.
    */
-  function __construct(ModuleHandlerInterface $module_handler, ConfigFactoryInterface $config) {
+  function __construct(\Traversable $namespaces, CacheBackendInterface $cache_backend, LanguageManager $language_manager, ModuleHandlerInterface $module_handler, ConfigFactoryInterface $config) {
+    parent::__construct('Plugin/monitoring', $namespaces, $module_handler, 'Drupal\monitoring\Annotation\Sensor');
+    $this->alterInfo('block');
     $this->moduleHandler = $module_handler;
+    $this->setCacheBackend($cache_backend, $language_manager, 'sensor_plugins');
     $this->config = $config;
   }
-
 
   /**
    * Returns monitoring sensor info.
