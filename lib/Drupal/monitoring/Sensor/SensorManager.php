@@ -58,10 +58,10 @@ class SensorManager extends DefaultPluginManager {
    *   The module handler to invoke the alter hook with.
    */
   function __construct(\Traversable $namespaces, CacheBackendInterface $cache_backend, LanguageManager $language_manager, ModuleHandlerInterface $module_handler, ConfigFactoryInterface $config) {
-    parent::__construct('Plugin/monitoring', $namespaces, $module_handler, 'Drupal\monitoring\Annotation\Sensor');
+    parent::__construct('Plugin/monitoring/Sensor', $namespaces, $module_handler, 'Drupal\monitoring\Annotation\Sensor');
     $this->alterInfo('block');
     $this->moduleHandler = $module_handler;
-    $this->setCacheBackend($cache_backend, $language_manager, 'sensor_plugins');
+    $this->setCacheBackend($cache_backend, $language_manager, 'monitoring_sensor_plugins');
     $this->config = $config;
   }
 
