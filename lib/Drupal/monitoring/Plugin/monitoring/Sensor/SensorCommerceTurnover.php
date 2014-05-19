@@ -4,7 +4,7 @@
  * Contains \Drupal\monitoring\Sensor\Sensors\SensorCommerceTurnover.
  */
 
-namespace Drupal\monitoring\Sensor\Sensors;
+namespace Drupal\monitoring\Plugin\monitoring\Sensor\;
 use Drupal\monitoring\Result\SensorResultInterface;
 use Drupal\monitoring\Sensor\Sensor;
 
