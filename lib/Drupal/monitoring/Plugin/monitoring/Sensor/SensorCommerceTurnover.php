@@ -6,13 +6,20 @@
 
 namespace Drupal\monitoring\Sensor\Sensors;
 use Drupal\monitoring\Result\SensorResultInterface;
+use Drupal\monitoring\Sensor\Sensor;
 
 /**
  * Monitors commerce order turnover stats.
  *
  * Based on SensorSimpleDatabaseAggregator using commerce_order table.
+ *
+ * @MonitoringSensor()
+ *   id = "commerce_turnover",
+ *   label = @Translation("Statistics for commerce order turnover."),
+ *   description = @Translation("SensorCommerceTurnover"))
+ *
  */
-class SensorCommerceTurnover extends SensorEntityDatabaseAggregator {
+class SensorCommerceTurnover extends SensorEntityDatabaseAggregator, Sensor {
 
   /**
    * {@inheritdoc}
