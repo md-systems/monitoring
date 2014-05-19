@@ -5,12 +5,19 @@
  * Contains \Drupal\monitoring\Sensor\Sensors\SensorConfigValue
  */
 
-namespace Drupal\monitoring\Sensor\Sensors;
+namespace Drupal\monitoring\Plugin\monitoring\Sensors;
+use Drupal\monitoring\Sensor\Sensor;
 
 /**
  * Generic sensor that checks for the config value.
+ *
+ * @MonitoringSensor(
+ *   id = "config_value",
+ *   label = @Translation("Config Value"),
+ *   description = @Translation("Sensor that checks for the config value"))
+ *
  */
-class SensorConfigValue extends SensorValueComparisonBase {
+class SensorConfigValue extends SensorValueComparisonBase, Sensor {
 
   /**
    * {@inheritdoc}

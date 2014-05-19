@@ -4,7 +4,7 @@
  * Contains \Drupal\monitoring\Sensor\Sensors\SensorCommerceTurnover.
  */
 
-namespace Drupal\monitoring\Plugin\monitoring\Sensor\;
+namespace Drupal\monitoring\Plugin\monitoring\Sensor;
 use Drupal\monitoring\Result\SensorResultInterface;
 use Drupal\monitoring\Sensor\Sensor;
 
@@ -13,7 +13,7 @@ use Drupal\monitoring\Sensor\Sensor;
  *
  * Based on SensorSimpleDatabaseAggregator using commerce_order table.
  *
- * @MonitoringSensor()
+ * @MonitoringSensor(
  *   id = "commerce_turnover",
  *   label = @Translation("Statistics for commerce order turnover."),
  *   description = @Translation("SensorCommerceTurnover"))
