@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Contains \Drupal\monitoring\Sensor\Sensors\SensorCommerceTurnover.
+ * Contains \Drupal\monitoring\Plugin\monitoring\Sensor\SensorCommerceTurnover.
  */
 
 namespace Drupal\monitoring\Plugin\monitoring\Sensor;
@@ -11,15 +11,15 @@ use Drupal\monitoring\Sensor\Sensor;
 /**
  * Monitors commerce order turnover stats.
  *
- * Based on SensorSimpleDatabaseAggregator using commerce_order table.
+ * Based on SensorEntityDatabaseAggregator using commerce_order table.
  *
- * @MonitoringSensor(
+ * @Sensor(
  *   id = "commerce_turnover",
- *   label = @Translation("Statistics for commerce order turnover."),
- *   description = @Translation("SensorCommerceTurnover"))
+ *   label = @Translation("Commerce order turnover."),
+ *   description = @Translation("Monitors how much money was earned with commerce orders."))
  *
  */
-class SensorCommerceTurnover extends SensorEntityDatabaseAggregator, Sensor {
+class SensorCommerceTurnover extends SensorEntityDatabaseAggregator {
 
   /**
    * {@inheritdoc}
