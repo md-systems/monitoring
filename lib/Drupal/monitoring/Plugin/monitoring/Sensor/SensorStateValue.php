@@ -2,15 +2,22 @@
 
 /**
  * @file
- * Contains \Drupal\monitoring\Sensor\Sensors\SensorStateValue
+ * Contains \Drupal\monitoring\Plugin\monitoring\Sensor\SensorStateValue
  */
 
-namespace Drupal\monitoring\Sensor\Sensors;
+namespace Drupal\monitoring\Plugin\monitoring\Sensor;
 
 use Drupal;
 
 /**
  * Generic sensor that checks for the variable value.
+ *
+ * @Sensor(
+ *   id = "monitoring_state_value",
+ *   label = @Translation("State Value"),
+ *   description = @Translation("Monitors and checks for the variable value.")
+ * )
+ *
  */
 class SensorStateValue extends SensorValueComparisonBase {
 
