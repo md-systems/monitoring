@@ -1,16 +1,22 @@
 <?php
 /**
  * @file
- * Contains \Drupal\monitoring\Sensor\Sensors\SensorDisappearedSensors.
+ * Contains \Drupal\monitoring\Plugin\monitoring\Sensor\SensorDisappearedSensors.
  */
 
-namespace Drupal\monitoring\Sensor\Sensors;
+namespace Drupal\monitoring\Plugin\monitoring\Sensor;
 
 use Drupal\monitoring\Result\SensorResultInterface;
 use Drupal\monitoring\Sensor\SensorConfigurable;
 
 /**
  * Monitors if sensors disappeared without prior being disabled.
+ *
+ * @Sensor(
+ *   id = "disappeared_sensors",
+ *   label = @Translation("Disappeared Sensors"),
+ *   description = @Translation("Monitors if sensors disappeared without prior being disabled.")
+ * )
  *
  * It stores the list of available sensors and their enabled/disabled status
  * and compares it to the current sensor info retrieved via
