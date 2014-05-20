@@ -2,22 +2,22 @@
 
 /**
  * @file
- * Contains \Drupal\monitoring\Sensor\Sensors\SensorConfigValue
+ * Contains \Drupal\monitoring\Plugin\monitoring\Sensor\SensorConfigValue
  */
 
-namespace Drupal\monitoring\Plugin\monitoring\Sensors;
+namespace Drupal\monitoring\Plugin\monitoring\Sensor;
 use Drupal\monitoring\Sensor\Sensor;
 
 /**
  * Generic sensor that checks for the config value.
  *
- * @MonitoringSensor(
+ * @Sensor(
  *   id = "config_value",
  *   label = @Translation("Config Value"),
- *   description = @Translation("Sensor that checks for the config value"))
+ *   description = @Translation("Checks for a specific configuration value"))
  *
  */
-class SensorConfigValue extends SensorValueComparisonBase, Sensor {
+class SensorConfigValue extends SensorValueComparisonBase {
 
   /**
    * {@inheritdoc}
