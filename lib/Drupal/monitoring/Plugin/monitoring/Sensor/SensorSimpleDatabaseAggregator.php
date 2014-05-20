@@ -1,10 +1,10 @@
 <?php
 /**
- * @file
- * Contains \Drupal\monitoring\Sensor\Sensors\SensorSimpleDatabaseAggregator.
+ * @fil
+ * Contains \Drupal\monitoring\Plugin\monitoring\Sensor\SensorSimpleDatabaseAggregator.
  */
 
-namespace Drupal\monitoring\Sensor\Sensors;
+namespace Drupal\monitoring\Plugin\monitoring\Sensor;
 
 
 use Drupal\Core\Database\Query\SelectInterface;
@@ -12,6 +12,13 @@ use Drupal\monitoring\Result\SensorResultInterface;
 
 /**
  * Simple database aggregator able to query a single db table.
+ *
+ * @Sensor(
+ *   id = "simple_database_aggregator",
+ *   label = @Translation("Simple Database Aggregator"),
+ *   description = @Translation("Simple database aggregator able to query a single db table.")
+ * )
+ *
  */
 class SensorSimpleDatabaseAggregator extends SensorDatabaseAggregatorBase {
 
