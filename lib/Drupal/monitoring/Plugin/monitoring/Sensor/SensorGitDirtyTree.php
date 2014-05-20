@@ -1,10 +1,10 @@
 <?php
 /**
  * @file
- * Contains \Drupal\monitoring\Sensor\Sensors\SensorGitDirtyTree.
+ * Contains \Drupal\monitoring\Plugin\monitoring\Sensor\SensorGitDirtyTree.
  */
 
-namespace Drupal\monitoring\Sensor\Sensors;
+namespace Drupal\monitoring\Plugin\monitoring\Sensor;
 
 use Drupal\monitoring\Result\SensorResultInterface;
 use Drupal\monitoring\Sensor\SensorConfigurable;
@@ -12,6 +12,12 @@ use Drupal\monitoring\Sensor\SensorExtendedInfoInterface;
 
 /**
  * Monitors the git repository for dirty files.
+ *
+ * @Sensor(
+ *   id = "monitoring_git_dirty_tree",
+ *   label = @Translation("Git Dirty Tree"),
+ *   description = @Translation("Monitors the git repository for dirty files.")
+ * )
  *
  * Tracks both changed and untracked files.
  * Also supports git submodules.
