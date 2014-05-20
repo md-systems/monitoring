@@ -1,16 +1,22 @@
 <?php
 /**
  * @file
- * Contains \Drupal\monitoring\Sensor\Sensors\SensorDblog404.
+ * Contains \Drupal\monitoring\Plugin\monitoring\Sensor\SensorDblog404.
  */
 
-namespace Drupal\monitoring\Sensor\Sensors;
+namespace Drupal\monitoring\Plugin\monitoring\Sensor;
 
 use Drupal\Core\Database\Query\SelectInterface;
 use Drupal\monitoring\Result\SensorResultInterface;
 
 /**
  * Monitors 404 page errors from dblog.
+ *
+ * @Sensor(
+ *   id = "dblog_404",
+ *   label = @Translation("Dblog 404"),
+ *   description = @Translation("Monitors 404 page errors from dblog.")
+ * )
  *
  * Displays URL with highest occurrence as message.
  */

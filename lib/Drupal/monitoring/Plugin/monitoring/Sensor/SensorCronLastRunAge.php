@@ -15,8 +15,9 @@ use Drupal;
  *
  * @Sensor(
  *   id = "cron_last_run_time",
- *   label = @Translation("Cron Last Run Age."),
- *   description = @Translation("Monitors the last cron run time."))
+ *   label = @Translation("Cron Last Run Age"),
+ *   description = @Translation("Monitors the last cron run time.")
+ * )
  *
  * Based on the drupal core variable cron_last.
  */
