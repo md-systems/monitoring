@@ -1,10 +1,10 @@
 <?php
 /**
  * @file
- * Contains \Drupal\monitoring\Sensor\Sensors\SensorEnabledModules.
+ * Contains \Drupal\monitoring\Plugin\monitoring\Sensor\SensorEnabledModules.
  */
 
-namespace Drupal\monitoring\Sensor\Sensors;
+namespace Drupal\monitoring\Plugin\monitoring\Sensor;
 
 use Drupal\Component\Utility\String;
 use Drupal\monitoring\Result\SensorResultInterface;
@@ -13,6 +13,13 @@ use Drupal;
 
 /**
  * Monitors installed modules.
+ *
+ * @Sensor(
+ *   id = "monitoring_enabled_modules",
+ *   label = @Translation("Enabled Modules"),
+ *   description = @Translation("Monitors installed modules.")
+ * )
+ *
  */
 class SensorEnabledModules extends SensorConfigurable {
 

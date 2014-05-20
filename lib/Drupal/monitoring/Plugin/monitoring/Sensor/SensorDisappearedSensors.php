@@ -13,7 +13,7 @@ use Drupal\monitoring\Sensor\SensorConfigurable;
  * Monitors if sensors disappeared without prior being disabled.
  *
  * @Sensor(
- *   id = "disappeared_sensors",
+ *   id = "monitoring_disappeared_sensors",
  *   label = @Translation("Disappeared Sensors"),
  *   description = @Translation("Monitors if sensors disappeared without prior being disabled.")
  * )

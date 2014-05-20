@@ -13,8 +13,8 @@ use Drupal\monitoring\Sensor\Sensor;
  * Monitors for available updates of Drupal core and installed contrib modules.
  *
  * @Sensor(
- *   id = "drupal_update",
- *   label = @Translation("Drupal Update"),
+ *   id = "update_status",
+ *   label = @Translation("Update status"),
  *   description = @Translation("Monitors for available updates of Drupal core and installed contrib modules.")
  * )
  *
