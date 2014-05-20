@@ -13,8 +13,8 @@ use Drupal\monitoring\Sensor\Sensor;
  *
  * @Sensor(
  *   id = "config_value",
- *   label = @Translation("Config Value"),
- *   description = @Translation("Checks for a specific configuration value"))
+ *   label = @Translation("Config Value."),
+ *   description = @Translation("Checks for a specific configuration value."))
  *
  */
 class SensorConfigValue extends SensorValueComparisonBase {

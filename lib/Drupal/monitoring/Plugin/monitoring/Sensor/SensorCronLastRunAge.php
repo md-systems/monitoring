@@ -1,10 +1,10 @@
 <?php
 /**
  * @file
- * Contains \Drupal\monitoring\Sensor\Sensors\SensorCronLastRunAge.
+ * Contains \Drupal\monitoring\Plugin\monitoring\Sensor\SensorCronLastRunAge.
  */
 
-namespace Drupal\monitoring\Sensor\Sensors;
+namespace Drupal\monitoring\Plugin\monitoring\Sensor;
 
 use Drupal\monitoring\Sensor\SensorThresholds;
 use Drupal\monitoring\Result\SensorResultInterface;
@@ -12,6 +12,11 @@ use Drupal;
 
 /**
  * Monitors the last cron run time.
+ *
+ * @Sensor(
+ *   id = "cron_last_run_time",
+ *   label = @Translation("Cron Last Run Age."),
+ *   description = @Translation("Monitors the last cron run time."))
  *
  * Based on the drupal core variable cron_last.
  */
