@@ -1,10 +1,10 @@
 <?php
 /**
  * @file
- * Contains \Drupal\monitoring\Sensor\Sensors\SensorCoreRequirements.
+ * Contains \Drupal\monitoring\Plugin\monitoring\Sensor\SensorCoreRequirements.
  */
 
-namespace Drupal\monitoring\Sensor\Sensors;
+namespace Drupal\monitoring\Plugin\monitoring\Sensor;
 
 use Drupal\Component\Utility\String;
 use Drupal\monitoring\Result\SensorResultInterface;
@@ -12,6 +12,11 @@ use Drupal\monitoring\Sensor\Sensor;
 
 /**
  * Monitors a specific module hook_requirements.
+ *
+ * @Sensor(
+ *   id = "core_requirements",
+ *   label = @Translation("Core Requirements"),
+ *   description = @Translation("Monitors a specific module hook_requirements"))
  *
  * @todo Shorten sensor message and add improved verbose output.
  */
