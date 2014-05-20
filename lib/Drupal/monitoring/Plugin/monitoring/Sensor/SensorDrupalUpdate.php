@@ -1,16 +1,22 @@
 <?php
 /**
  * @file
- * Contains \Drupal\monitoring\Sensor\Sensors\SensorDrupalUpdate.
+ * Contains \Drupal\monitoring\Plugin\monitoring\Sensor\SensorDrupalUpdate.
  */
 
-namespace Drupal\monitoring\Sensor\Sensors;
+namespace Drupal\monitoring\Plugin\monitoring\Sensor;
 
 use Drupal\monitoring\Result\SensorResultInterface;
 use Drupal\monitoring\Sensor\Sensor;
 
 /**
  * Monitors for available updates of Drupal core and installed contrib modules.
+ *
+ * @Sensor(
+ *   id = "drupal_update",
+ *   label = @Translation("Drupal Update"),
+ *   description = @Translation("Monitors for available updates of Drupal core and installed contrib modules.")
+ * )
  *
  * Based on drupal core update module.
  */
