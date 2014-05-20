@@ -1,16 +1,23 @@
 <?php
 /**
  * @file
- * Contains \Drupal\monitoring\Sensor\Sensors\SensorElysiaCron.
+ * Contains \Drupal\monitoring\Plugin\monitoring\Sensor\SensorElysiaCron.
  */
 
-namespace Drupal\monitoring\Sensor\Sensors;
+namespace Drupal\monitoring\Plugin\monitoring\Sensor;
 
 use Drupal\monitoring\Result\SensorResultInterface;
 use Drupal\monitoring\Sensor\SensorThresholds;
 
 /**
  * Monitors elysia cron channels for last execution.
+ *
+ * @Sensor(
+ *   id = "elysia_cron",
+ *   label = @Translation("Elysia Cron"),
+ *   description = @Translation("Monitors elysia cron channels for last execution.")
+ * )
+ *
  */
 class SensorElysiaCron extends SensorThresholds {
 
