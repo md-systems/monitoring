@@ -1,10 +1,10 @@
 <?php
 /**
  * @file
- * Contains \Drupal\monitoring\Sensor\Sensors\SensorSimpleDatabaseAggregator.
+ * Contains \Drupal\monitoring\Plugin\monitoring\Sensor\SensorSimpleDatabaseAggregator.
  */
 
-namespace Drupal\monitoring\Sensor\Sensors;
+namespace Drupal\monitoring\Plugin\monitoring\Sensor;
 
 
 use Drupal\Component\Utility\String;
@@ -13,6 +13,12 @@ use Drupal;
 
 /**
  * Entity database aggregator.
+ *
+ * @Sensor(
+ *   id = "entity_database_aggregator",
+ *   label = @Translation("Entity Database Aggregator"),
+ *   description = @Translation("Utilises the entity query aggregate functionality.")
+ * )
  *
  * It utilises the entity query aggregate functionality.
  *
