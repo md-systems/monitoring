@@ -19,7 +19,7 @@ function monitoring_test_monitoring_sensor_info() {
     'watchdog_aggregate_test' => array(
       'label' => 'Watchdog aggregate test',
       'description' => 'Test sensor for watchdog aggregate.',
-      'sensor_class' => 'Drupal\monitoring\Sensor\Sensors\SensorSimpleDatabaseAggregator',
+      'sensor_id' => 'database_aggregator',
       'settings' => array(
         'result_logging' => FALSE,
         'category' => 'Test',

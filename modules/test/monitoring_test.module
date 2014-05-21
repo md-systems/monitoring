@@ -41,7 +41,7 @@ function monitoring_monitoring_test_monitoring_sensor_info() {
     'watchdog_aggregate_test' => array(
       'label' => 'Watchdog aggregate test',
       'description' => 'Test sensor for watchdog aggregate.',
-      'sensor_class' => 'Drupal\monitoring\Sensor\Sensors\SensorSimpleDatabaseAggregator',
+      'sensor_id' => 'database_aggregator',
       'settings' => array(
         'result_logging' => FALSE,
         'category' => 'Test',
@@ -57,7 +57,7 @@ function monitoring_monitoring_test_monitoring_sensor_info() {
     'db_aggregate_test' => array(
       'label' => 'DB Aggregate test',
       'description' => 'Tests the generic DB aggregate sensor.',
-      'sensor_class' => 'Drupal\monitoring\Sensor\Sensors\SensorEntityDatabaseAggregator',
+      'sensor_id' => 'entity_aggregator',
       'value_label' => 'Druplicons',
       'result_logging' => TRUE,
       'settings' => array(

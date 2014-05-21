@@ -25,7 +25,7 @@ function monitoring_monitoring_sensor_info() {
   $info['monitoring_git_dirty_tree'] = array(
     'label' => 'Git dirty working tree',
     'description' => 'Repository local file changes',
-    'sensor_class' => 'Drupal\monitoring\Sensor\Sensors\SensorGitDirtyTree',
+    'sensor_id' => 'monitoring_git_dirty_tree',
     'settings' => array(
       'category' => 'System',
       // Disabled by default as we cannot know if the sensor is running in a
@@ -40,7 +40,7 @@ function monitoring_monitoring_sensor_info() {
   $info['monitoring_disappeared_sensors'] = array(
     'label' => 'Disappeared sensors',
     'description' => 'Keeps track of active sensors and reports if a sensor disappears',
-    'sensor_class' => 'Drupal\monitoring\Sensor\Sensors\SensorDisappearedSensors',
+    'sensor_id' => 'monitoring_disappeared_sensors',
     'settings' => array(
       'category' => 'System',
     ),
@@ -60,7 +60,7 @@ function monitoring_node_monitoring_sensor_info() {
   $info['node_new_all'] = array(
     'label' => 'All new nodes',
     'description' => 'All new nodes',
-    'sensor_class' => 'Drupal\monitoring\Sensor\Sensors\SensorSimpleDatabaseAggregator',
+    'sensor_id' => 'database_aggregator',
     'value_label' => 'Nodes',
     'services' => array('database'),
     'settings' => array(
@@ -78,7 +78,7 @@ function monitoring_node_monitoring_sensor_info() {
     $info['node_new_' . $node_type->type] = array(
       'label' => String::format('New @type nodes', array('@type' => $node_type->name)),
       'description' => String::format('New nodes of type @type', array('@type' => $node_type->name)),
-      'sensor_class' => 'Drupal\monitoring\Sensor\Sensors\SensorSimpleDatabaseAggregator',
+      'sensor_id' => 'database_aggregator',
       'value_label' => String::format('@type nodes', array('@type' => $node_type->name)),
       'settings' => array(
         'category' => 'Content',
@@ -111,7 +111,7 @@ function monitoring_comment_monitoring_sensor_info() {
 
   $info['comment_new'] = array(
     'label' => 'New comments',
-    'sensor_class' => 'Drupal\monitoring\Sensor\Sensors\SensorSimpleDatabaseAggregator',
+    'sensor_id' => 'database_aggregator',
     'value_label' => 'Comments',
     'services' => array('database'),
     'settings' => array(
@@ -138,7 +138,7 @@ function monitoring_user_monitoring_sensor_info() {
 
   $info['user_new'] = array(
     'label' => 'New users',
-    'sensor_class' => 'Drupal\monitoring\Sensor\Sensors\SensorSimpleDatabaseAggregator',
+    'sensor_id' => 'database_aggregator',
     'value_label' => 'Users',
     'services' => array('database'),
     'settings' => array(
@@ -154,7 +154,7 @@ function monitoring_user_monitoring_sensor_info() {
 
   $info['user_active'] = array(
     'label' => 'Active users',
-    'sensor_class' => 'Drupal\monitoring\Sensor\Sensors\SensorSimpleDatabaseAggregator',
+    'sensor_id' => 'database_aggregator',
     'value_label' => 'Users',
     'services' => array('database'),
     'settings' => array(
@@ -175,7 +175,7 @@ function monitoring_user_monitoring_sensor_info() {
   $info['user_sessions_authenticated'] = array(
     'label' => 'Authenticated user sessions',
     'description' => 'Authenticated user sessions without logout',
-    'sensor_class' => 'Drupal\monitoring\Sensor\Sensors\SensorSimpleDatabaseAggregator',
+    'sensor_id' => 'database_aggregator',
     'value_label' => 'Active sessions',
     'settings' => array(
       'category' => 'User activity',
@@ -190,7 +190,7 @@ function monitoring_user_monitoring_sensor_info() {
   $info['user_sessions_all'] = array(
     'label' => 'All active sessions',
     'description' => 'All active sessions of logged in and anonymous users without logout',
-    'sensor_class' => 'Drupal\monitoring\Sensor\Sensors\SensorSimpleDatabaseAggregator',
+    'sensor_id' => 'database_aggregator',
     'value_label' => 'Active sessions',
     'settings' => array(
       'category' => 'User activity',
@@ -213,7 +213,7 @@ function monitoring_dblog_monitoring_sensor_info() {
   $info['dblog_404'] = array(
     'label' => 'Page not found errors',
     'description' => 'Page not found errors logged by watchdog',
-    'sensor_class' => 'Drupal\monitoring\Sensor\Sensors\SensorDblog404',
+    'sensor_id' => 'dblog_404',
     'value_label' => 'Watchdog events',
     'services' => array('database'),
     'settings' => array(
@@ -258,7 +258,7 @@ function monitoring_dblog_monitoring_sensor_info() {
     $info['dblog_event_severity_' . $severities[$level]] = array(
       'label' => String::format('Severity @severity', array('@severity' => $name)),
       'description' => String::format('Watchdog entries of severity @severity', array('@severity' => $name)),
-      'sensor_class' => 'Drupal\monitoring\Sensor\Sensors\SensorSimpleDatabaseAggregator',
+      'sensor_id' => 'database_aggregator',
       'value_label' => 'Events',
       'services' => array('database'),
       'settings' => array(
@@ -282,7 +282,7 @@ function monitoring_dblog_monitoring_sensor_info() {
   $info['user_successful_logins'] = array(
     'label' => 'Successful user logins',
     'description' => 'Successful user logins by Watchdog',
-    'sensor_class' => 'Drupal\monitoring\Sensor\Sensors\SensorSimpleDatabaseAggregator',
+    'sensor_id' => 'database_aggregator',
     'value_label' => 'Login attempts',
     'services' => array('database'),
     'settings' => array(
@@ -301,7 +301,7 @@ function monitoring_dblog_monitoring_sensor_info() {
   $info['user_session_logouts'] = array(
     'label' => 'User session logouts',
     'description' => 'User session logouts by Watchdog',
-    'sensor_class' => 'Drupal\monitoring\Sensor\Sensors\SensorSimpleDatabaseAggregator',
+    'sensor_id' => 'database_aggregator',
     'value_label' => 'Logouts',
     'settings' => array(
       'category' => 'User activity',
@@ -319,7 +319,7 @@ function monitoring_dblog_monitoring_sensor_info() {
   $info['user_failed_logins'] = array(
     'label' => 'Failed user logins',
     'description' => 'Failed user logins by Watchdog',
-    'sensor_class' => 'Drupal\monitoring\Sensor\Sensors\SensorUserFailedLogins',
+    'sensor_id' => 'user_failed_logins',
     'value_label' => 'Login attempts',
     'services' => array('database'),
     'settings' => array(
@@ -348,7 +348,7 @@ function monitoring_dblog_monitoring_sensor_info() {
     $info['dblog_image_missing_style'] = array(
       'label' => 'Image derivative creation fail',
       'description' => 'Image derivative creation fails',
-      'sensor_class' => 'Drupal\monitoring\Sensor\Sensors\SensorImageMissingStyle',
+      'sensor_id' => 'image_style_missing',
       'value_label' => 'Watchdog entries',
       'settings' => array(
         'category' => 'Watchdog',
@@ -386,7 +386,7 @@ function monitoring_past_db_monitoring_sensor_info() {
     $info['past_db_event_severity_' . $severities[$severity]] = array(
       'label' => String::format('Severity @severity', array('@severity' => $name)),
       'description' => String::format('Past events with severity @severity', array('@severity' => $name)),
-      'sensor_class' => 'Drupal\monitoring\Sensor\Sensors\SensorSimpleDatabaseAggregator',
+      'sensor_id' => 'database_aggregator',
       'value_label' => 'Events',
       'services' => array('database'),
       'settings' => array(
@@ -396,6 +396,8 @@ function monitoring_past_db_monitoring_sensor_info() {
         'table' => 'past_event',
         'conditions' => array(
           array('field' => 'severity', 'value' => $severity),
+          // This is to exclude monitoring records.
+          array('field' => 'type', 'value' => 'monitoring', 'operator' => '!='),
         ),
         'time_interval_field' => 'timestamp',
         'time_interval_value' => 24 * 60 * 60,
@@ -421,7 +423,7 @@ function monitoring_past_form_monitoring_sensor_info() {
   $info['past_form'] = array(
     'label' => 'Logged form submissions',
     'description' => 'Past event logging form submissions',
-    'sensor_class' => 'Drupal\monitoring\Sensor\Sensors\SensorSimpleDatabaseAggregator',
+    'sensor_id' => 'database_aggregator',
     'value_label' => 'Past events',
     'services' => array('database'),
     'settings' => array(
@@ -452,7 +454,7 @@ function monitoring_system_monitoring_sensor_info() {
   $info['core_theme_default'] = array(
     'label' => 'Default theme',
     'description' => 'Site default theme',
-    'sensor_class' => 'Drupal\monitoring\Sensor\Sensors\SensorConfigValue',
+    'sensor_id' => 'config_value',
     'numeric' => FALSE,
     'services' => array('config.factory'),
     'settings' => array(
@@ -465,7 +467,7 @@ function monitoring_system_monitoring_sensor_info() {
   $info['core_maintenance_mode'] = array(
     'label' => 'Maintenance mode',
     'description' => 'Site maintenance mode',
-    'sensor_class' => 'Drupal\monitoring\Sensor\Sensors\SensorStateValue',
+    'sensor_id' => 'state_value',
     'numeric' => FALSE,
     'value_type' => 'bool',
     'services' => array('state'),
@@ -480,7 +482,7 @@ function monitoring_system_monitoring_sensor_info() {
   $info['core_cron_last_run_age'] = array(
     'label' => 'Last cron run age',
     'description' => 'Time since last cron run',
-    'sensor_class' => 'Drupal\monitoring\Sensor\Sensors\SensorCronLastRunAge',
+    'sensor_id' => 'cron_last_run_time',
     'value_type' => 'time_interval',
     'settings' => array(
       'category' => 'Cron',
@@ -495,7 +497,7 @@ function monitoring_system_monitoring_sensor_info() {
   $info['core_cron_safe_threshold'] = array(
     'label' => 'Cron safe threshold enabled',
     'description' => 'Cron safe threshold (Poormanscron) is enabled',
-    'sensor_class' => 'Drupal\monitoring\Sensor\Sensors\SensorConfigValue',
+    'sensor_id' => 'config_value',
     'numeric' => FALSE,
     'value_type' => 'bool',
     'services' => array('config.factory'),
@@ -515,7 +517,7 @@ function monitoring_system_monitoring_sensor_info() {
     $info['core_queue_' . $queue] = array(
       'label' => String::checkPlain($queue),
       'description' => String::format('Size of @queue queue', array('@queue' => $queue)),
-      'sensor_class' => 'Drupal\monitoring\Sensor\Sensors\SensorQueue',
+      'sensor_id' => 'queue_size',
       'value_label' => 'Items',
       'settings' => array(
         'category' => 'Queue',
@@ -529,7 +531,7 @@ function monitoring_system_monitoring_sensor_info() {
   $info['monitoring_enabled_modules'] = array(
     'label' => 'Enabled modules',
     'description' => 'Enabled only expected modules',
-    'sensor_class' => 'Drupal\monitoring\Sensor\Sensors\SensorEnabledModules',
+    'sensor_id' => 'monitoring_enabled_modules',
     'value_label' => 'Modules delta',
     'settings' => array(
       'category' => 'System',
@@ -553,7 +555,7 @@ function monitoring_system_monitoring_sensor_info() {
     $info['core_requirements_' . $module] = array(
       'label' => String::format('Module @module', array('@module' => $module)),
       'description' => String::format('Requirements of the @module module', array('@module' => $module)),
-      'sensor_class' => 'Drupal\monitoring\Sensor\Sensors\SensorCoreRequirements',
+      'sensor_id' => 'core_requirements',
       'numeric' => FALSE,
       'settings' => array(
         'category' => 'Requirements',
@@ -581,19 +583,20 @@ function monitoring_system_monitoring_sensor_info() {
 function monitoring_search_api_monitoring_sensor_info() {
   $info = array();
 
-  $indexes = entity_load_multiple('search_api_index');
+  $indexes = search_api_index_load_multiple(FALSE);
 
   if (!empty($indexes)) {
     foreach ($indexes as $index) {
       $info['search_api_' . $index->machine_name] = array(
         'label' => String::format('Search index queue size of @index', array('@index' => $index->name)),
-        'sensor_class' => 'Drupal\monitoring\Sensor\Sensors\SensorSearchApi',
+	'sensor_id' => 'search_api_unindexed',
         'value_label' => 'Unindexed items',
         'settings' => array(
           'category' => 'Search API',
           // Cache for 15 minutes.
           'caching_time' => 900,
-          'index_id' => $index->id(),
+          'index_id' => $index->id,
+          'enabled' => FALSE,
         ),
       );
     }
@@ -613,7 +616,7 @@ function monitoring_simplenews_monitoring_sensor_info() {
   $info['simplenews_pending'] = array(
     'label' => 'Simplenews spool size',
     'description' => 'Pending items in the simplenews spool.',
-    'sensor_class' => 'Drupal\monitoring\Sensor\Sensors\SensorSimplenewsPending',
+    'sensor_id' => 'simplenews_pending',
     'value_label' => 'Pending items',
     'settings' => array(
       'category' => 'Simplenews',
@@ -635,7 +638,7 @@ function monitoring_update_monitoring_sensor_info() {
   $info['update_core'] = array(
     'label' => 'Core',
     'description' => 'Available updates for Drupal core',
-    'sensor_class' => 'Drupal\monitoring\Sensor\Sensors\SensorDrupalUpdate',
+    'sensor_id' => 'update_status',
     'numeric' => FALSE,
     'value_label' => 'Outdated modules',
     'settings' => array(
@@ -648,7 +651,7 @@ function monitoring_update_monitoring_sensor_info() {
   $info['update_contrib'] = array(
     'label' => 'Modules and themes',
     'description' => 'Available updates for contrib modules and themes',
-    'sensor_class' => 'Drupal\monitoring\Sensor\Sensors\SensorDrupalUpdate',
+    'sensor_id' => 'update_status',
     'numeric' => FALSE,
     'value_label' => 'Outdated modules',
     'settings' => array(
@@ -678,7 +681,7 @@ function monitoring_elysia_cron_monitoring_sensor_info() {
     $info['elysia_cron_' . $name . '_last_execution'] = array(
       'label' => String::format('Elysia @name execution', array('@name' => $row->name)),
       'description' => String::format('Last execution duration for elysia @name cron', array('@name' => $row->name)),
-      'sensor_class' => 'Drupal\monitoring\Sensor\Sensors\SensorElysiaCron',
+      'sensor_id' => 'elysia_cron',
       'value_type' => 'time_interval',
       'settings' => array(
         'category' => 'Elysia Cron',
@@ -690,7 +693,7 @@ function monitoring_elysia_cron_monitoring_sensor_info() {
     $info['elysia_cron_' . $name . '_last_run'] = array(
       'label' => String::format('Elysia @name run', array('@name' => $row->name)),
       'description' => String::format('Time since last elysia @name run', array('@name' => $row->name)),
-      'sensor_class' => 'Drupal\monitoring\Sensor\Sensors\SensorElysiaCron',
+      'sensor_id' => 'elysia_cron',
       'value_type' => 'time_interval',
       'settings' => array(
         'category' => 'Elysia Cron',
@@ -712,7 +715,7 @@ function monitoring_elysia_cron_monitoring_sensor_info() {
 function monitoring_maillog_monitoring_sensor_info() {
   $info['maillog_records_count'] = array(
     'label' => 'Maillog records count',
-    'sensor_class' => 'Drupal\monitoring\Sensor\Sensors\SensorSimpleDatabaseAggregator',
+    'sensor_id' => 'database_aggregator',
     'value_label' => 'Mail records',
     'settings' => array(
       'table' => 'maillog',
@@ -736,7 +739,7 @@ function monitoring_commerce_order_monitoring_sensor_info() {
   foreach (commerce_order_statuses() as $status_name => $status_info) {
     $info['commerce_order_status_' . $status_name] = array(
       'label' => String::format('Orders in status @name', array('@name' => $status_info['title'])),
-      'sensor_class' => 'Drupal\monitoring\Sensor\Sensors\SensorEntityDatabaseAggregator',
+      'sensor_id' => 'database_aggregator',
       'value_label' => 'Orders',
       'settings' => array(
         'enabled' => FALSE,
@@ -758,7 +761,7 @@ function monitoring_commerce_order_monitoring_sensor_info() {
     $info['commerce_order_turnover_' . strtolower($currency['code'])] = array(
       'label' => String::format('Turnover in @currency', array('@currency' => $currency['code'])),
       'description' => String::format('Turnover from completed orders in @currency', array('@currency' => $currency['code'])),
-      'sensor_class' => 'Drupal\monitoring\Sensor\Sensors\SensorCommerceTurnover',
+      'sensor_id' => 'commerce_turnover',
       'value_label' => $currency['code'],
       'value_type' => 'commerce_currency',
       'settings' => array(
@@ -784,7 +787,7 @@ function monitoring_commerce_order_monitoring_sensor_info() {
     $info['commerce_order_turnover_total'] = array(
       'label' => 'Total turnover',
       'description' => 'Total turnover from completed orders in all currencies',
-      'sensor_class' => 'Drupal\monitoring\Sensor\Sensors\SensorCommerceTurnover',
+      'sensor_id' => 'commerce_turnover',
       'value_label' => $currencies[commerce_default_currency()]['code'],
       'value_type' => 'commerce_currency',
       'settings' => array(
