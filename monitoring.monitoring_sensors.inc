@@ -396,8 +396,6 @@ function monitoring_past_db_monitoring_sensor_info() {
         'table' => 'past_event',
         'conditions' => array(
           array('field' => 'severity', 'value' => $severity),
-          // This is to exclude monitoring records.
-          array('field' => 'type', 'value' => 'monitoring', 'operator' => '!='),
         ),
         'time_interval_field' => 'timestamp',
         'time_interval_value' => 24 * 60 * 60,
@@ -583,20 +581,19 @@ function monitoring_system_monitoring_sensor_info() {
 function monitoring_search_api_monitoring_sensor_info() {
   $info = array();
 
-  $indexes = search_api_index_load_multiple(FALSE);
+  $indexes = entity_load_multiple('search_api_index');
 
   if (!empty($indexes)) {
     foreach ($indexes as $index) {
       $info['search_api_' . $index->machine_name] = array(
         'label' => String::format('Search index queue size of @index', array('@index' => $index->name)),
-	'sensor_id' => 'search_api_unindexed',
+        'sensor_id' => 'search_api_unindexed',
         'value_label' => 'Unindexed items',
         'settings' => array(
           'category' => 'Search API',
           // Cache for 15 minutes.
           'caching_time' => 900,
-          'index_id' => $index->id,
-          'enabled' => FALSE,
+          'index_id' => $index->id(),
         ),
       );
     }
