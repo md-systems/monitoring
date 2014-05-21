@@ -4,4 +4,4 @@ services:
     arguments: ['@container.namespaces', '@cache.discovery', '@language_manager', '@module_handler', '@config.factory']
   monitoring.sensor_runner:
     class: Drupal\monitoring\SensorRunner
-    arguments: ['@monitoring.sensor_manager', '@cache.config', '@config.factory']
+    arguments: ['@monitoring.sensor_manager', '@cache.default', '@config.factory']
