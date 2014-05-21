@@ -1,10 +1,10 @@
 <?php
 /**
  * @file
- * Contains \Drupal\monitoring_test\Sensor\Sensors\TestSensor.
+ * Contains \Drupal\monitoring_test\Plugin\monitoring\Sensor\TestSensor.
  */
 
-namespace Drupal\monitoring_test\Sensor\Sensors;
+namespace Drupal\monitoring_test\Plugin\monitoring\Sensor;
 
 use Drupal\monitoring\Sensor\SensorExtendedInfoInterface;
 use Drupal\monitoring\Sensor\SensorInfo;
@@ -13,6 +13,13 @@ use Drupal\monitoring\Sensor\SensorThresholds;
 
 /**
  * Test sensor to report status as provided by external arguments.
+ *
+ * @Sensor(
+ *   id = "test_sensor",
+ *   label = @Translation("Test Sensor"),
+ *   description = @Translation("Test sensor to report status as provided by external arguments.")
+ * )
+ *
  */
 class TestSensor extends SensorThresholds implements SensorExtendedInfoInterface {
 
