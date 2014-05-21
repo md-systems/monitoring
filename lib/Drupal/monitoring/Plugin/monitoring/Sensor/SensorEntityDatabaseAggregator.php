@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Contains \Drupal\monitoring\Plugin\monitoring\Sensor\SensorSimpleDatabaseAggregator.
+ * Contains \Drupal\monitoring\Plugin\monitoring\Sensor\SensorEntityDatabaseAggregator.
  */
 
 namespace Drupal\monitoring\Plugin\monitoring\Sensor;
@@ -15,8 +15,8 @@ use Drupal;
  * Entity database aggregator.
  *
  * @Sensor(
- *   id = "entity_database_aggregator",
- *   label = @Translation("Entity Database Aggregator"),
+ *   id = "entity_aggregator",
+ *   label = @Translation("Entity Aggregator"),
  *   description = @Translation("Utilises the entity query aggregate functionality.")
  * )
  *

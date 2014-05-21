@@ -14,7 +14,7 @@ use Drupal;
  * Monitors number of items for a given core queue.
  *
  * @Sensor(
- *   id = "monitoring_queue",
+ *   id = "queue",
  *   label = @Translation("Queue"),
  *   description = @Translation("Monitors number of items for a given core queue.")
  * )

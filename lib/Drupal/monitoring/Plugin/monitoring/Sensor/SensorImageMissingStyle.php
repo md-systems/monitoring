@@ -13,7 +13,7 @@ use Drupal;
  * Monitors image derivate creation errors from dblog.
  *
  * @Sensor(
- *   id = "monitoring_image_missing",
+ *   id = "image_style_missing",
  *   label = @Translation("Image Missing Style"),
  *   description = @Translation("Monitors image derivate creation errors from database log.")
  * )

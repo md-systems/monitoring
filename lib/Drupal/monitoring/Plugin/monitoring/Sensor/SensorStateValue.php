@@ -13,7 +13,7 @@ use Drupal;
  * Generic sensor that checks for the variable value.
  *
  * @Sensor(
- *   id = "monitoring_state_value",
+ *   id = "state_value",
  *   label = @Translation("State Value"),
  *   description = @Translation("Monitors and checks for the variable value.")
  * )

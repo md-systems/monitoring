@@ -13,7 +13,7 @@ use Drupal\monitoring\Sensor\SensorThresholds;
  * Monitors pending items in the simplenews mail spool.
  *
  * @Sensor(
- *   id = "monitoring_simplenews_pending",
+ *   id = "simplenews_pending",
  *   label = @Translation("Simplenews Pending"),
  *   description = @Translation("Monitors pending items in the simplenews mail spool.")
  * )

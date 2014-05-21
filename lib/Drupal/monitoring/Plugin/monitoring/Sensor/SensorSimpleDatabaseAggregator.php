@@ -1,6 +1,6 @@
 <?php
 /**
- * @fil
+ * @file
  * Contains \Drupal\monitoring\Plugin\monitoring\Sensor\SensorSimpleDatabaseAggregator.
  */
 
@@ -14,7 +14,7 @@ use Drupal\monitoring\Result\SensorResultInterface;
  * Simple database aggregator able to query a single db table.
  *
  * @Sensor(
- *   id = "simple_database_aggregator",
+ *   id = "database_aggregator",
  *   label = @Translation("Simple Database Aggregator"),
  *   description = @Translation("Simple database aggregator able to query a single db table.")
  * )
