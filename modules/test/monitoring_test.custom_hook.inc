@@ -10,7 +10,7 @@ function monitoring_test_monitoring_sensor_info() {
     'test_sensor_custom' => array(
       'label' => 'Test from custom hook',
       'description' => '',
-      'sensor_class' => 'Drupal\monitoring_test\Sensor\Sensors\TestSensor',
+      'sensor_id' => 'test_sensor',
       'settings' => array(
         'result_logging' => FALSE,
         'category' => 'Test',
@@ -36,7 +36,7 @@ function monitoring_test_monitoring_sensor_info() {
     'test_sensor' => array(
       'label' => 'Test sensor',
       'description' => 'Test sensor status',
-      'sensor_class' => 'Drupal\monitoring_test\Sensor\Sensors\TestSensor',
+      'sensor_id' => 'test_sensor',
       'settings' => array(
         'result_logging' => TRUE,
         'category' => 'Test',
@@ -45,7 +45,7 @@ function monitoring_test_monitoring_sensor_info() {
     'test_sensor_inner' => array(
       'label' => 'Test sensor inner',
       'description' => 'Test sensor that sets inner error intervals',
-      'sensor_class' => 'Drupal\monitoring_test\Sensor\Sensors\TestSensor',
+      'sensor_id' => 'test_sensor',
       'settings' => array(
         'result_logging' => TRUE,
         'category' => 'Test',
@@ -61,7 +61,7 @@ function monitoring_test_monitoring_sensor_info() {
     'test_sensor_outer' => array(
       'label' => 'Test sensor outer',
       'description' => 'Test sensor that sets outer error intervals',
-      'sensor_class' => 'Drupal\monitoring_test\Sensor\Sensors\TestSensor',
+      'sensor_id' => 'test_sensor',
       'settings' => array(
         'result_logging' => TRUE,
         'category' => 'Test',
@@ -77,7 +77,7 @@ function monitoring_test_monitoring_sensor_info() {
     'test_sensor_exceeds' => array(
       'label' => 'Test sensor exceeds',
       'description' => 'Test sensor that sets error interval above give value',
-      'sensor_class' => 'Drupal\monitoring_test\Sensor\Sensors\TestSensor',
+      'sensor_id' => 'test_sensor',
       'settings' => array(
         'result_logging' => TRUE,
         'category' => 'Test',
@@ -91,7 +91,7 @@ function monitoring_test_monitoring_sensor_info() {
     'test_sensor_falls' => array(
       'label' => 'Test sensor falls',
       'description' => 'Test sensor that sets error interval below give value',
-      'sensor_class' => 'Drupal\monitoring_test\Sensor\Sensors\TestSensor',
+      'sensor_id' => 'test_sensor',
       'settings' => array(
         'result_logging' => TRUE,
         'category' => 'Test',
