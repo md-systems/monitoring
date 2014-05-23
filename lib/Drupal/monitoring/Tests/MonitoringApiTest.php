@@ -353,7 +353,7 @@ class MonitoringApiTest extends MonitoringUnitTestBase {
       'sensor_status' => SensorResultInterface::STATUS_OK,
     );
     \Drupal::state()->set('monitoring_test.sensor_result_data', $test_sensor_result_data);
-    monitoring_sensor_manager()->saveSettings('test_senor', array('result_logging' => TRUE));
+    monitoring_sensor_manager()->saveSettings('test_sensor', array('result_logging' => TRUE));
     $this->runSensor('test_sensor');
 
     $logs = $this->loadSensorLog('test_sensor');
