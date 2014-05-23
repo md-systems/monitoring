@@ -156,7 +156,7 @@ class SensorRunner {
    * @see \Drupal\monitoring\Sensor\SensorInterface::runSensor()
    */
   protected function runSensor(SensorInfo $sensor_info) {
-    $sensor = $this->getSensorObject($sensor_info);
+    $sensor = $sensor_info->getPlugin();
     // Check if sensor is enabled.
     if (!$sensor->isEnabled()) {
       throw new DisabledSensorException(String::format('Sensor @sensor_name is not enabled and must not be run.', array('@sensor_name' => $sensor_info->getName())));
@@ -290,20 +290,6 @@ class SensorRunner {
         );
       }
     }
-  }
-
-  /**
-   * Instantiates sensor object.
-   *
-   * @param SensorInfo $sensor_info
-   *   Sensor info.
-   *
-   * @return \Drupal\monitoring\Sensor\SensorInterface
-   *   Instantiated sensor.
-   */
-  protected function getSensorObject(SensorInfo $sensor_info) {
-    $sensor = $sensor_info->getPlugin();
-    return $sensor;
   }
 
   /**

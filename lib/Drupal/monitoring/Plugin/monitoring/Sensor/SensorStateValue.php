@@ -8,6 +8,7 @@
 namespace Drupal\monitoring\Plugin\monitoring\Sensor;
 
 use Drupal;
+use Drupal\monitoring\Sensor\Sensors\SensorValueComparisonBase;
 
 /**
  * Generic sensor that checks for the variable value.

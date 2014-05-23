@@ -9,6 +9,7 @@ namespace Drupal\monitoring\Plugin\monitoring\Sensor;
 
 use Drupal\Core\Database\Query\SelectInterface;
 use Drupal\monitoring\Result\SensorResultInterface;
+use Drupal\monitoring\Sensor\Sensors\SensorDatabaseAggregatorBase;
 
 /**
  * Simple database aggregator able to query a single db table.

@@ -7,6 +7,7 @@
 
 namespace Drupal\monitoring\Plugin\monitoring\Sensor;
 use Drupal\monitoring\Sensor\Sensor;
+use Drupal\monitoring\Sensor\Sensors\SensorValueComparisonBase;
 
 /**
  * Generic sensor that checks for the config value.
