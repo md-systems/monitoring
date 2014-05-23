@@ -302,8 +302,7 @@ class SensorRunner {
    *   Instantiated sensor.
    */
   protected function getSensorObject(SensorInfo $sensor_info) {
-    $sensor_class = $sensor_info->getSensorClass();
-    $sensor = new $sensor_class($sensor_info);
+    $sensor = $sensor_info->getPlugin();
     return $sensor;
   }
 

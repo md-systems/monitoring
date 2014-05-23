@@ -64,7 +64,17 @@ class SensorManager extends DefaultPluginManager {
     $this->setCacheBackend($cache_backend, $language_manager, 'monitoring_sensor_plugins');
     $this->config = $config;
   }
-
+  
+  /**
+   *
+   */
+  public function createInstance($plugin_id, array $configuration = array()) {
+    $sensor_info = $configuration['sensor_info'];
+    $definition = $this->getDefinition($plugin_id);
+    $class = $definition['class'];
+    return new $class($sensor_info);
+  }
+  
   /**
    * Returns monitoring sensor info.
    *

@@ -68,9 +68,8 @@ class SensorSettingsForm extends FormBase {
       return $form;
     }
 
-    $sensor_class = $sensor_info->getSensorClass();
+    $sensor = $sensor_info->getPlugin();
     /** @var SensorConfigurableInterface $sensor */
-    $sensor = new $sensor_class($sensor_info);
     // Set the sensor object into $form_state to make it available for validate
     // and submit callbacks.
     $form_state['sensor'] = $sensor;
