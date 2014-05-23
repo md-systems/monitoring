@@ -85,20 +85,20 @@ class SensorInfo {
    *   Sensor class
    */
   public function getSensorClass() {
-    return $this->sensorInfo['sensor_class'];
+    $sensor_id = $this->sensorInfo['sensor_id'];
+    $definition = monitoring_sensor_manager()->getDefinition($sensor_id);
+    return $definition['class'];
   }
 
   /**
-   * Gets sensor id.
+   * Returns the sensor plugin.
    *
    * @return \Drupal\monitoring\Sensor\SensorInterface
    *   Instantiated sensor.
    */
   public function getPlugin() {
     $sensor_id = $this->sensorInfo['sensor_id'];
-    $configuration = array('sensor_info' => $sensorInfo,
-			   'sensor_name' => $sensorName,
-			   );
+    $configuration = array('sensor_info' => $this);
     $sensor = monitoring_sensor_manager()->createInstance($sensor_id, $configuration);
     return $sensor;
   }
