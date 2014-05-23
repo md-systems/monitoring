@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Contains \Drupal\monitoring\Plugin\monitoring\Sensor\SensorEntityDatabaseAggregator.
+ * Contains \Drupal\monitoring\Plugin\monitoring\Sensor\SensorEntityAggregator.
  */
 
 namespace Drupal\monitoring\Plugin\monitoring\Sensor;
@@ -10,6 +10,7 @@ namespace Drupal\monitoring\Plugin\monitoring\Sensor;
 use Drupal\Component\Utility\String;
 use Drupal\monitoring\Result\SensorResultInterface;
 use Drupal;
+use Drupal\monitoring\Sensor\Sensors\SensorDatabaseAggregatorBase;
 
 /**
  * Entity database aggregator.
@@ -24,7 +25,7 @@ use Drupal;
  *
  * The table specified in the sensor info must be the base table of the entity.
  */
-class SensorEntityDatabaseAggregator extends SensorDatabaseAggregatorBase {
+class SensorEntityAggregator extends SensorDatabaseAggregatorBase {
 
   /**
    * Local variable to store the field that is used as aggregate.

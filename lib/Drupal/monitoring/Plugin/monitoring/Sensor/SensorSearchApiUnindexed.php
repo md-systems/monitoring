@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Contains \Drupal\monitoring\Plugin\monitoring\Sensor\SensorSearchApi.
+ * Contains \Drupal\monitoring\Plugin\monitoring\Sensor\SensorSearchApiUnindexed.
  */
 
 namespace Drupal\monitoring\Plugin\monitoring\Sensor;
@@ -24,7 +24,7 @@ use Drupal\monitoring\Sensor\SensorThresholds;
  *
  * @see search_api_index_status()
  */
-class SensorSearchApi extends SensorThresholds {
+class SensorSearchApiUnindexed extends SensorThresholds {
 
   /**
    * {@inheritdoc}

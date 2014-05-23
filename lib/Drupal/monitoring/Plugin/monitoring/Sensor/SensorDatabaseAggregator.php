@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Contains \Drupal\monitoring\Plugin\monitoring\Sensor\SensorSimpleDatabaseAggregator.
+ * Contains \Drupal\monitoring\Plugin\monitoring\Sensor\SensorDatabaseAggregator.
  */
 
 namespace Drupal\monitoring\Plugin\monitoring\Sensor;
@@ -21,7 +21,7 @@ use Drupal\monitoring\Sensor\Sensors\SensorDatabaseAggregatorBase;
  * )
  *
  */
-class SensorSimpleDatabaseAggregator extends SensorDatabaseAggregatorBase {
+class SensorDatabaseAggregator extends SensorDatabaseAggregatorBase {
 
   /**
    * The fetched object from the query result.

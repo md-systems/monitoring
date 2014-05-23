@@ -20,7 +20,7 @@ use Drupal\monitoring\Result\SensorResultInterface;
  *
  * Helps to identify bots or brute force attacks.
  */
-class SensorUserFailedLogins extends SensorSimpleDatabaseAggregator {
+class SensorUserFailedLogins extends SensorDatabaseAggregator {
 
   /**
    * {@inheritdoc}

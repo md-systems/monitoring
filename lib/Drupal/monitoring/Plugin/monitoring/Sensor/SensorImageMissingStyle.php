@@ -20,7 +20,7 @@ use Drupal;
  *
  * Displays image derivate with highest occurrence as message.
  */
-class SensorImageMissingStyle extends SensorSimpleDatabaseAggregator {
+class SensorImageMissingStyle extends SensorDatabaseAggregator {
 
   /**
    * The path of the most failed image.

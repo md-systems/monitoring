@@ -20,7 +20,7 @@ use Drupal\monitoring\Result\SensorResultInterface;
  *
  * Displays URL with highest occurrence as message.
  */
-class SensorDblog404 extends SensorSimpleDatabaseAggregator {
+class SensorDblog404 extends SensorDatabaseAggregator {
 
   /**
    * {@inheritdoc}

@@ -20,7 +20,7 @@ use Drupal\monitoring\Sensor\Sensor;
  * )
  *
  */
-class SensorCommerceTurnover extends SensorEntityDatabaseAggregator {
+class SensorCommerceTurnover extends SensorEntityAggregator {
 
   /**
    * {@inheritdoc}
