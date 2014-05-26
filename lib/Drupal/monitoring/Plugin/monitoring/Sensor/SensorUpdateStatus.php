@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Contains \Drupal\monitoring\Plugin\monitoring\Sensor\SensorDrupalUpdate.
+ * Contains \Drupal\monitoring\Plugin\monitoring\Sensor\SensorUpdateStatus.
  */
 
 namespace Drupal\monitoring\Plugin\monitoring\Sensor;
@@ -20,7 +20,7 @@ use Drupal\monitoring\Sensor\Sensor;
  *
  * Based on drupal core update module.
  */
-class SensorDrupalUpdate extends Sensor {
+class SensorUpdateStatus extends Sensor {
 
   /**
    * {@inheritdoc}

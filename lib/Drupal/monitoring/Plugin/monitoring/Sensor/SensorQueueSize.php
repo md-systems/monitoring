@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Contains \Drupal\monitoring\Plugin\monitoring\Sensor\SensorQueue.
+ * Contains \Drupal\monitoring\Plugin\monitoring\Sensor\SensorQueueSize.
  */
 
 namespace Drupal\monitoring\Plugin\monitoring\Sensor;
@@ -24,7 +24,7 @@ use Drupal;
  *
  * @see \DrupalQueue
  */
-class SensorQueue extends SensorThresholds {
+class SensorQueueSize extends SensorThresholds {
 
   /**
    * {@inheritdoc}
