@@ -22,21 +22,6 @@ use Drupal\Component\Utility\String;
  * - disappearing sensors
  */
 function monitoring_monitoring_sensor_info() {
-  $info['monitoring_git_dirty_tree'] = array(
-    'label' => 'Git dirty working tree',
-    'description' => 'Repository local file changes',
-    'sensor_id' => 'monitoring_git_dirty_tree',
-    'settings' => array(
-      'category' => 'System',
-      // Disabled by default as we cannot know if the sensor is running in a
-      // source base managed by git.
-      'enabled' => FALSE,
-      // Path of the repository relative to the Drupal root. Set to NULL if
-      // the repository root is the same as Drupal root.
-      'repo_path' => NULL,
-      'cmd' => 'git status --porcelain',
-    ),
-  );
   $info['monitoring_disappeared_sensors'] = array(
     'label' => 'Disappeared sensors',
     'description' => 'Keeps track of active sensors and reports if a sensor disappears',
@@ -473,23 +458,6 @@ function monitoring_system_monitoring_sensor_info() {
     'settings' => array(
       'state' => 'system.maintenance_mode',
       'value' => FALSE,
-    ),
-  );
-
-  // === Cron === //
-
-  $info['core_cron_safe_threshold'] = array(
-    'label' => 'Cron safe threshold enabled',
-    'description' => 'Cron safe threshold (Poormanscron) is enabled',
-    'sensor_id' => 'config_value',
-    'numeric' => FALSE,
-    'value_type' => 'bool',
-    'services' => array('config.factory'),
-    'settings' => array(
-      'category' => 'Cron',
-      'config' => 'system.cron',
-      'key' => 'threshold.autorun',
-      'value' => '0',
     ),
   );
 
