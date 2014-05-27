@@ -39,6 +39,13 @@ use Drupal\Core\Config\Entity\ConfigEntityBase;
 class SensorInfo extends ConfigEntityBase {
 
   /**
+   * The config id.
+   *
+   * @var string
+   */
+  protected $id;
+
+  /**
    * The sensor name.
    *
    * @var string
@@ -60,11 +67,18 @@ class SensorInfo extends ConfigEntityBase {
   protected $description;
 
   /**
+   * The sensor category.
+   *
+   * @var string
+   */
+  protected $category;
+
+  /**
    * The sensor id.
    *
    * @var string
    */
-  protected $id;
+  protected $sensor_id;
 
   /**
    * The sensor result class.
@@ -97,16 +111,9 @@ class SensorInfo extends ConfigEntityBase {
   /**
    * The sensor value numeric flag.
    *
-   * @var boolean
+   * @var bool
    */
   protected $numeric;
-
-  /**
-   * The sensor services definition.
-   *
-   * @var array
-   */
-  protected $services = array();
 
   /**
    * The sensor info array.
@@ -149,7 +156,7 @@ class SensorInfo extends ConfigEntityBase {
    *   Sensor class
    */
   public function getSensorClass() {
-    $definition = monitoring_sensor_manager()->getDefinition($this->id);
+    $definition = monitoring_sensor_manager()->getDefinition($this->sensor_id);
     return $definition['class'];
   }
 
@@ -161,7 +168,7 @@ class SensorInfo extends ConfigEntityBase {
    */
   public function getPlugin() {
     $configuration = array('sensor_info' => $this);
-    $sensor = monitoring_sensor_manager()->createInstance($this->id, $configuration);
+    $sensor = monitoring_sensor_manager()->createInstance($this->sensor_id, $configuration);
     return $sensor;
   }
   
@@ -182,7 +189,7 @@ class SensorInfo extends ConfigEntityBase {
    *   Categories.
    */
   public function getCategory() {
-    return $this->settings['category'];
+    return $this->category;
   }
 
   /**
@@ -303,28 +310,6 @@ class SensorInfo extends ConfigEntityBase {
     return $this->getSetting('time_interval_value', NULL);
   }
 
-  /** Gets sensor services definition.
-   *
-   * @return array
-   *   List of service name => service class pairs.
-   */
-  public function getServices() {
-    if ($this->isRequiringServices()) {
-      return $this->services;
-    }
-
-    return array();
-  }
-
-  /**
-   * Checks if sensor requires services.
-   *
-   * @return bool
-   */
-  public function isRequiringServices() {
-    return !empty($this->services);
-  }
-
   /**
    * Gets setting.
    *
@@ -374,6 +359,32 @@ class SensorInfo extends ConfigEntityBase {
    */
   public function isDefiningThresholds() {
     return in_array('Drupal\monitoring\Sensor\SensorThresholdsInterface', class_implements($this->getSensorClass()));
+  }
+
+  /**
+   * Compiles sensor values to an associative array.
+   *
+   * @return array
+   *   Sensor info associative array.
+   */
+  public function getDefinition() {
+    $info_array = array(
+      'sensor' => $this->getName(),
+      'label' => $this->getLabel(),
+      'category' => $this->getCategory(),
+      'description' => $this->getDescription(),
+      'numeric' => $this->isNumeric(),
+      'value_label' => $this->getValueLabel(),
+      'caching_time' => $this->getCachingTime(),
+      'time_interval' => $this->getTimeIntervalValue(),
+      'enabled' => $this->isEnabled(),
+    );
+
+    if ($this->isDefiningThresholds()) {
+      $info_array['thresholds'] = $this->getSetting('thresholds');
+    }
+
+    return $info_array;
   }
 
 }
