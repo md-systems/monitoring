@@ -459,6 +459,7 @@ function monitoring_system_monitoring_sensor_info() {
       'config' => 'system.theme',
       'key' => 'default',
       'value' => 'bartik',
+      'enabled' => FALSE,
     ),
   );
 
