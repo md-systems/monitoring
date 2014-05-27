@@ -14,6 +14,7 @@ use Drupal\monitoring\SensorRunner;
 use Drupal\Core\Plugin\DefaultPluginManager;
 use Drupal\Core\Language\LanguageManager;
 use Drupal\Core\Cache\CacheBackendInterface;
+use Drupal\monitoring\Entity\SensorInfo;
 
 /**
  * Manages sensor definitions and settings.

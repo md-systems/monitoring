@@ -1,17 +1,42 @@
 <?php
 /**
  * @file
- * Contains \Drupal\monitoring\Sensor\SensorInfo.
+ * Contains \Drupal\monitoring\Entity\SensorInfo.
  */
 
-namespace Drupal\monitoring\Sensor;
+namespace Drupal\monitoring\Entity;
+
+use Drupal\Core\Config\Entity\ConfigEntityBase;
 
 /**
- * Represents a sensor info as defined in hook_monitoring_sensor_info().
+ * Represents a sensor info entity class as defined in hook_monitoring_sensor_info().
  *
  * @todo more
+ * @ConfigEntityType(
+ *   id = "sensor",
+ *   label = @Translation("SensorInfo"),
+ *   controllers = {
+ *     "access" = "Drupal\monitoring\SensorAccessController",
+ *     "view_builder" = "Drupal\monitoring\SensorViewBuilder",
+ *     "list_builder" = "Drupal\monitoring\SensorListBuilder",
+ *     "form" = {
+ *       "default" = "Drupal\monitoring\SensorFormController",
+ *       "delete" = "Drupal\monitoring\SensorDeleteForm"
+ *     }
+ *   },
+ *   admin_permission = "administer sensors",
+ *   fieldable = FALSE,
+ *   entity_keys = {
+ *     "id" = "id",
+ *     "label" = "label"
+ *   },
+ *   links = {
+ *     "delete-form" = "sensor.admin_sensor_delete",
+ *     "edit-form" = "sensor.admin_edit"
+ *   }
+ * )
  */
-class SensorInfo {
+class SensorInfo extends ConfigEntityBase {
 
   /**
    * The sensor name.
