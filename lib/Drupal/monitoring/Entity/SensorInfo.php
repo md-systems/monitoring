@@ -9,12 +9,12 @@ namespace Drupal\monitoring\Entity;
 use Drupal\Core\Config\Entity\ConfigEntityBase;
 
 /**
- * Represents a sensor info entity class as defined in hook_monitoring_sensor_info().
+ * Represents a sensor info entity class.
  *
  * @todo more
  * @ConfigEntityType(
- *   id = "sensor",
- *   label = @Translation("SensorInfo"),
+ *   id = "monitoring_sensor",
+ *   label = @Translation("Monitoring Sensor"),
  *   controllers = {
  *     "access" = "Drupal\monitoring\SensorAccessController",
  *     "view_builder" = "Drupal\monitoring\SensorViewBuilder",
@@ -25,7 +25,7 @@ use Drupal\Core\Config\Entity\ConfigEntityBase;
  *     }
  *   },
  *   admin_permission = "administer sensors",
- *   fieldable = FALSE,
+ *   config_prefix = "sensor",
  *   entity_keys = {
  *     "id" = "id",
  *     "label" = "label"
