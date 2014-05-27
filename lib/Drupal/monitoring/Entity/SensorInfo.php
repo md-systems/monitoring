@@ -46,35 +46,74 @@ class SensorInfo extends ConfigEntityBase {
   protected $sensorName;
 
   /**
+   * The sensor label.
+   *
+   * @var string
+   */
+  protected $label;
+
+  /**
+   * The sensor description.
+   *
+   * @var string
+   */
+  protected $description;
+
+  /**
+   * The sensor id.
+   *
+   * @var string
+   */
+  protected $id;
+
+  /**
+   * The sensor result class.
+   *
+   * @var string
+   */
+  protected $result_class;
+
+  /**
+   * The sensor settings.
+   *
+   * @var array
+   */
+  protected $settings = array();
+
+  /**
+   * The sensor value label.
+   *
+   * @var string
+   */
+  protected $value_label;
+
+  /**
+   * The sensor value type.
+   *
+   * @var string
+   */
+  protected $value_type;
+
+  /**
+   * The sensor value numeric flag.
+   *
+   * @var boolean
+   */
+  protected $numeric;
+
+  /**
+   * The sensor services definition.
+   *
+   * @var array
+   */
+  protected $services = array();
+
+  /**
    * The sensor info array.
    *
    * @var array
    */
-  protected $sensorInfo;
 
-  /**
-   * Instantiates sensor info object.
-   *
-   * Note that sensor_info is unchecked and needs to be well defined.
-   *
-   * @see hook_monitoring_sensor_info().
-   *
-   * @param string $sensor_name
-   *   Sensor name.
-   * @param array $sensor_info
-   *   Sensor info.
-   */
-  function __construct($sensor_name, array $sensor_info) {
-    $this->sensorName = $sensor_name;
-    $this->sensorInfo = $sensor_info;
-  }
-
-  /**
-   * Gets sensor name.
-   *
-   * @return string
-   *   Sensor name.
-   */
   public function getName() {
     return $this->sensorName;
   }
@@ -90,7 +129,7 @@ class SensorInfo extends ConfigEntityBase {
    *   Sensor label.
    */
   public function getLabel() {
-    return $this->sensorInfo['label'];
+    return $this->label;
   }
 
   /**
@@ -100,7 +139,7 @@ class SensorInfo extends ConfigEntityBase {
    *   Sensor description.
    */
   public function getDescription() {
-    return $this->sensorInfo['description'];
+    return $this->description;
   }
 
   /**
@@ -110,8 +149,7 @@ class SensorInfo extends ConfigEntityBase {
    *   Sensor class
    */
   public function getSensorClass() {
-    $sensor_id = $this->sensorInfo['sensor_id'];
-    $definition = monitoring_sensor_manager()->getDefinition($sensor_id);
+    $definition = monitoring_sensor_manager()->getDefinition($this->id);
     return $definition['class'];
   }
 
@@ -122,9 +160,8 @@ class SensorInfo extends ConfigEntityBase {
    *   Instantiated sensor.
    */
   public function getPlugin() {
-    $sensor_id = $this->sensorInfo['sensor_id'];
     $configuration = array('sensor_info' => $this);
-    $sensor = monitoring_sensor_manager()->createInstance($sensor_id, $configuration);
+    $sensor = monitoring_sensor_manager()->createInstance($this->id, $configuration);
     return $sensor;
   }
   
@@ -135,7 +172,7 @@ class SensorInfo extends ConfigEntityBase {
    *   Result class.
    */
   public function getResultClass() {
-    return $this->sensorInfo['result_class'];
+    return $this->result_class;
   }
 
   /**
@@ -145,7 +182,7 @@ class SensorInfo extends ConfigEntityBase {
    *   Categories.
    */
   public function getCategory() {
-    return $this->getSetting('category');
+    return $this->settings['category'];
   }
 
   /**
@@ -162,10 +199,10 @@ class SensorInfo extends ConfigEntityBase {
    *   Sensor value label.
    */
   public function getValueLabel() {
-    if (isset($this->sensorInfo['value_label'])) {
-      return $this->sensorInfo['value_label'];
+    if ($this->value_label) {
+      return $this->value_label;
     }
-    if ($value_type = $this->getValueType()) {
+    if ($this->value_type) {
       $value_types = monitoring_value_types();
       return $value_types[$value_type]['label'];
     }
@@ -180,7 +217,7 @@ class SensorInfo extends ConfigEntityBase {
    * @see monitoring_value_types().
    */
   public function getValueType() {
-    return isset($this->sensorInfo['value_type']) ? $this->sensorInfo['value_type'] : NULL;
+    return $this->value_type;
   }
 
   /**
@@ -190,7 +227,7 @@ class SensorInfo extends ConfigEntityBase {
    *   TRUE if the sensor value is numeric.
    */
   public function isNumeric() {
-    return isset($this->sensorInfo['numeric']) ? $this->sensorInfo['numeric'] : TRUE;
+    return ($this->numeric != NULL) ? $this->numeric : TRUE;
   }
 
   /**
@@ -210,7 +247,7 @@ class SensorInfo extends ConfigEntityBase {
    *   Caching time in seconds.
    */
   public function getCachingTime() {
-    return $this->getSetting('caching_time');
+    return $this->settings['caching_time'];
   }
 
   /**
@@ -220,7 +257,7 @@ class SensorInfo extends ConfigEntityBase {
    *   Threshold type.
    */
   public function getThresholdsType() {
-    $thresholds = $this->getSetting('thresholds');
+    $thresholds = $this->settings['thresholds'];
     if (!empty($thresholds['type'])) {
       return $thresholds['type'];
     }
@@ -239,7 +276,7 @@ class SensorInfo extends ConfigEntityBase {
    *   The threshold value or NULL if not-configured.
    */
   public function getThresholdValue($key) {
-    $thresholds = $this->getSetting('thresholds');
+    $thresholds = $this->settings['thresholds'];
     if (isset($thresholds[$key]) && $thresholds[$key] !== '') {
       return $thresholds[$key];
     }
@@ -252,7 +289,7 @@ class SensorInfo extends ConfigEntityBase {
    *   Settings as an array.
    */
   public function getSettings() {
-    return $this->sensorInfo['settings'];
+    return $this->settings;
   }
 
   /**
@@ -273,7 +310,7 @@ class SensorInfo extends ConfigEntityBase {
    */
   public function getServices() {
     if ($this->isRequiringServices()) {
-      return $this->sensorInfo['services'];
+      return $this->services;
     }
 
     return array();
@@ -285,7 +322,7 @@ class SensorInfo extends ConfigEntityBase {
    * @return bool
    */
   public function isRequiringServices() {
-    return !empty($this->sensorInfo['services']);
+    return !empty($this->services);
   }
 
   /**
@@ -300,7 +337,7 @@ class SensorInfo extends ConfigEntityBase {
    *   Setting value.
    */
   public function getSetting($key, $default = NULL) {
-    return isset($this->sensorInfo['settings'][$key]) ? $this->sensorInfo['settings'][$key] : $default;
+    return isset($this->settings[$key]) ? $this->settings[$key] : $default;
   }
 
   /**
@@ -309,7 +346,7 @@ class SensorInfo extends ConfigEntityBase {
    * @return bool
    */
   public function isEnabled() {
-    return (boolean) $this->getSetting('enabled');
+    return (boolean) $this->settings['enabled'];
   }
 
   /**
@@ -337,32 +374,6 @@ class SensorInfo extends ConfigEntityBase {
    */
   public function isDefiningThresholds() {
     return in_array('Drupal\monitoring\Sensor\SensorThresholdsInterface', class_implements($this->getSensorClass()));
-  }
-
-  /**
-   * Compiles sensor info values to an associative array.
-   *
-   * @return array
-   *   Sensor info associative array.
-   */
-  public function toArray() {
-    $info_array = array(
-      'sensor' => $this->getName(),
-      'label' => $this->getLabel(),
-      'category' => $this->getCategory(),
-      'description' => $this->getDescription(),
-      'numeric' => $this->isNumeric(),
-      'value_label' => $this->getValueLabel(),
-      'caching_time' => $this->getCachingTime(),
-      'time_interval' => $this->getTimeIntervalValue(),
-      'enabled' => $this->isEnabled(),
-    );
-
-    if ($this->isDefiningThresholds()) {
-      $info_array['thresholds'] = $this->getSetting('thresholds');
-    }
-
-    return $info_array;
   }
 
 }
