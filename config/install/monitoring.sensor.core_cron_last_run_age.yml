@@ -7,6 +7,5 @@ settings:
   category: 'Cron'
   thresholds:
     type: 'exceeds'
-    warning: 60 * 60 * 24
-    critical: 60 * 60 * 24 * 3
-
+    warning: 86400
+    critical: 259200

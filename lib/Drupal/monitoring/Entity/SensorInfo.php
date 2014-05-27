@@ -43,86 +43,79 @@ class SensorInfo extends ConfigEntityBase {
    *
    * @var string
    */
-  protected $id;
-
-  /**
-   * The sensor name.
-   *
-   * @var string
-   */
-  protected $sensorName;
+  public $id;
 
   /**
    * The sensor label.
    *
    * @var string
    */
-  protected $label;
+  public $label;
 
   /**
    * The sensor description.
    *
    * @var string
    */
-  protected $description;
+  public $description;
 
   /**
    * The sensor category.
    *
    * @var string
    */
-  protected $category;
+  public $category;
 
   /**
    * The sensor id.
    *
    * @var string
    */
-  protected $sensor_id;
+  public $sensor_id;
 
   /**
    * The sensor result class.
    *
    * @var string
    */
-  protected $result_class;
+  public $result_class;
 
   /**
    * The sensor settings.
    *
    * @var array
    */
-  protected $settings = array();
+  public $settings = array();
 
   /**
    * The sensor value label.
    *
    * @var string
    */
-  protected $value_label;
+  public $value_label;
 
   /**
    * The sensor value type.
    *
    * @var string
    */
-  protected $value_type;
+  public $value_type;
 
   /**
    * The sensor value numeric flag.
    *
    * @var bool
    */
-  protected $numeric;
+  public $numeric;
 
   /**
-   * The sensor info array.
+   * The sensor id.
    *
-   * @var array
+   * @var string
    */
 
   public function getName() {
-    return $this->sensorName;
+    return $this->sensor_id;
   }
 
   /**
@@ -211,7 +204,7 @@ class SensorInfo extends ConfigEntityBase {
     }
     if ($this->value_type) {
       $value_types = monitoring_value_types();
-      return $value_types[$value_type]['label'];
+      return $value_types[$this->value_type]['label'];
     }
   }
 
@@ -369,7 +362,6 @@ class SensorInfo extends ConfigEntityBase {
    */
   public function getDefinition() {
     $info_array = array(
-      'sensor' => $this->getName(),
       'label' => $this->getLabel(),
       'category' => $this->getCategory(),
       'description' => $this->getDescription(),
