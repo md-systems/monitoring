@@ -478,21 +478,6 @@ function monitoring_system_monitoring_sensor_info() {
 
   // === Cron === //
 
-  $info['core_cron_last_run_age'] = array(
-    'label' => 'Last cron run age',
-    'description' => 'Time since last cron run',
-    'sensor_id' => 'cron_last_run_time',
-    'value_type' => 'time_interval',
-    'settings' => array(
-      'category' => 'Cron',
-      'thresholds' => array(
-        'type' => 'exceeds',
-        'warning' => 60 * 60 * 24,
-        'critical' => 60 * 60 * 24 * 3,
-      ),
-    ),
-  );
-
   $info['core_cron_safe_threshold'] = array(
     'label' => 'Cron safe threshold enabled',
     'description' => 'Cron safe threshold (Poormanscron) is enabled',
