@@ -6,6 +6,7 @@
 
 use Drupal\Component\Utility\String;
 use Drupal\monitoring\Entity\SensorInfo;
+use Drupal\node\Entity\NodeType;
 
 /**
  * Implements hook_schema().
@@ -83,29 +84,28 @@ function monitoring_schema() {
  * Declares initial set of node sensors.
  */
 function monitoring_install() {
-  foreach (node_type_get_types() as $node_type) {
-    $node = SensorInfo::create(array(
-              'id' => 'node_new_' . $node_type->type,
-              'label' => String::format('New @type nodes', array('@type' => $node_type->name)),
-              'description' => String::format('New nodes of type @type', array('@type' => $node_type->name)),
-              'sensor_id' => 'database_aggregator',
-              'value_label' => String::format('@type nodes', array('@type' => $node_type->name)),
-              'category' => 'Content',
-              'settings' => array(
-                'enabled' => FALSE,
-                'caching_time' => 600,
-                'thresholds' => array(
-                  'type' => 'falls',
-                ),
-                'table' => 'node_field_data',
-                'conditions' => array(
-                  array('field' => 'type', 'value' => $node_type->type),
-                ),
-                'time_interval_field' => 'created',
-                'time_interval_value' => 60 * 60 * 24,
-              ),
-            )
-    );
-    $node->save();
+  foreach (NodeType::loadMultiple() as $node_type) {
+    $sensor = SensorInfo::create(array(
+      'id' => 'node_new_' . $node_type->type,
+      'label' => String::format('New @type nodes', array('@type' => $node_type->name)),
+      'description' => String::format('New nodes of type @type', array('@type' => $node_type->name)),
+      'sensor_id' => 'database_aggregator',
+      'value_label' => String::format('@type nodes', array('@type' => $node_type->name)),
+      'category' => 'Content',
+      'settings' => array(
+        'enabled' => FALSE,
+        'caching_time' => 600,
+        'thresholds' => array(
+          'type' => 'falls',
+        ),
+        'table' => 'node_field_data',
+        'conditions' => array(
+          array('field' => 'type', 'value' => $node_type->type),
+        ),
+        'time_interval_field' => 'created',
+        'time_interval_value' => 60 * 60 * 24,
+      ),
+    ));
+    $sensor->save();
   }
 }

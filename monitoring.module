@@ -549,29 +549,28 @@ function monitoring_sensor_thresholds_ajax($form, &$form_state) {
  * Inserts new node sensor config entities on creation of new node types.
  */
 function monitoring_node_type_insert($info) {
-  $node = SensorInfo::create(array(
-            'id' => 'node_new_' . $info->type,
-            'label' => String::format('New @type nodes', array('@type' => $info->name)),
-            'description' => String::format('New nodes of type @type', array('@type' => $info->name)),
-            'sensor_id' => 'database_aggregator',
-            'value_label' => String::format('@type nodes', array('@type' => $info->name)),
-            'category' => 'Content',
-            'settings' => array(
-              'enabled' => FALSE,
-              'caching_time' => 600,
-              'thresholds' => array(
-                'type' => 'falls',
-              ),
-              'table' => 'node_field_data',
-              'conditions' => array(
-                array('field' => 'type', 'value' => $info->type),
-              ),
-              'time_interval_field' => 'created',
-              'time_interval_value' => 60 * 60 * 24,
-            ),
-          )
-  );
-  $node->save();
+  $sensor = SensorInfo::create(array(
+    'id' => 'node_new_' . $info->type,
+    'label' => String::format('New @type nodes', array('@type' => $info->name)),
+    'description' => String::format('New nodes of type @type', array('@type' => $info->name)),
+    'sensor_id' => 'database_aggregator',
+    'value_label' => String::format('@type nodes', array('@type' => $info->name)),
+    'category' => 'Content',
+    'settings' => array(
+      'enabled' => FALSE,
+      'caching_time' => 600,
+      'thresholds' => array(
+        'type' => 'falls',
+      ),
+      'table' => 'node_field_data',
+      'conditions' => array(
+        array('field' => 'type', 'value' => $info->type),
+      ),
+      'time_interval_field' => 'created',
+      'time_interval_value' => 60 * 60 * 24,
+    ),
+  ));
+  $sensor->save();
 }
 
 /*
@@ -593,28 +592,10 @@ function monitoring_node_type_delete($info) {
 function monitoring_node_type_update($info) {
   $config_id = 'node_new_' . $info->type;
   $sensor = SensorInfo::load($config_id);
-  $sensor->delete();
-  $node = SensorInfo::create(array(
-            'id' => 'node_new_' . $info->type,
-            'label' => String::format('New @type nodes', array('@type' => $info->name)),
-            'description' => String::format('New nodes of type @type', array('@type' => $info->name)),
-            'sensor_id' => 'database_aggregator',
-            'value_label' => String::format('@type nodes', array('@type' => $info->name)),
-            'category' => 'Content',
-            'settings' => array(
-              'enabled' => FALSE,
-              'caching_time' => 600,
-              'thresholds' => array(
-                'type' => 'falls',
-              ),
-              'table' => 'node_field_data',
-              'conditions' => array(
-                array('field' => 'type', 'value' => $info->type),
-              ),
-              'time_interval_field' => 'created',
-              'time_interval_value' => 60 * 60 * 24,
-            ),
-          )
-  );
-  $node->save();
+  $sensor->id = 'node_new_' . $info->type;
+  $sensor->label = String::format('New @type nodes', array('@type' => $info->name));
+  $sensor->description = String::format('New nodes of type @type', array('@type' => $info->name));
+  $sensor->value_label = String::format('@type nodes', array('@type' => $info->name));
+  $sensor->settings->conditions->value = $info->type;
+  $sensor->save();
 }
