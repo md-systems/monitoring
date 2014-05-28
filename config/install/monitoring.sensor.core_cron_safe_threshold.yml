@@ -4,8 +4,8 @@ description: 'Cron safe threshold (Poormanscron) is enabled'
 sensor_id: 'config_value'
 numeric: FALSE
 value_type: 'bool'
+category: 'Cron'
 settings:
-  category: 'Cron'
   config: 'system.cron'
   key: 'threshold.autorun'
   value: '0'

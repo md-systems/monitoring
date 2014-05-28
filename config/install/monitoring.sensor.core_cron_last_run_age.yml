@@ -3,8 +3,8 @@ label: 'Last cron run age'
 description: 'Time since last cron run'
 sensor_id: 'cron_last_run_time'
 value_type: 'time_interval'
+category: 'Cron'
 settings:
-  category: 'Cron'
   thresholds:
     type: 'exceeds'
     warning: 86400
