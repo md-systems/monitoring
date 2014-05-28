@@ -87,11 +87,8 @@ class SensorManager extends DefaultPluginManager {
    *   List of SensorInfo instances.
    */
   public function getSensorInfo() {
-    if (empty($this->info)) {
-      $this->info = $this->loadSensorInfo();
-    }
-
-    return $this->info;
+    $sensors = SensorInfo::loadMultiple();
+    return $sensors;
   }
 
   /**
@@ -259,82 +256,6 @@ class SensorManager extends DefaultPluginManager {
     }
     // In the end, the label's order is determined.
     return ($a->getLabel() < $b->getLabel()) ? -1 : 1;
-  }
-
-  /**
-   * Loads sensor info from hooks.
-   *
-   * Instantiates a SensorInfo for each sensor with merged settings.
-   * Creates also instances for disabled sensors.
-   *
-   * @return \Drupal\monitoring\Sensor\SensorInfo[]
-   *   List of SensorInfo instances.
-   *
-   * @see hook_monitoring_sensor_info()
-   * @see hook_monitoring_sensor_info_alter()
-   */
-  protected function loadSensorInfo() {
-    $info = array();
-    // A module might provide a separate file with sensor definitions. Try to
-    // include it prior to checking if a hook exists.
-    // @todo: Use hook_hook_info().
-    foreach (array_keys($this->moduleHandler->getModuleList()) as $module) {
-      $sensors_file = drupal_get_path('module', $module) . '/' . $module . '.monitoring_sensors.inc';
-      if (file_exists($sensors_file)) {
-        require_once $sensors_file;
-      }
-    }
-
-    // Collect sensors info.
-    $custom_implementations = $this->moduleHandler->getImplementations('monitoring_sensor_info');
-    foreach (array_keys($this->moduleHandler->getModuleList()) as $module) {
-      // Favor custom implementation.
-      if (in_array($module, $custom_implementations)) {
-        $result = $this->moduleHandler->invoke($module, 'monitoring_sensor_info');
-        $info = NestedArray::mergeDeep($info, $result);
-      }
-      // If there is no custom implementation try to find local integration.
-      elseif (function_exists('monitoring_' . $module . '_monitoring_sensor_info')) {
-        $function = 'monitoring_' . $module . '_monitoring_sensor_info';
-        $result = $function();
-        if (is_array($result)) {
-          $info = NestedArray::mergeDeep($info, $result);
-        }
-      }
-    }
-
-    // Allow to alter the collected sensors info.
-    $this->moduleHandler->alter('monitoring_sensor_info', $info);
-
-    // Merge in saved sensor settings.
-    foreach ($info as $key => &$value) {
-      // Set default values.
-      $value += array(
-        'description' => '',
-        'result_class' => 'Drupal\monitoring\Result\SensorResult',
-        'numeric' => TRUE,
-        'value_label' => NULL,
-        'settings' => array(),
-      );
-      $value['settings'] += array(
-        'enabled' => TRUE,
-        'caching_time' => 0,
-        'category' => 'Other',
-      );
-      $value['settings'] = $this->mergeSettings($key, $value['settings']);
-    }
-
-    $info = NestedArray::mergeDeep($info, (array)$this->config->get('monitoring.sensor_info')->get());
-
-    // Convert the arrays into SensorInfo objects.
-    foreach ($info as $sensor_name => $sensor_info) {
-      $info[$sensor_name] = new SensorInfo($sensor_name, $sensor_info);
-    }
-
-    // Sort the sensors by category and label.
-    uasort($info, "\Drupal\monitoring\Sensor\SensorManager::orderSensorInfo");
-
-    return $info;
   }
 
   /**
