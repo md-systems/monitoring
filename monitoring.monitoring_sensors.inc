@@ -37,58 +37,6 @@ function monitoring_monitoring_sensor_info() {
 /**
  * Implements monitoring_MODULE_monitoring_sensor_info().
  *
- * Module: node
- */
-function monitoring_node_monitoring_sensor_info() {
-  $info = array();
-
-  $info['node_new_all'] = array(
-    'label' => 'All new nodes',
-    'description' => 'All new nodes',
-    'sensor_id' => 'database_aggregator',
-    'value_label' => 'Nodes',
-    'services' => array('database'),
-    'settings' => array(
-      'category' => 'Content',
-      'enabled' => FALSE,
-      // Cache for one hour.
-      'caching_time' => 3600,
-      'table' => 'node_field_data',
-      'time_interval_field' => 'created',
-      'time_interval_value' => 60 * 60 * 24,
-    ),
-  );
-
-  foreach (node_type_get_types() as $node_type) {
-    $info['node_new_' . $node_type->type] = array(
-      'label' => String::format('New @type nodes', array('@type' => $node_type->name)),
-      'description' => String::format('New nodes of type @type', array('@type' => $node_type->name)),
-      'sensor_id' => 'database_aggregator',
-      'value_label' => String::format('@type nodes', array('@type' => $node_type->name)),
-      'settings' => array(
-        'category' => 'Content',
-        'enabled' => FALSE,
-        // Cache for 10 minutes.
-        'caching_time' => 600,
-        'thresholds' => array(
-          'type' => 'falls',
-        ),
-        'table' => 'node_field_data',
-        'conditions' => array(
-          array('field' => 'type', 'value' => $node_type->type),
-        ),
-        'time_interval_field' => 'created',
-        'time_interval_value' => 60 * 60 * 24,
-      ),
-    );
-  }
-
-  return $info;
-}
-
-/**
- * Implements monitoring_MODULE_monitoring_sensor_info().
- *
  * Module: comment
  */
 function monitoring_comment_monitoring_sensor_info() {
