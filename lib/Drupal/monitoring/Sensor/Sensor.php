@@ -6,6 +6,8 @@
 
 namespace Drupal\monitoring\Sensor;
 
+use Drupal\monitoring\Entity\SensorInfo;
+
 /**
  * Abstract SensorInterface implementation with common behaviour and will be extended by
  * sensor plugins.

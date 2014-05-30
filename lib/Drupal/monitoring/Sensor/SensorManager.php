@@ -65,7 +65,7 @@ class SensorManager extends DefaultPluginManager {
     $this->setCacheBackend($cache_backend, $language_manager, 'monitoring_sensor_plugins');
     $this->config = $config;
   }
-  
+
   /**
    * {@inheritdoc}
    */
@@ -79,7 +79,7 @@ class SensorManager extends DefaultPluginManager {
     // Creating instance of the sensor. Refer Sensor.php for arguments.
     return new $class($sensor_info, $plugin_id, $definition);
   }
-  
+
   /**
    * Returns monitoring sensor info.
    *
@@ -88,6 +88,16 @@ class SensorManager extends DefaultPluginManager {
    */
   public function getSensorInfo() {
     $sensors = SensorInfo::loadMultiple();
+    $this->moduleHandler->alter('monitoring_sensor_info', $sensors);
+    foreach ($sensors as $key => &$value) {
+      // Set default values.
+      $value->settings += array(
+        'enabled' => TRUE,
+        'caching_time' => 0,
+      );
+      $value->settings = $this->mergeSettings($key, $value->settings);
+    }
+    // Convert the arrays into SensorInfo objects.
     return $sensors;
   }
 
@@ -270,7 +280,7 @@ class SensorManager extends DefaultPluginManager {
    *   Merged settings.
    */
   protected function mergeSettings($sensor_name, array $default_settings) {
-    $saved_settings = (array)$this->config->get('monitoring.settings')->get($sensor_name);
+    $saved_settings = SensorInfo::load($sensor_name)->getSettings();
     return $this->mergeSettingsArrays(array($default_settings, $saved_settings));
   }
 
