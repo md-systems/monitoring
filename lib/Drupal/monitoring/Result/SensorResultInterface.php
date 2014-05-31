@@ -6,7 +6,7 @@
 
 namespace Drupal\monitoring\Result;
 
-use Drupal\monitoring\Sensor\SensorInfo;
+use Drupal\monitoring\Entity\SensorInfo;
 
 /**
  * Interface for a sensor result.

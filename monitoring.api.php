@@ -93,12 +93,12 @@ function hook_monitoring_sensor_info() {
  *
  * @param array $links
  *   Links to be altered.
- * @param \Drupal\monitoring\Sensor\SensorInfo $sensor_info
+ * @param \Drupal\monitoring\Entity\SensorInfo $sensor_info
  *   Sensor info object of a sensor for which links are being altered.
  *
  * @see monitoring_reports_sensors_overview()
  */
-function hook_monitoring_sensor_links_alter(&$links, \Drupal\monitoring\Sensor\SensorInfo $sensor_info) {
+function hook_monitoring_sensor_links_alter(&$links, \Drupal\monitoring\Entity\SensorInfo $sensor_info) {
 
 }
 

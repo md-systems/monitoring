@@ -7,7 +7,7 @@
 namespace Drupal\monitoring\Form;
 
 use Drupal\Core\Form\FormBase;
-use Drupal\monitoring\Sensor\SensorInfo;
+use Drupal\monitoring\Entity\SensorInfo;
 use Drupal\monitoring\Sensor\SensorManager;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 

@@ -12,7 +12,7 @@ use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\monitoring\Result\SensorResultInterface;
 use Drupal\monitoring\Sensor\DisabledSensorException;
-use Drupal\monitoring\Sensor\SensorInfo;
+use Drupal\monitoring\Entity\SensorInfo;
 use Drupal;
 use Drupal\monitoring\Sensor\SensorManager;
 
@@ -40,7 +40,7 @@ class SensorRunner {
   /**
    * List of sensors info keyed by sensor name that are meant to run.
    *
-   * @var \Drupal\monitoring\Sensor\SensorInfo[]
+   * @var \Drupal\monitoring\Entity\SensorInfo[]
    */
   protected $sensorInfo = array();
 
@@ -84,7 +84,7 @@ class SensorRunner {
   /**
    * Loads available sensor results from cache.
    *
-   * @param \Drupal\monitoring\Sensor\SensorInfo[] $sensors_info
+   * @param \Drupal\monitoring\Entity\SensorInfo[] $sensors_info
    *   List of sensor info object that we want to run.
    */
   protected function loadCache(array $sensors_info) {
@@ -105,7 +105,7 @@ class SensorRunner {
   /**
    * Runs the defined sensableors.
    *
-   * @param \Drupal\monitoring\Sensor\SensorInfo[] $sensors_info
+   * @param \Drupal\monitoring\Entity\SensorInfo[] $sensors_info
    *   List of sensor info object that we want to run.
    * @param bool $force
    *   Force sensor execution.

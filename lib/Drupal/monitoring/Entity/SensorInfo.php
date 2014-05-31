@@ -115,7 +115,7 @@ class SensorInfo extends ConfigEntityBase {
    */
 
   public function getName() {
-    return $this->sensor_id;
+    return $this->id;
   }
 
   /**

@@ -69,7 +69,7 @@ class SensorDisappearedSensors extends SensorConfigurable {
    *
    * @param array $available_sensors
    *   The available sensors list.
-   * @param \Drupal\monitoring\Sensor\SensorInfo[] $sensor_info
+   * @param \Drupal\monitoring\Entity\SensorInfo[] $sensor_info
    *   The current sensor info.
    *
    * @return array
@@ -112,7 +112,7 @@ class SensorDisappearedSensors extends SensorConfigurable {
    *   The current sensor result object.
    * @param array $available_sensors
    *   The available sensors list.
-   * @param \Drupal\monitoring\Sensor\SensorInfo[] $sensor_info
+   * @param \Drupal\monitoring\Entity\SensorInfo[] $sensor_info
    *   The current sensor info.
    */
   protected function checkForMissingSensors(SensorResultInterface $result, $available_sensors, $sensor_info) {

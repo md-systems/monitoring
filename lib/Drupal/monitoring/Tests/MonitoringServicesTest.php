@@ -7,7 +7,7 @@
 namespace Drupal\monitoring\Tests;
 
 use Drupal\Component\Utility\Json;
-use Drupal\monitoring\Sensor\SensorInfo;
+use Drupal\monitoring\Entity\SensorInfo;
 use Drupal\rest\Tests\RESTTestBase;
 
 /**
@@ -170,7 +170,7 @@ class MonitoringServicesTest extends RESTTestBase {
    *
    * @param array $response_result
    *   Result received via response.
-   * @param \Drupal\monitoring\Sensor\SensorInfo $sensor_info
+   * @param \Drupal\monitoring\Entity\SensorInfo $sensor_info
    *   Sensor info for which we have the result.
    */
   protected function assertSensorResult($response_result, SensorInfo $sensor_info) {

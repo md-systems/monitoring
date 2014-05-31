@@ -29,7 +29,7 @@ function monitoring_sensor_manager() {
 /**
  * Returns monitoring sensor info.
  *
- * @return \Drupal\monitoring\Sensor\SensorInfo[]
+ * @return \Drupal\monitoring\Entity\SensorInfo[]
  *   List of SensorInfo instances.
  *
  * @throws \Drupal\monitoring\Sensor\NonExistingSensorException
@@ -47,7 +47,7 @@ function monitoring_sensor_info() {
  * @param bool $enabled
  *   Sensor isEnabled flag.
  *
- * @return \Drupal\monitoring\Sensor\SensorInfo[]
+ * @return \Drupal\monitoring\Entity\SensorInfo[]
  *   Sensor info.
  */
 function monitoring_sensor_info_by_categories($enabled = TRUE) {
@@ -175,7 +175,7 @@ function monitoring_preprocess_views_view_table(&$vars) {
  *
  * @param string $action
  *   View/page action.
- * @param \Drupal\monitoring\Sensor\SensorInfo $sensor_info
+ * @param \Drupal\monitoring\Entity\SensorInfo $sensor_info
  *   Sensor info.
  *
  * @return string

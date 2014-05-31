@@ -31,7 +31,7 @@ class SensorManager extends DefaultPluginManager {
   /**
    * List of sensor definitions.
    *
-   * @var \Drupal\monitoring\Sensor\SensorInfo[]
+   * @var \Drupal\monitoring\Entity\SensorInfo[]
    */
   protected $info;
 
@@ -83,28 +83,23 @@ class SensorManager extends DefaultPluginManager {
   /**
    * Returns monitoring sensor info.
    *
-   * @return \Drupal\monitoring\Sensor\SensorInfo[]
+   * @return \Drupal\monitoring\Entity\SensorInfo[]
    *   List of SensorInfo instances.
    */
   public function getSensorInfo() {
     $sensors = SensorInfo::loadMultiple();
     $this->moduleHandler->alter('monitoring_sensor_info', $sensors);
-    foreach ($sensors as $key => &$value) {
-      // Set default values.
-      $value->settings += array(
-        'enabled' => TRUE,
-        'caching_time' => 0,
-      );
-      $value->settings = $this->mergeSettings($key, $value->settings);
-    }
-    // Convert the arrays into SensorInfo objects.
+
+    // Sort the sensors by category and label.
+    uasort($sensors, "\Drupal\monitoring\Sensor\SensorManager::orderSensorInfo");
+
     return $sensors;
   }
 
   /**
    * Returns monitoring sensor info for enabled sensors.
    *
-   * @return \Drupal\monitoring\Sensor\SensorInfo[]
+   * @return \Drupal\monitoring\Entity\SensorInfo[]
    *   List of SensorInfo instances.
    */
   public function getEnabledSensorInfo() {
@@ -123,7 +118,7 @@ class SensorManager extends DefaultPluginManager {
    * @param string $sensor_name
    *   Sensor id.
    *
-   * @return \Drupal\monitoring\Sensor\SensorInfo
+   * @return \Drupal\monitoring\Entity\SensorInfo
    *   A single SensorInfo instance.
    *
    * @throws \Drupal\monitoring\Sensor\NonExistingSensorException
@@ -145,7 +140,7 @@ class SensorManager extends DefaultPluginManager {
    * @param bool $enabled
    *   Sensor isEnabled flag.
    *
-   * @return \Drupal\monitoring\Sensor\SensorInfo[]
+   * @return \Drupal\monitoring\Entity\SensorInfo[]
    *   Sensor info.
    */
   public function getSensorInfoByCategories($enabled = TRUE) {
@@ -177,17 +172,9 @@ class SensorManager extends DefaultPluginManager {
    *   Settings that should be saved.
    */
   public function saveSettings($sensor_name, array $settings) {
-    $config = $this->config->get('monitoring.settings');
-    $saved_settings = (array) $config->get($sensor_name);
-    foreach ($settings as $key => $value) {
-      $saved_settings[$key] = $value;
-    }
-
-    $config->set($sensor_name, $saved_settings)->save();
-    // After settings save reset the cache.
-    $this->resetCache();
-    // Changed settings might affect the sensor result.
-    \Drupal::service('monitoring.sensor_runner')->resetCache(array($sensor_name));
+    $sensor = SensorInfo::load($sensor_name);
+    $sensor->settings = $settings;
+    $sensor->save();
   }
 
   /**
@@ -246,10 +233,10 @@ class SensorManager extends DefaultPluginManager {
   /**
    * Callback for uasort() to order sensors by category and label.
    *
-   * @param \Drupal\monitoring\Sensor\SensorInfo $a
+   * @param \Drupal\monitoring\Entity\SensorInfo $a
    *   1st Object to compare with.
    *
-   * @param \Drupal\monitoring\Sensor\SensorInfo $b
+   * @param \Drupal\monitoring\Entity\SensorInfo $b
    *   2nd Object to compare with.
    *
    * @return int
@@ -266,66 +253,6 @@ class SensorManager extends DefaultPluginManager {
     }
     // In the end, the label's order is determined.
     return ($a->getLabel() < $b->getLabel()) ? -1 : 1;
-  }
-
-  /**
-   * Merges provided sensor settings with saved settings.
-   *
-   * @param string $sensor_name
-   *   Sensor name.
-   * @param array $default_settings
-   *   Default sensor settings.
-   *
-   * @return array
-   *   Merged settings.
-   */
-  protected function mergeSettings($sensor_name, array $default_settings) {
-    $saved_settings = SensorInfo::load($sensor_name)->getSettings();
-    return $this->mergeSettingsArrays(array($default_settings, $saved_settings));
-  }
-
-  /**
-   * Merges settings arrays.
-   *
-   * Based on drupal_array_merge_deep_array() but with the additional special
-   * case that flat arrays (arrays that don't have other arrays as values)
-   * are replaced, not merged.
-   *
-   * That allows to expose settings forms for multiple values that can override
-   * the default configuration.
-   *
-   * @param $arrays
-   *   List of arrays to merge, later arrays replace keys in the previous.
-   *
-   * @return array
-   *   The merged array.
-   */
-  protected function mergeSettingsArrays($arrays) {
-    $result = array();
-
-    foreach ($arrays as $array) {
-      foreach ($array as $key => $value) {
-        // Renumber integer keys as array_merge_recursive() does. Note that PHP
-        // automatically converts array keys that are integer strings (e.g., '1')
-        // to integers.
-        if (is_integer($key)) {
-          $result[] = $value;
-        }
-        // Check if we have an array and the first array is flat.
-        elseif (isset($result[$key]) && is_array($result[$key]) && is_array($value) && $this->isFlatArray($result[$key]))  {
-          $result[$key] = $value;
-        }
-        // Recurse when both values are arrays.
-        elseif (isset($result[$key]) && is_array($result[$key]) && is_array($value)) {
-          $result[$key] = $this->mergeSettingsArrays(array($result[$key], $value));
-        }
-        // Otherwise, use the latter value, overriding any previous value.
-        else {
-          $result[$key] = $value;
-        }
-      }
-    }
-    return $result;
   }
 
   /**

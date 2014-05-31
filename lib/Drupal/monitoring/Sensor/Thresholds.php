@@ -8,6 +8,7 @@ namespace Drupal\monitoring\Sensor;
 
 use Drupal\Component\Utility\String;
 use Drupal\monitoring\Result\SensorResultInterface;
+use Drupal\monitoring\Entity\SensorInfo;
 
 /**
  * Determine status based on thresholds during sensor run.
@@ -19,7 +20,7 @@ class Thresholds {
   /**
    * The SensorInfo instance.
    *
-   * @var \Drupal\monitoring\Sensor\SensorInfo
+   * @var \Drupal\monitoring\Entity\SensorInfo
    */
   protected $sensorInfo;
 
@@ -33,7 +34,7 @@ class Thresholds {
   /**
    * Constructs a Thresholds object.
    *
-   * @param \Drupal\monitoring\Sensor\SensorInfo $sensor_info
+   * @param \Drupal\monitoring\Entity\SensorInfo $sensor_info
    *   The SensorInfo instance.
    */
   function __construct(SensorInfo $sensor_info) {
