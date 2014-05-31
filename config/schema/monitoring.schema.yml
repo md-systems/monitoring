@@ -1,0 +1,60 @@
+#Schema for the configuration of the monitoring module.
+
+monitoring.sensor.*:
+  type: mapping
+  label: 'Monitoring Sensor'
+  mapping:
+    id:
+      type: string
+      label: 'Machine-readable name'
+    label:
+      type: string
+      label: 'Sensor Label'
+    description:
+      type: string
+      label: 'Description'
+    category:
+      type: string
+      label: 'Category'
+    sensor_id:
+      type: string
+      label: 'Sensor ID'
+    result_class:
+      type: strin
+      label: 'Result Class'
+    value_label:
+      type: string
+      label: 'Value Label'
+    value_type:
+      type: string
+      label: 'Value Type'
+    numeric:
+      type: boolean
+      label: 'Value Numeric Flag'
+    settings:
+      type: mapping
+      label: 'Settings'
+      mapping:
+        node:
+          type: monitoring.settings.sensor
+
+monitoring.settings.sensor:
+  type: mapping
+  label: 'Sensor settings'
+  mapping:
+    caching_time:
+      type: integer
+      label: 'Sensor Caching Time'
+    thresholds:
+      type: mapping
+      label: 'Threshold'
+      mapping:
+        type:
+          type: string
+          label: 'Threshold Type'
+    time_interval_value:
+      type: integer
+      label: 'Time interval value'
+    enabled:
+      type: boolean
+      label: 'Enabled'
