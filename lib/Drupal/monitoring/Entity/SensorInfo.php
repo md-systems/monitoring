@@ -109,6 +109,20 @@ class SensorInfo extends ConfigEntityBase {
   public $numeric;
 
   /**
+   * The sensor caching time.
+   *
+   * @var integer
+   */
+  public $caching_time;
+
+  /**
+   * The sensor enabled/disabled flag.
+   *
+   * @var bool
+   */
+  public $status;
+
+  /**
    * The sensor id.
    *
    * @var string
@@ -247,7 +261,7 @@ class SensorInfo extends ConfigEntityBase {
    *   Caching time in seconds.
    */
   public function getCachingTime() {
-    return $this->settings['caching_time'];
+    return $this->caching_time;
   }
 
   /**
@@ -324,7 +338,7 @@ class SensorInfo extends ConfigEntityBase {
    * @return bool
    */
   public function isEnabled() {
-    return (boolean) $this->settings['enabled'];
+    return (boolean) $this->status;
   }
 
   /**

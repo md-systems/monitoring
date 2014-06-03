@@ -30,7 +30,13 @@ monitoring.sensor.*:
       label: 'Value Type'
     numeric:
       type: boolean
-      label: 'Value Numeric Flag'
+      label: 'Flag if the value is numeric'
+    status:
+      type: boolean
+      label: 'Enabled'
+    caching_time:
+      type: integer
+      label: 'Sensor Caching Time'
     settings:
       type: mapping
       label: 'Settings'
@@ -42,9 +48,6 @@ monitoring.settings.sensor:
   type: mapping
   label: 'Sensor settings'
   mapping:
-    caching_time:
-      type: integer
-      label: 'Sensor Caching Time'
     thresholds:
       type: mapping
       label: 'Threshold'
@@ -55,6 +58,3 @@ monitoring.settings.sensor:
     time_interval_value:
       type: integer
       label: 'Time interval value'
-    enabled:
-      type: boolean
-      label: 'Enabled'

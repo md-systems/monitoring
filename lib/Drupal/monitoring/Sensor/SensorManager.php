@@ -164,20 +164,6 @@ class SensorManager extends DefaultPluginManager {
   }
 
   /**
-   * Saves sensor settings.
-   *
-   * @param string $sensor_name
-   *   The sensor name.
-   * @param $settings
-   *   Settings that should be saved.
-   */
-  public function saveSettings($sensor_name, array $settings) {
-    $sensor = SensorInfo::load($sensor_name);
-    $sensor->settings = $settings;
-    $sensor->save();
-  }
-
-  /**
    * Enable a sensor.
    *
    * Checks if the sensor is enabled and enables it if not.
@@ -191,7 +177,9 @@ class SensorManager extends DefaultPluginManager {
   public function enableSensor($sensor_name) {
     $sensor_info = $this->getSensorInfoByName($sensor_name);
     if (!$sensor_info->isEnabled()) {
-      $this->saveSettings($sensor_name, array('enabled' => TRUE));
+      $sensor_info->status = TRUE;
+      $sensor_info->save();
+
       $available_sensors = \Drupal::state()->get('monitoring.available_sensors', array());
 
       if (!isset($available_sensors[$sensor_name])) {
@@ -222,7 +210,8 @@ class SensorManager extends DefaultPluginManager {
   public function disableSensor($sensor_name) {
     $sensor_info = $this->getSensorInfoByName($sensor_name);
     if ($sensor_info->isEnabled()) {
-      $this->saveSettings($sensor_name, array('enabled' => FALSE));
+      $sensor_info->status = FALSE;
+      $sensor_info->save();
       $available_sensors = \Drupal::state()->get('monitoring.available_sensors', array());
       $available_sensors[$sensor_name]['enabled'] = FALSE;
       $available_sensors[$sensor_name]['name'] = $sensor_name;
