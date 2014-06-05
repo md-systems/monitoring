@@ -478,35 +478,6 @@ function monitoring_system_monitoring_sensor_info() {
 /**
  * Implements monitoring_MODULE_monitoring_sensor_info().
  *
- * Module: search_api
- */
-function monitoring_search_api_monitoring_sensor_info() {
-  $info = array();
-
-  $indexes = entity_load_multiple('search_api_index');
-
-  if (!empty($indexes)) {
-    foreach ($indexes as $index) {
-      $info['search_api_' . $index->machine_name] = array(
-        'label' => String::format('Search index queue size of @index', array('@index' => $index->name)),
-        'sensor_id' => 'search_api_unindexed',
-        'value_label' => 'Unindexed items',
-        'settings' => array(
-          'category' => 'Search API',
-          // Cache for 15 minutes.
-          'caching_time' => 900,
-          'index_id' => $index->id(),
-        ),
-      );
-    }
-  }
-
-  return $info;
-}
-
-/**
- * Implements monitoring_MODULE_monitoring_sensor_info().
- *
  * Module: simplenews
  */
 function monitoring_simplenews_monitoring_sensor_info() {
