@@ -3,8 +3,8 @@ label: 'Git dirty working tree'
 description: 'Repository local file changes'
 sensor_id: 'monitoring_git_dirty_tree'
 category: 'System'
+status: FALSE
 settings:
-  enabled: FALSE
   repo_path: NULL
   cmd: 'git status --porcelain'
   

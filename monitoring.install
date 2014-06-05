@@ -7,6 +7,7 @@
 use Drupal\Component\Utility\String;
 use Drupal\monitoring\Entity\SensorInfo;
 use Drupal\node\Entity\NodeType;
+use Drupal\search_api\Entity\Index;
 
 /**
  * Implements hook_schema().
@@ -81,7 +82,7 @@ function monitoring_schema() {
 /*
  * Implements hook_install().
  *
- * Declares initial set of node sensors.
+ * Declares initial set of node sensors and search api sensors.
  */
 function monitoring_install() {
   foreach (NodeType::loadMultiple() as $node_type) {
@@ -92,9 +93,9 @@ function monitoring_install() {
       'sensor_id' => 'database_aggregator',
       'value_label' => String::format('@type nodes', array('@type' => $node_type->name)),
       'category' => 'Content',
+      'status' => FALSE,
+      'caching_time' => 600,
       'settings' => array(
-        'enabled' => FALSE,
-        'caching_time' => 600,
         'thresholds' => array(
           'type' => 'falls',
         ),
@@ -104,6 +105,23 @@ function monitoring_install() {
         ),
         'time_interval_field' => 'created',
         'time_interval_value' => 60 * 60 * 24,
+      ),
+    ));
+    $sensor->save();
+  }
+
+  //  $indexes = entity_load_multiple('search_api_index');
+  foreach (Index::loadMultiple() as $index) {
+    $sensor = SensorInfo::create(array(
+      'id' => 'search_api_' . $index->machine_name,
+      'label' => String::format('Search index queue size of @index', array('@index' => $index->name)),
+      'sensor_id' => 'search_api_unindexed',
+      'value_label' => 'Unindexed items',
+      'category' => 'Search API',
+      // Cache for 15 minutes.
+      'caching_time' => 900,
+      'settings' => array(
+        'index_id' => $index->id(),
       ),
     ));
     $sensor->save();

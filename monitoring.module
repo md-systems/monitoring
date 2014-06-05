@@ -556,9 +556,9 @@ function monitoring_node_type_insert($info) {
     'sensor_id' => 'database_aggregator',
     'value_label' => String::format('@type nodes', array('@type' => $info->name)),
     'category' => 'Content',
+    'status' => FALSE,
+    'caching_time' => 600,
     'settings' => array(
-      'enabled' => FALSE,
-      'caching_time' => 600,
       'thresholds' => array(
         'type' => 'falls',
       ),
@@ -597,5 +597,49 @@ function monitoring_node_type_update($info) {
   $sensor->description = String::format('New nodes of type @type', array('@type' => $info->name));
   $sensor->value_label = String::format('@type nodes', array('@type' => $info->name));
   $sensor->settings->conditions->value = $info->type;
+  $sensor->save();
+}
+
+/*
+ * Implements hook_search_api_index_insert().
+ *
+ * Inserts new search api index  sensor config entities on creation of new search api index.
+ */
+function monitoring_search_api_index_insert($info) {
+  $sensor = SensorInfo::create(array(
+    'id' => 'search_api_' . $info->machine_name,
+    'label' => String::format('Search index queue size of @index', array('@index' => $info->name)),
+    'sensor_id' => 'search_api_unindexed',
+    'value_label' => 'Unindexed items',
+    'category' => 'Search API',
+    'caching_time' => 900,
+    'settings' => array(
+      'index_id' => $info->id(),
+    ),
+  ));
+  $sensor->save();
+}
+
+/*
+ * Implements hook_search_api_index_delete().
+ *
+ * Deletes search api index sensor config entities on deletion of search api index.
+ */
+function monitoring_search_api_index_delete($info) {
+  $config_id = 'search_api_' . $info->machine_name;
+  $sensor = SensorInfo::load($config_id);
+  $sensor->delete();
+}
+
+/*
+ * Implements hook_search_api_index_update().
+ *
+ * Updates search api index sensor config entities on updation of search api index.
+ */
+function monitoring_search_api_index_update($info) {
+  $config_id = 'search_api_' . $info->machine_name;
+  $sensor = SensorInfo::load($config_id);
+  $sensor->id = 'search_api_' . $info->machine_name;
+  $sensor->label = String::format('Search index queue size of @index', array('@index' => $info->name));
   $sensor->save();
 }

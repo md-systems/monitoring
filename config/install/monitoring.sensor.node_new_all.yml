@@ -4,9 +4,9 @@ description: 'All new nodes'
 sensor_id: 'database_aggregator'
 value_label: 'Nodes'
 category: 'Content'
+status: FALSE
+caching_time: 3600
 settings:
-  enabled: FALSE
-  caching_time: 3600
   table: 'node_field_data'
   time_interval_field: 'created'
   time_interval_value: 86400
