@@ -109,21 +109,21 @@ function monitoring_install() {
     ));
     $sensor->save();
   }
-
-  //  $indexes = entity_load_multiple('search_api_index');
-  foreach (Index::loadMultiple() as $index) {
-    $sensor = SensorInfo::create(array(
-      'id' => 'search_api_' . $index->machine_name,
-      'label' => String::format('Search index queue size of @index', array('@index' => $index->name)),
-      'sensor_id' => 'search_api_unindexed',
-      'value_label' => 'Unindexed items',
-      'category' => 'Search API',
-      // Cache for 15 minutes.
-      'caching_time' => 900,
-      'settings' => array(
-        'index_id' => $index->id(),
-      ),
-    ));
-    $sensor->save();
+  if (\Drupal::moduleHandler()->moduleExists('search_api')) {
+    foreach (Index::loadMultiple() as $index) {
+      $sensor = SensorInfo::create(array(
+        'id' => 'search_api_' . $index->machine_name,
+        'label' => String::format('Search index queue size of @index', array('@index' => $index->name)),
+        'sensor_id' => 'search_api_unindexed',
+        'value_label' => 'Unindexed items',
+        'category' => 'Search API',
+        // Cache for 15 minutes.
+        'caching_time' => 900,
+        'settings' => array(
+          'index_id' => $index->id(),
+        ),
+      ));
+      $sensor->save();
+    }
   }
 }

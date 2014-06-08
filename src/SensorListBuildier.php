@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Contains \Drupal\monitoring\MonitoringListBuilder.
+ * Contains \Drupal\monitoring\SensorListBuilder.
  */
 
 namespace Drupal\monitoring;
@@ -15,7 +15,7 @@ use Drupal\Core\Entity\EntityInterface;
  *
  * @see \Drupal\monitoring\Entity\SensorInfo
  */
-class MonitoringListBuilder extends ConfigEntityListBuilder {
+class SensorListBuilder extends ConfigEntityListBuilder {
 
   /*
    * {@inheritdoc}
@@ -37,10 +37,10 @@ class MonitoringListBuilder extends ConfigEntityListBuilder {
     $row['category'] = $entity->getCategory();
     $row['description'] = $entity->getDescription();
     if($entity->isEnabled()) {
-      $row['status'] = 'Enabled';
+      $row['status'] = t('Enabled');
     }
     else {
-      $row['status'] = 'Disabled';
+      $row['status'] = t('Disabled');
     }
     return $row + parent::buildRow($entity);
   }
