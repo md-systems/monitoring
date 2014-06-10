@@ -9,13 +9,16 @@ namespace Drupal\monitoring;
 
 use Drupal\Core\Config\Entity\ConfigEntityListBuilder;
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Form\FormInterface;
+use Drupal\monitoring\Sensor\SensorManager;
+use Drupal\monitoring\Entity\SensorInfo;
 
 /**
  * Defines a class to build a listing of monitoring entities.
  *
  * @see \Drupal\monitoring\Entity\SensorInfo
  */
-class SensorListBuilder extends ConfigEntityListBuilder {
+class SensorListBuilder extends ConfigEntityListBuilder implements FormInterface {
 
   /*
    * {@inheritdoc}
@@ -27,7 +30,7 @@ class SensorListBuilder extends ConfigEntityListBuilder {
     $header['status'] = t('Status');
     return $header + parent::buildHeader();
   }
-  
+
   /*
    * {@inheritdoc}
    */
@@ -35,12 +38,75 @@ class SensorListBuilder extends ConfigEntityListBuilder {
     $row['label'] = $this->getLabel($entity);
     $row['category'] = $entity->getCategory();
     $row['description'] = $entity->getDescription();
-    if($entity->isEnabled()) {
-      $row['status'] = t('Enabled');
-    }
-    else {
-      $row['status'] = t('Disabled');
-    }
+    $row['status'] = $entity->isEnabled() ? $this->t('Enabled') : $this->t('Disabled');
+    $row['operations']['data'] = $this->buildOperations($entity);
     return $row + parent::buildRow($entity);
+  }
+
+  /*
+   * {@inheritdoc}
+   */
+  public function getFormId() {
+    return 'sensor_overview_form';
+  }
+
+  /**
+   * Implements \Drupal\Core\Form\FormInterface::validateForm().
+   */
+  public function validateForm(array &$form, array &$form_state) {
+    // No validation.
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function render() {
+    return drupal_get_form($this);
+  }
+
+  /*
+   * {@inheritdoc}
+   */
+  public function buildForm(array $form, array &$form_state) {
+    foreach ($this->load() as $entity) {
+      $row = $this->buildRow($entity);
+      $options[$entity->id()] = $row;
+      $default_value[$entity->id()] = $entity->isEnabled();
+    }
+
+    $form['sensors'] = array(
+      '#type' => 'tableselect',
+      '#header' => $this->buildHeader(),
+      '#options' => $options,
+      '#default_value' => $default_value,
+      '#attributes' => array(
+        'id' => 'monitoring-sensors-config-overview',
+      ),
+    );
+
+    $form['actions']['#type'] = 'actions';
+    $form['actions']['submit'] = array(
+      '#type' => 'submit',
+      '#value' => $this->t('Save configuration'),
+    );
+
+    return $form;
+  }
+
+  /*
+   * {@inheritdoc}
+   */
+  public function submitForm(array &$form, array &$form_state) {
+    foreach ($form_state['values']['sensors'] as $sensor_id => $enabled) {
+      $sensor = SensorInfo::load($sensor_id);
+      if ($enabled) {
+        $sensor->status = TRUE;
+      }
+      else {
+        $sensor->status = FALSE;
+      }
+      $sensor->save();
+    }
+    drupal_set_message($this->t('Configuration has been saved.'));
   }
 }
