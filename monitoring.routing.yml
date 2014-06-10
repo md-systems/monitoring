@@ -6,14 +6,6 @@ monitoring.sensors_overview_settings:
   requirements:
     _permission: 'administer monitoring'
 
-monitoring.sensor_settings:
-  path: '/admin/config/system/monitoring/sensors/{sensor_name}'
-  defaults:
-    _form: '\Drupal\monitoring\Form\SensorSettingsForm'
-    _title_callback: '\Drupal\monitoring\Form\SensorSettingsForm::formTitle'
-  requirements:
-    _permission: 'administer monitoring'
-
 monitoring.sensor_list:
   path: '/admin/reports/monitoring'
   defaults:
@@ -47,15 +39,15 @@ monitoring.force_run_sensor:
 sensor.admin_sensor_delete:
   path: '/admin/config/system/monitoring/sensors/{monitoring_sensor}/delete'
   defaults:
-    _entity_form: 'monitoring_sensor'
+    _entity_form: 'monitoring_sensor.delete'
     _title: 'Delete'
   requirements:
-    _entity_access: 'sensor.admin_sensor_delete'
+    _permission: 'administer monitoring'
 
 sensor.admin_edit:
   path: '/admin/config/system/monitoring/sensors/{monitoring_sensor}'
   defaults:
-    _entity_form: 'monitoring_sensor'
+    _entity_form: 'monitoring_sensor.edit'
     _title: 'Edit Monitoring Sensor'
   requirements:
-    _entity_access: 'sensor.admin_edit'
+    _permission: 'administer monitoring'

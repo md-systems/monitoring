@@ -20,8 +20,8 @@ use Drupal\Core\Config\Entity\ConfigEntityInterface;
  *     "view_builder" = "Drupal\monitoring\SensorViewBuilder",
  *     "list_builder" = "Drupal\monitoring\SensorListBuilder",
  *     "form" = {
- *       "default" = "Drupal\monitoring\SensorFormController",
- *       "delete" = "Drupal\monitoring\SensorDeleteForm"
+ *       "delete" = "Drupal\monitoring\SensorDeleteForm",
+ *       "edit" = "Drupal\monitoring\SensorForm"
  *     }
  *   },
  *   admin_permission = "administer sensors",
