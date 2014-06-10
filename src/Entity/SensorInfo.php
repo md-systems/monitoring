@@ -16,7 +16,6 @@ use Drupal\Core\Config\Entity\ConfigEntityBase;
  *   id = "monitoring_sensor",
  *   label = @Translation("Monitoring Sensor"),
  *   controllers = {
- *     "access" = "Drupal\monitoring\SensorAccessController",
  *     "view_builder" = "Drupal\monitoring\SensorViewBuilder",
  *     "list_builder" = "Drupal\monitoring\SensorListBuilder",
  *     "form" = {
@@ -393,4 +392,28 @@ class SensorInfo extends ConfigEntityBase {
     return $info_array;
   }
 
+  /**
+   * Callback for uasort() to order sensors by category and label.
+   *
+   * @param \Drupal\monitoring\Entity\SensorInfo $a
+   *   1st Object to compare with.
+   *
+   * @param \Drupal\monitoring\Entity\SensorInfo $b
+   *   2nd Object to compare with.
+   *
+   * @return int
+   *   Sort order of the passed in SensorInfo objects.
+   */
+  public static function sort(SensorInfo $a, SensorInfo $b) {
+    // Checks whether both labels and categories are equal.
+    if ($a->getLabel() == $b->getLabel() && $a->getCategory() == $b->getCategory()) {
+      return 0;
+    }
+    // If the categories are not equal, their order is determined.
+    elseif ($a->getCategory() != $b->getCategory()) {
+      return ($a->getCategory() < $b->getCategory()) ? -1 : 1;
+    }
+    // In the end, the label's order is determined.
+    return ($a->getLabel() < $b->getLabel()) ? -1 : 1;
+  }
 }

@@ -25,7 +25,6 @@ class SensorListBuilder extends ConfigEntityListBuilder {
     $header['label'] = t('Label');
     $header['description'] = t('Description');
     $header['status'] = t('Status');
-    $header['actions'] = t('Actions');
     return $header + parent::buildHeader();
   }
   

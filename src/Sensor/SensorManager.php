@@ -91,7 +91,7 @@ class SensorManager extends DefaultPluginManager {
     $this->moduleHandler->alter('monitoring_sensor_info', $sensors);
 
     // Sort the sensors by category and label.
-    uasort($sensors, "\Drupal\monitoring\Sensor\SensorManager::orderSensorInfo");
+    uasort($sensors, "\Drupal\monitoring\Entity\SensorInfo::sort");
 
     return $sensors;
   }
@@ -217,31 +217,6 @@ class SensorManager extends DefaultPluginManager {
       $available_sensors[$sensor_name]['name'] = $sensor_name;
       \Drupal::state()->set('monitoring.available_sensors', $available_sensors);
     }
-  }
-
-  /**
-   * Callback for uasort() to order sensors by category and label.
-   *
-   * @param \Drupal\monitoring\Entity\SensorInfo $a
-   *   1st Object to compare with.
-   *
-   * @param \Drupal\monitoring\Entity\SensorInfo $b
-   *   2nd Object to compare with.
-   *
-   * @return int
-   *   Sort order of the passed in SensorInfo objects.
-   */
-  public static function orderSensorInfo(SensorInfo $a, SensorInfo $b) {
-    // Checks whether both labels and categories are equal.
-    if ($a->getLabel() == $b->getLabel() && $a->getCategory() == $b->getCategory()) {
-      return 0;
-    }
-    // If the categories are not equal, their order is determined.
-    elseif ($a->getCategory() != $b->getCategory()) {
-      return ($a->getCategory() < $b->getCategory()) ? -1 : 1;
-    }
-    // In the end, the label's order is determined.
-    return ($a->getLabel() < $b->getLabel()) ? -1 : 1;
   }
 
   /**
