@@ -556,7 +556,7 @@ function monitoring_node_type_insert($info) {
     'sensor_id' => 'database_aggregator',
     'value_label' => String::format('@type nodes', array('@type' => $info->name)),
     'category' => 'Content',
-    'status' => TRUE,
+    'status' => FALSE,
     'caching_time' => 600,
     'settings' => array(
       'thresholds' => array(

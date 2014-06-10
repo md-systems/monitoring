@@ -4,7 +4,7 @@ description: 'All new nodes'
 sensor_id: 'database_aggregator'
 value_label: 'Nodes'
 category: 'Content'
-status: TRUE
+status: FALSE
 caching_time: 3600
 settings:
   table: 'node_field_data'
