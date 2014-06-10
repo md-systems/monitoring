@@ -556,7 +556,7 @@ function monitoring_node_type_insert($info) {
     'sensor_id' => 'database_aggregator',
     'value_label' => String::format('@type nodes', array('@type' => $info->name)),
     'category' => 'Content',
-    'status' => FALSE,
+    'status' => TRUE,
     'caching_time' => 600,
     'settings' => array(
       'thresholds' => array(
@@ -613,6 +613,7 @@ function monitoring_search_api_index_insert($info) {
     'value_label' => 'Unindexed items',
     'category' => 'Search API',
     'caching_time' => 900,
+    'status' => TRUE,
     'settings' => array(
       'index_id' => $info->id(),
     ),

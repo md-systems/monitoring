@@ -5,6 +5,7 @@ sensor_id: 'config_value'
 numeric: FALSE
 value_type: 'bool'
 category: 'Cron'
+status: TRUE
 settings:
   config: 'system.cron'
   key: 'threshold.autorun'

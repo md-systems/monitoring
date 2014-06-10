@@ -93,7 +93,7 @@ function monitoring_install() {
       'sensor_id' => 'database_aggregator',
       'value_label' => String::format('@type nodes', array('@type' => $node_type->name)),
       'category' => 'Content',
-      'status' => FALSE,
+      'status' => TRUE,
       'caching_time' => 600,
       'settings' => array(
         'thresholds' => array(
@@ -119,6 +119,7 @@ function monitoring_install() {
         'category' => 'Search API',
         // Cache for 15 minutes.
         'caching_time' => 900,
+        'status' => TRUE,
         'settings' => array(
           'index_id' => $index->id(),
         ),

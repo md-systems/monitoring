@@ -7,6 +7,7 @@
 namespace Drupal\monitoring\Entity;
 
 use Drupal\Core\Config\Entity\ConfigEntityBase;
+use Drupal\Core\Config\Entity\ConfigEntityInterface;
 
 /**
  * Represents a sensor info entity class.
@@ -393,18 +394,9 @@ class SensorInfo extends ConfigEntityBase {
   }
 
   /**
-   * Callback for uasort() to order sensors by category and label.
-   *
-   * @param \Drupal\monitoring\Entity\SensorInfo $a
-   *   1st Object to compare with.
-   *
-   * @param \Drupal\monitoring\Entity\SensorInfo $b
-   *   2nd Object to compare with.
-   *
-   * @return int
-   *   Sort order of the passed in SensorInfo objects.
+   * {@inheritdoc}
    */
-  public static function sort(SensorInfo $a, SensorInfo $b) {
+  public static function sort(ConfigEntityInterface $a, ConfigEntityInterface $b) {
     // Checks whether both labels and categories are equal.
     if ($a->getLabel() == $b->getLabel() && $a->getCategory() == $b->getCategory()) {
       return 0;

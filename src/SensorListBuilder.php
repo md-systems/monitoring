@@ -27,7 +27,6 @@ class SensorListBuilder extends ConfigEntityListBuilder implements FormInterface
     $header['category'] = t('Category');
     $header['label'] = t('Label');
     $header['description'] = t('Description');
-    $header['status'] = t('Status');
     return $header + parent::buildHeader();
   }
 
@@ -38,7 +37,6 @@ class SensorListBuilder extends ConfigEntityListBuilder implements FormInterface
     $row['label'] = $this->getLabel($entity);
     $row['category'] = $entity->getCategory();
     $row['description'] = $entity->getDescription();
-    $row['status'] = $entity->isEnabled() ? $this->t('Enabled') : $this->t('Disabled');
     $row['operations']['data'] = $this->buildOperations($entity);
     return $row + parent::buildRow($entity);
   }
