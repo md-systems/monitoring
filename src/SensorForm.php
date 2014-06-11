@@ -37,6 +37,13 @@ class SensorForm extends EntityForm {
     $form[$sensor_name] = array(
       '#tree' => TRUE,
     );
+  $form[$sensor_name]['plugin'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Sensor Plugin'), 
+      '#maxlength' => 255,
+      '#attributes' => array('readonly' => 'readonly'),
+      '#default_value' => $sensor_info->sensor_id
+    );
     $form[$sensor_name]['label'] = array(
       '#type' => 'textfield',
       '#title' => t('Label'),
