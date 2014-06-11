@@ -36,7 +36,7 @@ monitoring.force_run_sensor:
   requirements:
     _permission: 'monitoring force run'
 
-sensor.admin_sensor_delete:
+monitoring.sensor_delete:
   path: '/admin/config/system/monitoring/sensors/{monitoring_sensor}/delete'
   defaults:
     _entity_form: 'monitoring_sensor.delete'
@@ -44,10 +44,18 @@ sensor.admin_sensor_delete:
   requirements:
     _permission: 'administer monitoring'
 
-sensor.admin_edit:
+monitoring.sensor_edit:
   path: '/admin/config/system/monitoring/sensors/{monitoring_sensor}'
   defaults:
     _entity_form: 'monitoring_sensor.edit'
     _title: 'Edit Monitoring Sensor'
+  requirements:
+    _permission: 'administer monitoring'
+
+monitoring.sensor_add:
+  path: '/admin/config/system/monitoring/sensors/add'
+  defaults:
+    _entity_form: 'monitoring_sensor.add'
+    _title: 'Add Sensor'
   requirements:
     _permission: 'administer monitoring'

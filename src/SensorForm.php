@@ -20,31 +20,25 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 class SensorForm extends EntityForm {
 
   /**
-   * Overrides Drupal\Core\Entity\EntityForm::form().
+   * {@inheritdoc}
    */
   public function form(array $form, array &$form_state) {
     $form = parent::form($form, $form_state);
     $sensor_info = $this->entity;
-    $sensor_name = $sensor_info->getName();
     if (!$sensor_info->isConfigurable()) {
       return $form;
     }
     $sensor = $sensor_info->getPlugin();
     // Set the sensor object into $form_state to make it available for validate
     // and submit callbacks.
-    $form_state['sensor'] = $sensor;
-
-    $form[$sensor_name] = array(
-      '#tree' => TRUE,
-    );
-  $form[$sensor_name]['plugin'] = array(
+    $form['plugin'] = array(
       '#type' => 'textfield',
       '#title' => t('Sensor Plugin'), 
       '#maxlength' => 255,
       '#attributes' => array('readonly' => 'readonly'),
-      '#default_value' => $sensor_info->sensor_id
+      '#default_value' =>  monitoring_sensor_manager()->getDefinition($sensor_info->sensor_id)['label']->render()
     );
-    $form[$sensor_name]['label'] = array(
+    $form['label'] = array(
       '#type' => 'textfield',
       '#title' => t('Label'),
       '#maxlength' => 255,
@@ -52,7 +46,7 @@ class SensorForm extends EntityForm {
       '#description' => t("Example: 'website feedback' or 'product information'."),
       '#required' => TRUE,
     );
-    $form[$sensor_name]['description'] = array(
+    $form['description'] = array(
       '#type' => 'textfield',
       '#title' => t('Description'),
       '#maxlength' => 255,
@@ -60,8 +54,7 @@ class SensorForm extends EntityForm {
       '#description' => t("About the sensor."),
       '#required' => TRUE,
     );
-    $form[$sensor_name] = $sensor->settingsForm($form[$sensor_name], $form_state);
-
+    $form = $sensor->settingsForm($form, $form_state);
     $form['actions']['submit'] = array(
       '#type' => 'submit',
       '#value' => $this->t('Save'),
@@ -76,7 +69,7 @@ class SensorForm extends EntityForm {
   public function validate(array $form, array &$form_state) {
     parent::validate($form, $form_state);
     /** @var SensorConfigurableInterface $sensor */
-    $sensor = $form_state['sensor'];
+    $sensor = $this->entity->getPlugin();
     $sensor->settingsFormValidate($form, $form_state);
   }
   
@@ -85,10 +78,9 @@ class SensorForm extends EntityForm {
    */
   public function save(array $form, array &$form_state) {
     /** @var Sensor $sensor */
-    $sensor = $form_state['sensor'];
-    $sensor_name = $sensor->getSensorName();
     $sensor_info = $this->entity;
-    $new_settings = $form_state['values'][$sensor_name];
+    $sensor = $sensor_info->getPlugin();
+    $new_settings = $form_state['values'];
     $sensor_info->status = $new_settings['enabled'];
     $sensor_info->label = $new_settings['label'];
     $sensor_info->description = $new_settings['description'];
@@ -101,6 +93,7 @@ class SensorForm extends EntityForm {
     $sensor_info->settings = $settings;
     $sensor_info->save();
     $form_state['redirect_route']['route_name'] = 'monitoring.sensors_overview_settings';
+    drupal_set_message($this->t('Sensor settings saved.'));
   }
 
 }
