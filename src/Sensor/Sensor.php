@@ -81,7 +81,7 @@ abstract class Sensor implements SensorInterface {
    * {@inheritdoc}
    */
   public function isEnabled() {
-    return (boolean) $this->info->getSetting('enabled');
+    return (boolean) $this->info->isEnabled();
   }
 
   /**
