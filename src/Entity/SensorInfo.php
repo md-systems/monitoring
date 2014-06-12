@@ -20,6 +20,7 @@ use Drupal\Core\Config\Entity\ConfigEntityInterface;
  *     "view_builder" = "Drupal\monitoring\SensorViewBuilder",
  *     "list_builder" = "Drupal\monitoring\SensorListBuilder",
  *     "form" = {
+ *       "add" = "Drupal\monitoring\SensorForm",
  *       "delete" = "Drupal\monitoring\SensorDeleteForm",
  *       "edit" = "Drupal\monitoring\SensorForm"
  *     }
@@ -31,8 +32,8 @@ use Drupal\Core\Config\Entity\ConfigEntityInterface;
  *     "label" = "label"
  *   },
  *   links = {
- *     "delete-form" = "sensor.admin_sensor_delete",
- *     "edit-form" = "sensor.admin_edit"
+ *     "delete-form" = "monitoring.sensor_delete",
+ *     "edit-form" = "monitoring.sensor_edit"
  *   }
  * )
  */
