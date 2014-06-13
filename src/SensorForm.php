@@ -47,9 +47,11 @@ class SensorForm extends EntityForm {
         '#options' => $plugin_types,
         '#title' => t('Sensor Plugin'),
         '#default_value' => $plugin_types,
+        '#submit' => array($this,'submitFunction'),
+        '#executes_submit_callback' => TRUE,
         '#ajax' => array(
           'callback' => array($this,'updateSelectedPluginType'),
-          'wrapper' => 'monitoring-sensor-add-form',
+          'wrapper' => 'monitoring-sensor-plugin',
           'method' => 'replace',
         )
       );
@@ -70,11 +72,7 @@ class SensorForm extends EntityForm {
       );
       $form['id']['#attributes'] = array('readonly' => 'readonly');
     }
-    /* $form['submit'] = array(
-       '#type' => 'submit',
-       '#value' => $this->t('Save2'),
-       '#submit' => array('\Drupal\monitoring\SensorForm::submitFunction'),
-     ); */
+
     $form['id'] = array(
       '#type' => 'textfield',
       '#title' => t('ID'),
@@ -106,7 +104,7 @@ class SensorForm extends EntityForm {
       '#type' => 'fieldset',
       '#title' => t('Sensor Settings'),
       '#description' => t("Here you change settings of the sensor."),
-      '#prefix' => '<div id="monitoring-sensor-plugin"',
+      '#prefix' => '<div id="monitoring-sensor-plugin">',
       '#suffix' => '</div>',
     );
 
@@ -125,10 +123,16 @@ class SensorForm extends EntityForm {
    * Handles switching the configuration type selector.
    */
   public function updateSelectedPluginType($form, &$form_state) {
+    return $form['sensors'];
+  }
+
+  /**
+   * Handles submit call when sensor type is selected.
+   */
+  public function submitFunction(array $form, array &$form_state) {
     $this->entity->sensor_id = $form_state['values']['sensor_id'];
-    $sensor = monitoring_sensor_manager()->createInstance($this->entity->sensor_id, array('sensor_info' => $this->entity));
+    $this->$sensor = monitoring_sensor_manager()->createInstance($this->entity->sensor_id, array('sensor_info' => $this->entity));
     $form_state['rebuild'] = TRUE;
-    return $form;
   }
 
   /**
@@ -179,9 +183,5 @@ class SensorForm extends EntityForm {
     $sensor_info->save();
     $form_state['redirect_route']['route_name'] = 'monitoring.sensors_overview_settings';
     drupal_set_message($this->t('Sensor settings saved.'));*/
-  }
-
-  public function submitFunction(array $form, array &$form_state) {
-    $form_state['rebuild'] = TRUE;
   }
 }
