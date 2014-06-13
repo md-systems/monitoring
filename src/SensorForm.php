@@ -33,12 +33,10 @@ class SensorForm extends EntityForm {
     $form['#tree'] = TRUE;
     $sensor_info = $this->entity;
     $form['id'] = array();
-    $form['sensors'] = array();
     if($this->entity->isNew()) {
       $plugin_types = array();
       foreach(monitoring_sensor_manager()->getDefinitions() as $plugins => $definition) {
         $plugin_types[$plugins] = $definition['label']->render();
-        $form = $this->buildPluginForm($form,$plugins);
       }
       uasort($plugin_types, 'strnatcasecmp');
       $plugin_types = array(
@@ -53,7 +51,7 @@ class SensorForm extends EntityForm {
           'callback' => array($this,'updateSelectedPluginType'),
           'wrapper' => 'monitoring-sensor-add-form',
           'method' => 'replace',
-          )
+        )
       );
     }
     else {
@@ -72,6 +70,11 @@ class SensorForm extends EntityForm {
       );
       $form['id']['#attributes'] = array('readonly' => 'readonly');
     }
+    /* $form['submit'] = array(
+       '#type' => 'submit',
+       '#value' => $this->t('Save2'),
+       '#submit' => array('\Drupal\monitoring\SensorForm::submitFunction'),
+     ); */
     $form['id'] = array(
       '#type' => 'textfield',
       '#title' => t('ID'),
@@ -80,6 +83,7 @@ class SensorForm extends EntityForm {
       '#description' => t("ID of the config entity"),
       '#required' => TRUE,
     ) + $form['id'];
+
     $form['label'] = array(
       '#type' => 'textfield',
       '#title' => t('Label'),
@@ -88,6 +92,7 @@ class SensorForm extends EntityForm {
       '#description' => t("Example: 'website feedback' or 'product information'."),
       '#required' => TRUE,
     );
+
     $form['description'] = array(
       '#type' => 'textfield',
       '#title' => t('Description'),
@@ -96,8 +101,17 @@ class SensorForm extends EntityForm {
       '#description' => t("About the sensor."),
       '#required' => TRUE,
     );
-    if (isset($sensor)) {
-      $form = $sensor->settingsForm($form, $form_state);
+
+    $form['sensors'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Sensor Settings'),
+      '#description' => t("Here you change settings of the sensor."),
+      '#prefix' => '<div id="monitoring-sensor-plugin"',
+      '#suffix' => '</div>',
+    );
+
+    if (isset($this->entity->sensor_id)) {
+      $form['sensors'] = $sensor->settingsForm($form['sensors'], $form_state);
     }
     $form['actions']['submit'] = array(
       '#type' => 'submit',
@@ -111,20 +125,12 @@ class SensorForm extends EntityForm {
    * Handles switching the configuration type selector.
    */
   public function updateSelectedPluginType($form, &$form_state) {
-    $plugin = $form_state['values']['sensor_id'];
-    // $sensor = monitoring_sensor_manager()->createInstance($plugin, array('sensor_info' => $this->entity));
-    //    $form['settings']['#attributes'] = array('class' => array('js-show'));
-    // $form = $sensor->settingsForm($form, $form_state);
-    //    $form['#attributes']['class'] = array('form-item-enabled');
-    $form['sensor'] = $form['sensors'][$plugin];
+    $this->entity->sensor_id = $form_state['values']['sensor_id'];
+    $sensor = monitoring_sensor_manager()->createInstance($this->entity->sensor_id, array('sensor_info' => $this->entity));
+    $form_state['rebuild'] = TRUE;
     return $form;
   }
-  public function buildPluginForm($form, $id) {
-    $sensor = monitoring_sensor_manager()->createInstance($id, array('sensor_info' => $this->entity));
-    //    $form['settings']['#attributes'] = array('class' => array('js-show'));
-    $form['sensors'][$id] = $sensor->settingsForm($form['sensors'][$id], $form_state);
-    return $form;
-  }
+
   /**
    * {@inheritdoc}
    */
@@ -175,4 +181,7 @@ class SensorForm extends EntityForm {
     drupal_set_message($this->t('Sensor settings saved.'));*/
   }
 
+  public function submitFunction(array $form, array &$form_state) {
+    $form_state['rebuild'] = TRUE;
+  }
 }
