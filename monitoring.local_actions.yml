@@ -1,0 +1,6 @@
+monitoring.sensor_add:
+  route_name: monitoring.sensor_add
+  title: 'Add Sensor'
+  weight: 1
+  appears_on:
+    - monitoring.sensors_overview_settings
