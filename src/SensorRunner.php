@@ -161,12 +161,6 @@ class SensorRunner {
     if (!$sensor->isEnabled()) {
       throw new DisabledSensorException(String::format('Sensor @sensor_name is not enabled and must not be run.', array('@sensor_name' => $sensor_info->getName())));
     }
-    // If the sensor requires external services add them.
-    if ($sensor_info->isRequiringServices()) {
-      foreach ($sensor_info->getServices() as $service_id) {
-        $sensor->addService($service_id, \Drupal::service($service_id));
-      }
-    }
 
     $result = $this->getResultObject($sensor_info);
 
