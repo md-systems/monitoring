@@ -187,7 +187,7 @@ class SensorInfo extends ConfigEntityBase {
    *   Result class.
    */
   public function getResultClass() {
-    return $this->result_class;
+    return '\Drupal\monitoring\Result\SensorResult';
   }
 
   /**
