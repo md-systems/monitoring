@@ -272,9 +272,8 @@ class SensorInfo extends ConfigEntityBase {
    *   Threshold type.
    */
   public function getThresholdsType() {
-    $thresholds = $this->settings['thresholds'];
-    if (!empty($thresholds['type'])) {
-      return $thresholds['type'];
+    if (!empty($this->settings['thresholds']['type'])) {
+      return $this->settings['thresholds']['type'];
     }
 
     // We assume the default threshold type.
@@ -291,9 +290,8 @@ class SensorInfo extends ConfigEntityBase {
    *   The threshold value or NULL if not-configured.
    */
   public function getThresholdValue($key) {
-    $thresholds = $this->settings['thresholds'];
-    if (isset($thresholds[$key]) && $thresholds[$key] !== '') {
-      return $thresholds[$key];
+    if (isset($this->settings['thresholds'][$key]) && $this->settings['thresholds'][$key] !== '') {
+      return $this->settings['thresholds'][$key];
     }
   }
 

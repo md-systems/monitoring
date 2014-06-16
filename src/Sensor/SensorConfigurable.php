@@ -21,15 +21,6 @@ abstract class SensorConfigurable extends Sensor implements SensorConfigurableIn
    */
   public function settingsForm($form, &$form_state) {
 
-    // If sensor provides settings form, automatically provide settings to
-    // enable the sensor.
-    $form['enabled'] = array(
-      '#type' => 'checkbox',
-      '#title' => t('Enabled'),
-      '#description' => t('Check to have the sensor trigger.'),
-      '#default_value' => $this->isEnabled(),
-    );
-
     return $form;
   }
 
