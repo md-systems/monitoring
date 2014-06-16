@@ -8,10 +8,10 @@ monitoring.sensor.*:
       type: string
       label: 'Machine-readable name'
     label:
-      type: string
+      type: label
       label: 'Sensor Label'
     description:
-      type: string
+      type: text
       label: 'Description'
     category:
       type: string
@@ -20,7 +20,7 @@ monitoring.sensor.*:
       type: string
       label: 'Sensor ID'
     result_class:
-      type: strin
+      type: string
       label: 'Result Class'
     value_label:
       type: string
@@ -38,23 +38,62 @@ monitoring.sensor.*:
       type: integer
       label: 'Sensor Caching Time'
     settings:
-      type: mapping
+      type: monitoring.settings.[sensor_id]
       label: 'Settings'
-      mapping:
-        node:
-          type: monitoring.settings.sensor
 
-monitoring.settings.sensor:
+monitoring.settings.monitoring_git_dirty_tree:
+  type: mapping
+  label: 'Sensor settings'
+  mapping:
+    repo_path:
+      type: string
+      label: 'Repository path'
+    cmd:
+      type: string
+      label: 'Command'
+
+monitoring.settings.config_value:
+  type: mapping
+  label: 'Sensor settings'
+  mapping:
+    config:
+      type: string
+      label: 'Type'
+    key:
+      type: string
+      label: 'Key'
+    value:
+      type: string # this may need to be undefined or something.
+      label: 'Value'
+
+monitoring.settings.cron_last_run_time:
   type: mapping
   label: 'Sensor settings'
   mapping:
     thresholds:
       type: mapping
-      label: 'Threshold'
+      label: 'Thresholds'
       mapping:
         type:
           type: string
-          label: 'Threshold Type'
+          label: 'Type'
+        warning:
+          type: integer
+          label: 'Warning'
+        critical:
+          type: integer
+          label: 'Critical'
+
+monitoring.settings.database_aggregator:
+  type: mapping
+  label: 'Sensor settings'
+  mapping:
+    table:
+      type: string
+      label: 'Table'
+    time_interval_field:
+      type: string
+      label: 'Time interval field'
     time_interval_value:
       type: integer
-      label: 'Time interval value'
+      label: 'Time interval'
