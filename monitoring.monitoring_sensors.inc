@@ -15,128 +15,6 @@
 use Drupal\Component\Utility\String;
 
 /**
- * Implements hook_monitoring_sensor_info().
- *
- * Module unspecific sensors:
- * - git
- * - disappearing sensors
- */
-function monitoring_monitoring_sensor_info() {
-  $info['monitoring_disappeared_sensors'] = array(
-    'label' => 'Disappeared sensors',
-    'description' => 'Keeps track of active sensors and reports if a sensor disappears',
-    'sensor_id' => 'monitoring_disappeared_sensors',
-    'settings' => array(
-      'category' => 'System',
-    ),
-  );
-
-  return $info;
-}
-
-/**
- * Implements monitoring_MODULE_monitoring_sensor_info().
- *
- * Module: comment
- */
-function monitoring_comment_monitoring_sensor_info() {
-  $info = array();
-
-  $info['comment_new'] = array(
-    'label' => 'New comments',
-    'sensor_id' => 'database_aggregator',
-    'value_label' => 'Comments',
-    'services' => array('database'),
-    'settings' => array(
-      'category' => 'Content',
-      'enabled' => FALSE,
-      // Cache for one hour.
-      'caching_time' => 3600,
-      'table' => 'comment',
-      'time_interval_field' => 'created',
-      'time_interval_value' => 60 * 60 * 24,
-    ),
-  );
-
-  return $info;
-}
-
-/**
- * Implements monitoring_MODULE_monitoring_sensor_info().
- *
- * Module: user
- */
-function monitoring_user_monitoring_sensor_info() {
-  $info = array();
-
-  $info['user_new'] = array(
-    'label' => 'New users',
-    'sensor_id' => 'database_aggregator',
-    'value_label' => 'Users',
-    'services' => array('database'),
-    'settings' => array(
-      'category' => 'User activity',
-      'enabled' => FALSE,
-      // Cache for one hour.
-      'caching_time' => 3600,
-      'table' => 'users',
-      'time_interval_field' => 'created',
-      'time_interval_value' => 60 * 60 * 24,
-    ),
-  );
-
-  $info['user_active'] = array(
-    'label' => 'Active users',
-    'sensor_id' => 'database_aggregator',
-    'value_label' => 'Users',
-    'services' => array('database'),
-    'settings' => array(
-      'category' => 'User activity',
-      'enabled' => FALSE,
-      // Cache for one hour.
-      'caching_time' => 3600,
-      'table' => 'users',
-      'time_interval_field' => 'created',
-      'time_interval_value' => 60 * 60 * 24,
-    ),
-  );
-
-  // If a user logs out, the session is destroyed. This decreases visibility of
-  // previous user sessions within timeframe.
-  // Also this can lead to completely unidentified previous user sessions with
-  // recent activity and a following logout.
-  $info['user_sessions_authenticated'] = array(
-    'label' => 'Authenticated user sessions',
-    'description' => 'Authenticated user sessions without logout',
-    'sensor_id' => 'database_aggregator',
-    'value_label' => 'Active sessions',
-    'settings' => array(
-      'category' => 'User activity',
-      'table' => 'sessions',
-      'conditions' => array(
-        array('field' => 'uid', 'value' => '0', 'operator' => '!='),
-      ),
-      'time_interval_field' => 'timestamp',
-      'time_interval_value' => 60 * 60 * 24,
-    ),
-  );
-  $info['user_sessions_all'] = array(
-    'label' => 'All active sessions',
-    'description' => 'All active sessions of logged in and anonymous users without logout',
-    'sensor_id' => 'database_aggregator',
-    'value_label' => 'Active sessions',
-    'settings' => array(
-      'category' => 'User activity',
-      'table' => 'sessions',
-      'time_interval_field' => 'timestamp',
-      'time_interval_value' => 60 * 60 * 24,
-    ),
-  );
-
-  return $info;
-}
-
-/**
  * Implements monitoring_MODULE_monitoring_sensor_info().
  *
  * Module: dblog
@@ -348,34 +226,6 @@ function monitoring_past_db_monitoring_sensor_info() {
 /**
  * Implements monitoring_MODULE_monitoring_sensor_info().
  *
- * Module: past_form
- */
-function monitoring_past_form_monitoring_sensor_info() {
-  $info['past_form'] = array(
-    'label' => 'Logged form submissions',
-    'description' => 'Past event logging form submissions',
-    'sensor_id' => 'database_aggregator',
-    'value_label' => 'Past events',
-    'services' => array('database'),
-    'settings' => array(
-      'category' => 'Past',
-      // Cache for one hour.
-      'caching_time' => 3600,
-      'table' => 'past_event',
-      'conditions' => array(
-        array('field' => 'module', 'value' => 'past_form'),
-      ),
-      'time_interval_field' => 'timestamp',
-      'time_interval_value' => 24 * 60 * 60,
-    ),
-  );
-
-  return $info;
-}
-
-/**
- * Implements monitoring_MODULE_monitoring_sensor_info().
- *
  * Module: system
  */
 function monitoring_system_monitoring_sensor_info() {
@@ -478,66 +328,6 @@ function monitoring_system_monitoring_sensor_info() {
 /**
  * Implements monitoring_MODULE_monitoring_sensor_info().
  *
- * Module: simplenews
- */
-function monitoring_simplenews_monitoring_sensor_info() {
-  $info = array();
-
-  $info['simplenews_pending'] = array(
-    'label' => 'Simplenews spool size',
-    'description' => 'Pending items in the simplenews spool.',
-    'sensor_id' => 'simplenews_pending',
-    'value_label' => 'Pending items',
-    'settings' => array(
-      'category' => 'Simplenews',
-      'enabled' => FALSE,
-    ),
-  );
-
-  return $info;
-}
-
-/**
- * Implements monitoring_MODULE_monitoring_sensor_info().
- *
- * Module: update
- */
-function monitoring_update_monitoring_sensor_info() {
-  $info = array();
-
-  $info['update_core'] = array(
-    'label' => 'Core',
-    'description' => 'Available updates for Drupal core',
-    'sensor_id' => 'update_status',
-    'numeric' => FALSE,
-    'value_label' => 'Outdated modules',
-    'settings' => array(
-      'category' => 'Update',
-      // Cache for 1 day.
-      'caching_time' => 24 * 3600,
-      'type' => 'core',
-    ),
-  );
-  $info['update_contrib'] = array(
-    'label' => 'Modules and themes',
-    'description' => 'Available updates for contrib modules and themes',
-    'sensor_id' => 'update_status',
-    'numeric' => FALSE,
-    'value_label' => 'Outdated modules',
-    'settings' => array(
-      'category' => 'Update',
-      // Cache for 1 day.
-      'caching_time' => 24 * 3600,
-      'type' => 'contrib',
-    ),
-  );
-
-  return $info;
-}
-
-/**
- * Implements monitoring_MODULE_monitoring_sensor_info().
- *
  * Module: elysia_cron
  */
 function monitoring_elysia_cron_monitoring_sensor_info() {
@@ -573,26 +363,6 @@ function monitoring_elysia_cron_monitoring_sensor_info() {
       ),
     );
   }
-
-  return $info;
-}
-
-/**
- * Implements monitoring_MODULE_monitoring_sensor_info().
- *
- * Module: maillog
- */
-function monitoring_maillog_monitoring_sensor_info() {
-  $info['maillog_records_count'] = array(
-    'label' => 'Maillog records count',
-    'sensor_id' => 'database_aggregator',
-    'value_label' => 'Mail records',
-    'settings' => array(
-      'table' => 'maillog',
-      'time_interval_field' => 'sent_date',
-      'time_interval_value' => 60 * 60 * 24,
-    ),
-  );
 
   return $info;
 }

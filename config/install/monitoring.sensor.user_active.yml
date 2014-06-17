@@ -1,0 +1,12 @@
+id: user_active
+label: 'Active users'
+description: ''
+category: 'User activity'
+sensor_id: database_aggregator
+value_label: 'Users'
+status: FALSE
+caching_time: 3600
+settings:
+  table: 'users'
+  time_interval_value: '86400'
+  time_interval_field: 'created'

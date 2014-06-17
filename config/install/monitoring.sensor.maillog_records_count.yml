@@ -1,0 +1,9 @@
+id: maillog_records_count
+label: 'Maillog records count'
+sensor_id: database_aggregator
+value_label: 'Mail records'
+status: TRUE
+settings:
+  table: 'maillog'
+  time_interval_field: 'sent_date'
+  time_interval_value: '86400'

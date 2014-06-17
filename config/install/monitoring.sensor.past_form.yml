@@ -1,0 +1,15 @@
+id: past_form
+label: 'Logged form submissions'
+description: 'Past event logging form submissions'
+category: Past
+sensor_id: database_aggregator
+value_label: 'Past events'
+status: TRUE
+caching_time: 3600
+settings:
+  table: 'past_event'
+  conditions:
+    field: 'module'
+    value: 'past_form'
+  time_interval_field: 'timestamp'
+  time_interval_value: '86400'

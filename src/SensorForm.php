@@ -33,7 +33,6 @@ class SensorForm extends EntityForm {
       '#title' => t('Category'),
       '#maxlength' => 255,
       '#default_value' => $sensor_info->getCategory(),
-      '#required' => TRUE,
     );
 
     $form['label'] = array(

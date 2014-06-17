@@ -1,0 +1,11 @@
+id: comment_new
+label: 'New Comments'
+description: ''
+category: Content
+sensor_id: database_aggregator
+value_label: Comments
+status: FALSE
+caching_time: 3600
+settings:
+  table: 'comment'
+  time_interval_value: '86400'
