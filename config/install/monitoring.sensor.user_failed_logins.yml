@@ -1,0 +1,23 @@
+id: user_failed_logins
+label: 'Failed user logins'
+description: 'Failed user logins by Watchdog'
+category: 'User activity'
+sensor_id: user_failed_logins
+value_label: 'Login attempts'
+status: TRUE
+caching_time: 3600
+settings:
+  table: 'watchdog'
+  conditions:
+    -
+      field: 'type'
+      value: 'user'
+    -
+      field: 'message'
+      value: 'Login attempt failed for %user.'
+  thresholds:
+    type: exceeds
+    warning: 50
+    critical: 120
+  time_interval_field: 'timestamp'
+  time_interval_value: '86400'

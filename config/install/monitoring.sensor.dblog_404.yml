@@ -1,0 +1,21 @@
+id: dblog_404
+label: 'Page not found errors'
+description: 'Page not found errors logged by watchdog'
+category: Watchdog
+sensor_id: dblog_404
+result_class: null
+value_label: 'Watchdog events'
+status: TRUE
+caching_time: 3600
+settings:
+  table: 'watchdog'
+  conditions:
+    -
+      field: 'type'
+      value: 'page not found'
+  thresholds:
+    type: exceeds
+    warning: '20'
+    critical: '100'
+  time_interval_field: 'timestamp'
+  time_interval_value: '86400'

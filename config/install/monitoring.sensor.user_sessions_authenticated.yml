@@ -10,6 +10,7 @@ settings:
   time_interval_value: '86400'
   time_interval_field: 'timestamp'
   conditions:
-    field: 'uid'
-    value: 0
-    operator: '!='
+    -
+      field: 'uid'
+      value: 0
+      operator: '!='

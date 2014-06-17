@@ -7,6 +7,6 @@ category: 'Cron'
 status: TRUE
 settings:
   thresholds:
-    type: 'exceeds'
+    type: exceeds
     warning: 86400
     critical: 259200

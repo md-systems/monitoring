@@ -9,7 +9,8 @@ caching_time: 3600
 settings:
   table: 'past_event'
   conditions:
-    field: 'module'
-    value: 'past_form'
+    -
+      field: 'module'
+      value: 'past_form'
   time_interval_field: 'timestamp'
   time_interval_value: '86400'

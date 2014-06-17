@@ -1,0 +1,19 @@
+id: user_session_logouts
+label: 'User session logouts'
+description: 'User session logouts by Watchdog'
+category: 'User activity'
+sensor_id: database_aggregator
+value_label: 'Logouts'
+status: TRUE
+caching_time: 3600
+settings:
+  table: 'watchdog'
+  conditions:
+    -
+      field: 'type'
+      value: 'user'
+    -
+      field: 'message'
+      value: 'Session closed for %name.'
+  time_interval_field: 'timestamp'
+  time_interval_value: '86400'
