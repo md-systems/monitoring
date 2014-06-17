@@ -115,7 +115,7 @@ class SensorList extends ControllerBase {
           $links['force_execution'] = array('title' => t('Force execution'), 'href' => 'monitoring/sensors/force/' . $sensor_name);
         }
         if ($sensor_info->isConfigurable() && $this->currentUser()->hasPermission('administer monitoring')) {
-          $links['settings'] = array('title' => t('Settings'), 'href' => 'admin/config/system/monitoring/sensors/' . $sensor_name,
+          $links['edit'] = array('title' => t('Edit'), 'href' => 'admin/config/system/monitoring/sensors/' . $sensor_name,
             'query' => array('destination' => 'admin/reports/monitoring'));
         }
 
