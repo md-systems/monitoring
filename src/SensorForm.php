@@ -28,6 +28,14 @@ class SensorForm extends EntityForm {
     $form['#tree'] = TRUE;
     $sensor_info = $this->entity;
 
+    $form['category'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Category'),
+      '#maxlength' => 255,
+      '#default_value' => $sensor_info->getCategory(),
+      '#required' => TRUE,
+    );
+
     $form['label'] = array(
       '#type' => 'textfield',
       '#title' => t('Label'),
@@ -43,7 +51,7 @@ class SensorForm extends EntityForm {
       '#default_value' => $sensor_info->id(),
       '#description' => t("ID of the sensor"),
       '#required' => TRUE,
-      '#disabled' => $sensor_info->isNew(),
+      '#disabled' => !$sensor_info->isNew(),
       '#machine_name' => array(
         'exists' => 'Drupal\monitoring\Entity\SensorInfo::load',
       ),
@@ -87,14 +95,15 @@ class SensorForm extends EntityForm {
 
     }
     else {
+      $form_state['sensor_object'] = $sensor_info->getPlugin();
       // Set the sensor object into $form_state to make it available for validate
       // and submit callbacks.
-      $form['sensor_id'] = array(
+      $form['old_sensor_id'] = array(
         '#type' => 'textfield',
         '#title' => t('Sensor Plugin'),
         '#maxlength' => 255,
         '#attributes' => array('readonly' => 'readonly'),
-        '#default_value' => monitoring_sensor_manager()->getDefinition($sensor_info->sensor_id)['label']->render()
+        '#default_value' => monitoring_sensor_manager()->getDefinition($sensor_info->sensor_id)['label']->render(),
       );
     }
 
@@ -162,7 +171,7 @@ class SensorForm extends EntityForm {
       $sensor = monitoring_sensor_manager()->createInstance($plugin, array('sensor_info' => $this->entity));
     }
     else {
-      $sensor = $this->entity->getPlugin();
+      $sensor = $form_state['sensor_object'];
     }
     $sensor->settingsFormValidate($form, $form_state);
   }
@@ -173,31 +182,8 @@ class SensorForm extends EntityForm {
   public function save(array $form, array &$form_state) {
     /** @var Sensor $sensor */
     $sensor_info = $this->entity;
-    if ($sensor_info->isNew()) {
-      $plugin = $form_state['values']['sensor_id'];
-      $sensor = monitoring_sensor_manager()->createInstance($plugin, array('sensor_info' => $this->entity));
-      //      $sensor_info->id = $form_state['values'][''];
-
-
-    }
-    drupal_set_message('<pre>'.print_r($form,TRUE).'</pre>');
-    drupal_set_message('<pre>'.print_r($form_state['values'],TRUE).'</pre>');
-    /*    else {
-      $sensor = $sensor_info->getPlugin();
-    }
-    $new_settings = $form_state['values'];
-    $sensor_info->status = $new_settings['enabled'];
-    $sensor_info->label = $new_settings['label'];
-    $sensor_info->description = $new_settings['description'];
-    $settings = $sensor_info->getSettings();
-    foreach($new_settings as $key => $value) {
-      if(isset($settings[$key])) {
-	$settings[$key] = $value;
-      }
-    }
-    $sensor_info->settings = $settings;
     $sensor_info->save();
     $form_state['redirect_route']['route_name'] = 'monitoring.sensors_overview_settings';
-    drupal_set_message($this->t('Sensor settings saved.'));*/
+    drupal_set_message($this->t('Sensor settings saved.'));
   }
 }
