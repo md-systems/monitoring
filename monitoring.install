@@ -135,8 +135,7 @@ function monitoring_install() {
     ));
     $sensor->save();
   }
-
-  // @todo - uncomment this section after past module is ready for 8.x
+  /* @todo - uncomment the below section once the concerned modules are ported to 8.x
   // Declares Past events sensors.
   $severities = monitoring_event_severities();
   foreach (past_event_severities() as $severity => $name) {
@@ -278,7 +277,7 @@ function monitoring_install() {
         'time_interval_value' => 60 * 60 * 24,
       ),
     ));
-  }
+  }*/
 }
 
 /**
