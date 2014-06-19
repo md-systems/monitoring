@@ -1,0 +1,10 @@
+id: core_maintenance_mode
+label: 'Maintenance mode'
+description: 'Site maintenance mode'
+sensor_id: state_value
+value_type: 'bool'
+numeric: FALSE
+status: TRUE
+settings:
+  state: 'system.maintenance_mode'
+  value: FALSE
