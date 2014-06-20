@@ -35,7 +35,7 @@ class SensorQueueSize extends SensorThresholds {
     $form['queue'] = array(
       '#type' => 'select',
       '#options' => $queues,
-      '#default_value' => $queues,
+      '#default_value' => $this->sensorInfo,
       '#required' => TRUE,
       '#title' => t('Queues'),
     );
