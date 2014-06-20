@@ -27,6 +27,22 @@ use Drupal;
 class SensorQueueSize extends SensorThresholds {
 
   /**
+   * Adds UI to select Queue for the sensor.
+   */
+  public function settingsForm($form, &$form_state) {
+    $form = parent::settingsForm($form, $form_state);
+    $queues = array_keys(Drupal::moduleHandler()->invokeAll('queue_info'));
+    $form['queue'] = array(
+      '#type' => 'select',
+      '#options' => $queues,
+      '#default_value' => $queues,
+      '#required' => TRUE,
+      '#title' => t('Queues'),
+    );
+    return $form;
+  }
+
+  /**
    * {@inheritdoc}
    */
   public function runSensor(SensorResultInterface $result) {
