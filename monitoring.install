@@ -135,149 +135,39 @@ function monitoring_install() {
     ));
     $sensor->save();
   }
-  /* @todo - uncomment the below section once the concerned modules are ported to 8.x
-  // Declares Past events sensors.
-  $severities = monitoring_event_severities();
-  foreach (past_event_severities() as $severity => $name) {
+
+  // Declares core requirements sensors.
+  // Load .install files
+  include_once DRUPAL_ROOT . '/core/includes/install.inc';
+  drupal_load_updates();
+
+  foreach (\Drupal::moduleHandler()->getImplementations('requirements') as $module) {
+    // Skip update module as there is a separate sensors for core and contrib.
+    if ($module == 'update') {
+      continue;
+    }
     $sensor = SensorInfo::create(array(
-      'id' => 'past_db_event_severity_' . $severities[$severity],
-      'label' => String::format('Severity @severity', array('@severity' => $name)),
-      'description' => String::format('Past events with severity @severity',array('@severity' => $name)),
-      'sensor_id' => 'database_aggregator',
-      'value_label' => 'Events',
-      'category' => 'Past',
+      'id' => 'core_requirements_' . $module,
+      'label' => String::format('Module @module', array('@module' => $module)),
+      'description' => String::format('Requirements of the @module module', array('@module' => $module)),
+      'sensor_id' => 'core_requirements',
+      'numeric' => FALSE,
+      'category' => 'Requirements',
       'caching_time' => 3600,
       'status' => TRUE,
       'settings' => array(
-        'table' => 'past_event',
-        'conditions' => array(
-          array('field' => 'severity', 'value' => $severity),
-        ),
-        'time_interval_field' => 'timestamp',
-        'time_interval_value' => 86400,
+        'module' => $module,
+        // List requirements keys which reports will be suppressed.
+        'exclude keys' => array(),
       ),
     ));
+    // Ignore the cron key for system requirements, as we have a separate
+    // sensor for this.
+    if ($module == 'system') {
+      $sensor->settings['exclude keys'][] = 'cron';
+    }
     $sensor->save();
   }
-  $sensor = SensorInfo::load('past_db_event_severity_' . $severities[PAST_SEVERITY_CRITICAL]);
-  $sensor->settings['thresholds'] = array(
-    'type' => 'exceeds',
-    'warning' => 5,
-    'critical' => 1,
-  );
-  $sensor->save();
-
-  // Declares elysia cron sensors
-  $result = db_select('elysia_cron', 'e')->fields('e', array('name'))->execute()->fetchAll();
-
-  foreach ($result as $row) {
-    // Remove the colon from the name as it breaks munin graphs.
-    $name = str_replace(':', '', $row->name);
-    $sensor = SensorInfo::create(array(
-      'id' => 'elysia_cron_' . $name . '_last_execution',
-      'label' => String::format('Elysia @name execution', array('@name' => $row->name)),
-      'description' => String::format('Last execution duration for elysia @name cron', array('@name' => $row->name)),
-      'sensor_id' => 'elysia_cron',
-      'value_type' => 'time_interval',
-      'category' => 'Elysia Cron',
-      'status' => FALSE,
-      'settings' => array(
-        'name' => $row->name,
-        'metric' => 'last_execution_time',
-      ),
-    ));
-    $sensor->save();
-
-    $sensor = SensorInfo::create(array(
-      'id' => 'elysia_cron_' . $name . '_last_run',
-      'label' => String::format('Elysia @name run', array('@name' => $row->name)),
-      'description' => String::format('Time since last elysia @name run', array('@name' => $row->name)),
-      'sensor_id' => 'elysia_cron',
-      'value_type' => 'time_interval',
-      'category' => 'Elysia Cron',
-      'status' => FALSE,
-      'settings' => array(
-        'name' => $row->name,
-        'metric' => 'last_run',
-      ),
-    ));
-    $sensor->save();
-  }
-
-  //Declares commerce order status sensors.
-  foreach (commerce_order_statuses() as $status_name => $status_info) {
-    $sensor = SensorInfo::create(array(
-      'id' => 'commerce_order_status_' . $status_name,
-      'label' => String::format('Orders in status @name', array('@name' => $status_info['title'])),
-      'sensor_id' => 'database_aggregator',
-      'value_label' => 'Orders',
-      'status' => FALSE,
-      'category' => 'Commerce',
-      'caching_time' => 3600,
-      'settings' => array(
-        'entity_type' => 'commerce_order',
-        'conditions' => array(
-          array('field' => 'status', 'value' => $status_name),
-        ),
-        'time_interval_field' => 'created',
-        'time_interval_value' => 60 * 60 * 24,
-      ),
-    ));
-    $sensor->save();
-  }
-
-  $currencies = commerce_currencies(TRUE);
-  foreach ($currencies as $currency) {
-    $sensor = SensorInfo::create(array(
-      'id' => 'commerce_order_turnover_' . strtolower($currency['code']),
-      'label' => String::format('Turnover in @currency', array('@currency' => $currency['code'])),
-      'description' => String::format('Turnover from completed orders in @currency', array('@currency' => $currency['code'])),
-      'sensor_id' => 'commerce_turnover',
-      'value_label' => $currency['code'],
-      'value_type' => 'commerce_currency',
-      'category' => 'Commerce',
-      'caching_time' => 3600,
-      'settings' => array(
-        'table' => 'commerce_order',
-        'conditions' => array(
-          'status' => array(
-            'field' => 'status',
-            'value' => array('pending'),
-            'operator' => 'IN',
-            ),
-        ),
-      'time_interval_field' => 'created',
-      'time_interval_value' => 60 * 60 * 24,
-      'currency_code' => $currency['code'],
-      ),
-    ));
-    $sensor->save();
-  }
-  if (count($currencies) > 1) {
-    $sensor = SensorInfo::create(array(
-      'id' => 'commerce_order_turnover_total',
-      'label' => 'Total turnover',
-      'description' => 'Total turnover from completed orders in all currencies',
-      'sensor_id' => 'commerce_turnover',
-      'value_label' => $currencies[commerce_default_currency()]['code'],
-      'value_type' => 'commerce_currency',
-      'category' => 'Commerce',
-      'caching_time' => 3600,
-      'status' => TRUE,
-      'settings' => array(
-        'table' => 'commerce_order',
-        'conditions' => array(
-          'status' => array(
-            'field' => 'status',
-            'value' => array('pending'),
-            'operator' => 'IN',
-          ),
-        ),
-        'time_interval_field' => 'created',
-        'time_interval_value' => 60 * 60 * 24,
-      ),
-    ));
-  }*/
 }
 
 /**
