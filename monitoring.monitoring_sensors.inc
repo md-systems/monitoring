@@ -57,33 +57,6 @@ function monitoring_past_db_monitoring_sensor_info() {
 /**
  * Implements monitoring_MODULE_monitoring_sensor_info().
  *
- * Module: system
- */
-function monitoring_system_monitoring_sensor_info() {
-
-  // === Queue === //
-
-  $queues = array_keys(Drupal::moduleHandler()->invokeAll('queue_info'));
-
-  foreach ($queues as $queue) {
-    $info['core_queue_' . $queue] = array(
-      'label' => String::checkPlain($queue),
-      'description' => String::format('Size of @queue queue', array('@queue' => $queue)),
-      'sensor_id' => 'queue_size',
-      'value_label' => 'Items',
-      'settings' => array(
-        'category' => 'Queue',
-        'queue' => $queue,
-      ),
-    );
-  }
-
-  return $info;
-}
-
-/**
- * Implements monitoring_MODULE_monitoring_sensor_info().
- *
  * Module: elysia_cron
  */
 function monitoring_elysia_cron_monitoring_sensor_info() {

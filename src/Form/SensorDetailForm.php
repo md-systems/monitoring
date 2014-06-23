@@ -6,7 +6,7 @@
 
 namespace Drupal\monitoring\Form;
 
-use Drupal\Core\Form\FormBase;
+use Drupal\Core\Entity\EntityForm;
 use Drupal\monitoring\Sensor\DisabledSensorException;
 use Drupal\monitoring\Sensor\NonExistingSensorException;
 use Drupal\monitoring\Sensor\SensorManager;
@@ -18,7 +18,7 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 /**
  * Sensor detail form controller.
  */
-class SensorDetailForm extends FormBase {
+class SensorDetailForm extends EntityForm {
 
   /**
    * Stores the sensor runner.
@@ -33,7 +33,7 @@ class SensorDetailForm extends FormBase {
    * @var \Drupal\monitoring\Sensor\SensorManager
    */
   protected $sensorManager;
-
+  protected $sensorName;
   /**
    * Constructs a \Drupal\monitoring\Form\SensorDetailForm object.
    *
@@ -57,20 +57,21 @@ class SensorDetailForm extends FormBase {
     );
   }
 
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getFormID() {
-    return 'sensor_detail_form';
+  public function buildForm(array $form, array &$form_state, $sensor_name = '') {
+    $this->sensorName = $sensor_name;
+    $form = parent::buildForm($form, $form_state);
+    return $form;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function buildForm(array $form, array &$form_state, $sensor_name = '') {
-    $form_state['sensor_name'] = $sensor_name;
-
+  public function form(array $form, array &$form_state) {
+    // print_r($this->);
+    //    drupal_set_message('<pre>'.print_r($form_state,TRUE).'</pre>');
+    $form = parent::form($form, $form_state);
+    //    $form_state['sensor_name'] = $sensor_name;
+    $sensor_name = $this->sensorName;
     try {
       $sensor_info = $this->sensorManager->getSensorInfoByName($sensor_name);
       $results = $this->sensorRunner->runSensors(array($sensor_info), FALSE, TRUE);
@@ -210,13 +211,13 @@ class SensorDetailForm extends FormBase {
   /**
    * {@inheritdoc}
    */
-  public function validateForm(array &$form, array &$form_state) {
+  public function validate(array $form, array &$form_state) {
   }
 
   /**
    * {@inheritdoc}
    */
-  public function submitForm(array &$form, array &$form_state) {
+  public function save(array $form, array &$form_state) {
     $this->sensorRunner->resetCache(array($form_state['sensor_name']));
     drupal_set_message(t('Sensor force run executed.'));
   }

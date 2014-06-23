@@ -17,10 +17,10 @@ monitoring.sensor_list:
 monitoring.detail_form:
   path: '/admin/reports/monitoring/sensors/{sensor_name}'
   defaults:
-    _form: '\Drupal\monitoring\Form\SensorDetailForm'
-    _title_callback: '\Drupal\monitoring\Form\SensorDetailForm::formTitle'
+    _entity_form: 'monitoring_sensor.details'
+    _title: 'Details'
   requirements:
-    _permission: 'monitoring reports'
+    _permission: 'administer monitoring'
 
 monitoring.force_run_all:
   path: 'monitoring/sensors/force'

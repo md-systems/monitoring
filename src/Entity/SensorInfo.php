@@ -17,12 +17,12 @@ use Drupal\Core\Config\Entity\ConfigEntityInterface;
  *   id = "monitoring_sensor",
  *   label = @Translation("Monitoring Sensor"),
  *   controllers = {
- *     "view_builder" = "Drupal\monitoring\SensorViewBuilder",
  *     "list_builder" = "Drupal\monitoring\SensorListBuilder",
  *     "form" = {
  *       "add" = "Drupal\monitoring\SensorForm",
  *       "delete" = "Drupal\monitoring\SensorDeleteForm",
- *       "edit" = "Drupal\monitoring\SensorForm"
+ *       "edit" = "Drupal\monitoring\SensorForm",
+ *       "details" = "Drupal\monitoring\Form\SensorDetailForm"
  *     }
  *   },
  *   admin_permission = "administer sensors",
