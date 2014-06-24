@@ -70,7 +70,7 @@ class SensorResultEntity extends ContentEntityBase {
       ->setLabel(t('Sensor value'))
       ->setDescription(t('The sensor value at the moment of the sensor run.'));
 
-    $fields['sensor_message'] = FieldDefinition::create('string')
+    $fields['sensor_message'] = FieldDefinition::create('string_long')
       ->setLabel(t('Sensor message'))
       ->setDescription(t('The sensor message reported by the sensor.'));
 
