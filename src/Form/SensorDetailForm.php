@@ -33,7 +33,14 @@ class SensorDetailForm extends EntityForm {
    * @var \Drupal\monitoring\Sensor\SensorManager
    */
   protected $sensorManager;
+
+  /**
+   * Stores the sensor id.
+   *
+   * @string
+   */
   protected $sensorName;
+
   /**
    * Constructs a \Drupal\monitoring\Form\SensorDetailForm object.
    *
@@ -57,6 +64,9 @@ class SensorDetailForm extends EntityForm {
     );
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function buildForm(array $form, array &$form_state, $sensor_name = '') {
     $this->sensorName = $sensor_name;
     $form = parent::buildForm($form, $form_state);
@@ -67,10 +77,7 @@ class SensorDetailForm extends EntityForm {
    * {@inheritdoc}
    */
   public function form(array $form, array &$form_state) {
-    // print_r($this->);
-    //    drupal_set_message('<pre>'.print_r($form_state,TRUE).'</pre>');
     $form = parent::form($form, $form_state);
-    //    $form_state['sensor_name'] = $sensor_name;
     $sensor_name = $this->sensorName;
     try {
       $sensor_info = $this->sensorManager->getSensorInfoByName($sensor_name);
