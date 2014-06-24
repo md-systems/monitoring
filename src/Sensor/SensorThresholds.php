@@ -149,7 +149,7 @@ abstract class SensorThresholds extends SensorConfigurable implements SensorThre
    */
   public function settingsFormValidate($form, &$form_state) {
     $form_key = $this->info->getName();
-    $values = $form_state['values'][$form_key]['thresholds'];
+    $values = $form_state['values']['settings']['thresholds'];
     $type = $values['type'];
 
     switch ($type) {

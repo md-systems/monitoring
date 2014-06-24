@@ -58,14 +58,14 @@ class SensorInfo extends ConfigEntityBase {
    *
    * @var string
    */
-  public $description;
+  public $description = '';
 
   /**
    * The sensor category.
    *
    * @var string
    */
-  public $category;
+  public $category = 'Other';
 
   /**
    * The sensor id.
@@ -121,7 +121,7 @@ class SensorInfo extends ConfigEntityBase {
    *
    * @var bool
    */
-  public $status;
+  public $status = TRUE;
 
   /**
    * The sensor id.

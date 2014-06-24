@@ -3,6 +3,7 @@ label: 'Default theme'
 description: 'Site default theme'
 sensor_id: config_value
 numeric: FALSE
+category: 'Other'
 status: FALSE
 settings:
   config: 'system.theme'
