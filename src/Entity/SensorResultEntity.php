@@ -32,21 +32,6 @@ class SensorResultEntity extends ContentEntityBase {
   /**
    * {@inheritdoc}
    */
-  public function id() {
-    return $this->get('record_id')->value;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function preSave(EntityStorageInterface $storage_controller, $update = TRUE) {
-    parent::preSave($storage_controller);
-    $this->timestamp = REQUEST_TIME;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   public static function baseFieldDefinitions(EntityTypeInterface $entity_type) {
     $fields['record_id'] = FieldDefinition::create('integer')
       ->setLabel(t('Record ID'))
@@ -70,7 +55,7 @@ class SensorResultEntity extends ContentEntityBase {
       ->setLabel(t('Sensor value'))
       ->setDescription(t('The sensor value at the moment of the sensor run.'));
 
-    $fields['sensor_message'] = FieldDefinition::create('string')
+    $fields['sensor_message'] = FieldDefinition::create('string_long')
       ->setLabel(t('Sensor message'))
       ->setDescription(t('The sensor message reported by the sensor.'));
 
