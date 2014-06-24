@@ -82,7 +82,7 @@ class SensorCoreRequirements extends Sensor {
    *   Thrown when the given module does not provide a requirements hook.
    */
   protected function getRequirements($module) {
-    module_load_include('install', $module);
+    module_load_install($module);
     $function = $module . '_requirements';
 
     if (!function_exists($function)) {
