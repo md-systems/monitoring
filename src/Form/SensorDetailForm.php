@@ -35,13 +35,6 @@ class SensorDetailForm extends EntityForm {
   protected $sensorManager;
 
   /**
-   * Stores the sensor id.
-   *
-   * @string
-   */
-  protected $sensorName;
-
-  /**
    * Constructs a \Drupal\monitoring\Form\SensorDetailForm object.
    *
    * @param \Drupal\monitoring\SensorRunner $sensor_runner
@@ -68,7 +61,7 @@ class SensorDetailForm extends EntityForm {
    * {@inheritdoc}
    */
   public function buildForm(array $form, array &$form_state, $sensor_name = '') {
-    $this->sensorName = $sensor_name;
+    $form_state['sensor_name'] = $sensor_name;
     $form = parent::buildForm($form, $form_state);
     return $form;
   }
@@ -78,7 +71,7 @@ class SensorDetailForm extends EntityForm {
    */
   public function form(array $form, array &$form_state) {
     $form = parent::form($form, $form_state);
-    $sensor_name = $this->sensorName;
+    $sensor_name = $form_state['sensor_name'];
     try {
       $sensor_info = $this->sensorManager->getSensorInfoByName($sensor_name);
       $results = $this->sensorRunner->runSensors(array($sensor_info), FALSE, TRUE);
@@ -141,7 +134,7 @@ class SensorDetailForm extends EntityForm {
       $form['sensor_result']['force_run'] = array(
         '#type' => 'submit',
         '#value' => $this->t('Run now'),
-        '#access' => \Drupal::currentUser()->hasPermission('monitoring force run'),
+	'#access' => \Drupal::currentUser()->hasPermission('monitoring force run'),
       );
     }
     elseif ($sensor_info->getCachingTime()) {
@@ -224,7 +217,7 @@ class SensorDetailForm extends EntityForm {
   /**
    * {@inheritdoc}
    */
-  public function save(array $form, array &$form_state) {
+  public function submitForm(array &$form, array &$form_state) {
     $this->sensorRunner->resetCache(array($form_state['sensor_name']));
     drupal_set_message(t('Sensor force run executed.'));
   }
