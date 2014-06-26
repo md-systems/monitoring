@@ -66,7 +66,9 @@ class SensorForm extends EntityForm {
     if ($sensor_info->isNew()) {
       $plugin_types = array();
       foreach (monitoring_sensor_manager()->getDefinitions() as $plugin_id => $definition) {
-        $plugin_types[$plugin_id] = $definition['label']->render();
+	if ($definition['addable'] == TRUE) {
+	  $plugin_types[$plugin_id] = $definition['label']->render();
+	}
       }
       uasort($plugin_types, 'strnatcasecmp');
       $form['sensor_id'] = array(

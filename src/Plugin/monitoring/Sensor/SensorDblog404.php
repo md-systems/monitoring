@@ -16,7 +16,8 @@ use Drupal\monitoring\Result\SensorResultInterface;
  *   id = "dblog_404",
  *   provider = "dblog",
  *   label = @Translation("404 page errors (database log)"),
- *   description = @Translation("Monitors 404 page errors from database log.")
+ *   description = @Translation("Monitors 404 page errors from database log."),
+ *   addable = TRUE
  * )
  *
  * Displays URL with highest occurrence as message.

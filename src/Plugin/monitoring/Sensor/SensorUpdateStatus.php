@@ -15,7 +15,8 @@ use Drupal\monitoring\Sensor\Sensor;
  * @Sensor(
  *   id = "update_status",
  *   label = @Translation("Update status"),
- *   description = @Translation("Monitors for available updates of Drupal core and installed contrib modules.")
+ *   description = @Translation("Monitors for available updates of Drupal core and installed contrib modules."),
+ *   addable = FALSE
  * )
  *
  * Based on drupal core update module.

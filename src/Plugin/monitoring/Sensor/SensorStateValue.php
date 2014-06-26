@@ -16,7 +16,8 @@ use Drupal\monitoring\Sensor\Sensors\SensorValueComparisonBase;
  * @Sensor(
  *   id = "state_value",
  *   label = @Translation("State Value"),
- *   description = @Translation("Monitors and checks for the variable value.")
+ *   description = @Translation("Monitors and checks for the variable value."),
+ *   addable = TRUE
  * )
  *
  */

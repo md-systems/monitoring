@@ -44,4 +44,11 @@ class Sensor extends Plugin {
    * @var string
    */
   public $provider;
+
+  /**
+   * Whether plugin instances can be created or not.
+   *
+   * @var boolean
+   */
+  public $addable;
 }

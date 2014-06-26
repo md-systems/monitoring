@@ -16,7 +16,8 @@ use Drupal\monitoring\Sensor\SensorExtendedInfoInterface;
  * @Sensor(
  *   id = "monitoring_git_dirty_tree",
  *   label = @Translation("Git Dirty Tree"),
- *   description = @Translation("Monitors the git repository for dirty files.")
+ *   description = @Translation("Monitors the git repository for dirty files."),
+ *   addable = TRUE
  * )
  *
  * Tracks both changed and untracked files.

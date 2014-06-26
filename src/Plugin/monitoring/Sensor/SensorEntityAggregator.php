@@ -18,7 +18,8 @@ use Drupal\monitoring\Sensor\Sensors\SensorDatabaseAggregatorBase;
  * @Sensor(
  *   id = "entity_aggregator",
  *   label = @Translation("Entity Aggregator"),
- *   description = @Translation("Utilises the entity query aggregate functionality.")
+ *   description = @Translation("Utilises the entity query aggregate functionality."),
+ *   addable = TRUE
  * )
  *
  * It utilises the entity query aggregate functionality.

@@ -16,7 +16,8 @@ use Drupal;
  * @Sensor(
  *   id = "queue_size",
  *   label = @Translation("Queue Size"),
- *   description = @Translation("Monitors number of items for a given core queue.")
+ *   description = @Translation("Monitors number of items for a given core queue."),
+ *   addable = TRUE
  * )
  *
  * Every instance represents a single queue.
