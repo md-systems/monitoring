@@ -2,6 +2,8 @@ services:
   monitoring.sensor_manager:
     class: Drupal\monitoring\Sensor\SensorManager
     arguments: ['@container.namespaces', '@cache.discovery', '@module_handler', '@config.factory']
+    tags:
+      - { name: plugin_manager_cache_clear }
   monitoring.sensor_runner:
     class: Drupal\monitoring\SensorRunner
     arguments: ['@monitoring.sensor_manager', '@cache.default', '@config.factory']
