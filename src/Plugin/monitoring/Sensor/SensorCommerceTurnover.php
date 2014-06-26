@@ -16,7 +16,8 @@ use Drupal\monitoring\Sensor\Sensor;
  * @Sensor(
  *   id = "commerce_turnover",
  *   label = @Translation("Commerce order turnover"),
- *   description = @Translation("Monitors how much money was earned with commerce orders.")
+ *   description = @Translation("Monitors how much money was earned with commerce orders."),
+ *   provider = "commerce_order"
  * )
  *
  */

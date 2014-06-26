@@ -15,7 +15,8 @@ use Drupal\monitoring\Sensor\SensorThresholds;
  * @Sensor(
  *   id = "elysia_cron",
  *   label = @Translation("Elysia Cron"),
- *   description = @Translation("Monitors elysia cron channels for last execution.")
+ *   description = @Translation("Monitors elysia cron channels for last execution."),
+ *   provider = "elysia_cron"
  * )
  *
  */

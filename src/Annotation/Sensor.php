@@ -38,4 +38,10 @@ class Sensor extends Plugin {
    */
   public $description = '';
 
+  /**
+   * The provider of the annotated class.
+   *
+   * @var string
+   */
+  public $provider;
 }
