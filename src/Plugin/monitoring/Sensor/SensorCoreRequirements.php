@@ -17,7 +17,7 @@ use Drupal\monitoring\Sensor\Sensor;
  *   id = "core_requirements",
  *   label = @Translation("Core Requirements"),
  *   description = @Translation("Monitors a specific module hook_requirements."),
- *   addable = TRUE
+ *   addable = FALSE
  * )
  *
  * @todo Shorten sensor message and add improved verbose output.

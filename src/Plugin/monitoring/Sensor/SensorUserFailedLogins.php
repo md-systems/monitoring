@@ -16,7 +16,7 @@ use Drupal\monitoring\Result\SensorResultInterface;
  *   id = "user_failed_logins",
  *   label = @Translation("User Failed Logins"),
  *   description = @Translation("Monitors user failed login from dblog messages."),
- *   addable = TRUE
+ *   addable = FALSE
  * )
  *
  * Helps to identify bots or brute force attacks.

@@ -18,7 +18,7 @@ use Drupal\monitoring\Sensor\Sensors\SensorDatabaseAggregatorBase;
  *   id = "database_aggregator",
  *   label = @Translation("Simple Database Aggregator"),
  *   description = @Translation("Simple database aggregator able to query a single db table."),
- *   addable = TRUE
+ *   addable = FALSE
  * )
  *
  */

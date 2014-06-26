@@ -17,7 +17,7 @@ use Drupal;
  *   label = @Translation("Image Missing Style"),
  *   description = @Translation("Monitors image derivate creation errors from database log."),
  *   provider = "image",
- *   addable = TRUE
+ *   addable = FALSE
  * ),
  *
  * Displays image derivate with highest occurrence as message.

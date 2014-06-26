@@ -18,7 +18,7 @@ use Drupal;
  *   id = "monitoring_enabled_modules",
  *   label = @Translation("Enabled Modules"),
  *   description = @Translation("Monitors installed modules."),
- *   addable = TRUE
+ *   addable = FALSE
  * )
  *
  */

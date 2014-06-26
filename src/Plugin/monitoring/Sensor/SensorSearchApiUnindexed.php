@@ -17,7 +17,7 @@ use Drupal\monitoring\Sensor\SensorThresholds;
  *   label = @Translation("Unindexed Search Items"),
  *   description = @Translation("Monitors unindexed items for a search api index."),
  *   provider = "search_api",
- *   addable = TRUE
+ *   addable = FALSE
  * )
  *
  * Every instance represents a single index.

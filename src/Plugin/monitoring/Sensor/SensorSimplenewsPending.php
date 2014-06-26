@@ -17,7 +17,7 @@ use Drupal\monitoring\Sensor\SensorThresholds;
  *   label = @Translation("Simplenews Pending"),
  *   description = @Translation("Monitors pending items in the simplenews mail spool."),
  *   provider = "simplenews",
- *   addable = TRUE
+ *   addable = FALSE
  * )
  *
  * Once all is processed, the value should be 0.

@@ -16,7 +16,7 @@ use Drupal\monitoring\Sensor\Sensors\SensorValueComparisonBase;
  *   id = "config_value",
  *   label = @Translation("Config Value"),
  *   description = @Translation("Checks for a specific configuration value."),
- *   addable = TRUE
+ *   addable = FALSE
  * )
  *
  */

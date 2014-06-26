@@ -16,7 +16,7 @@ use Drupal\monitoring\Sensor\SensorConfigurable;
  *   id = "monitoring_disappeared_sensors",
  *   label = @Translation("Disappeared Sensors"),
  *   description = @Translation("Monitors if sensors disappeared without prior being disabled."),
- *   addable = TRUE
+ *   addable = FALSE
  * )
  *
  * It stores the list of available sensors and their enabled/disabled status
