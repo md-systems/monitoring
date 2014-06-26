@@ -15,9 +15,9 @@ use Drupal;
  * @Sensor(
  *   id = "image_style_missing",
  *   label = @Translation("Image Missing Style"),
- *   description = @Translation("Monitors image derivate creation errors from database log.")
- * ),
+ *   description = @Translation("Monitors image derivate creation errors from database log."),
  *   provider = "image"
+ * ),
  *
  * Displays image derivate with highest occurrence as message.
  */
