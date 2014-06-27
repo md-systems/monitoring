@@ -1,0 +1,11 @@
+id: test_sensor_falls
+label: 'Test sensor falls'
+description: 'Test sensor that sets error interval below give value.'
+category: 'Test'
+sensor_id: test_sensor
+settings:
+  result_logging: TRUE
+  thresholds:
+    type: 'falls'
+    warning: 10
+    critical: 5

@@ -1,0 +1,13 @@
+id: test_sensor_inner
+label: 'Test sensor inner'
+description: 'Test sensor that sets inner error intervals.'
+category: 'Test'
+sensor_id: test_sensor
+settings:
+  result_logging: TRUE
+  thresholds:
+    type: 'inner_interval'
+    warning_low: 1
+    critical_low: 4
+    warning_high: 6
+    critical_high: 9

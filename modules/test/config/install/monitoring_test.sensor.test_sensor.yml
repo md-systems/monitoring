@@ -1,0 +1,7 @@
+id: test_sensor
+label: 'Test sensor'
+description: 'Test sensor status.'
+category: 'Test'
+sensor_id: test_sensor
+settings:
+  result_logging: TRUE

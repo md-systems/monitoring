@@ -1,0 +1,7 @@
+id: test_sensor_custom
+label: 'Test from custom hook'
+description: ''
+category: 'Test'
+sensor_id: test_sensor
+settings:
+  result_logging: FALSE

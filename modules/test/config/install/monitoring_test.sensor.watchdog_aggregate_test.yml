@@ -1,0 +1,15 @@
+id: watchdog_aggregate_test
+label: 'Watchdog aggregate test'
+description: 'Test sensor for watchdog aggregate.'
+category: 'Test'
+sensor_id: database_aggregator
+settings:
+  result_logging: FALSE
+  thresholds:
+    warning: 1
+    critical: 2
+  table: 'watchdog'
+  conditions:
+    -
+      field: 'type'
+      value: 'test_watchdog_aggregate_sensor'

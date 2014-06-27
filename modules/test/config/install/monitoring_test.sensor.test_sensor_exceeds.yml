@@ -1,0 +1,11 @@
+id: test_sensor_exceeds
+label: 'Test sensor exceeds'
+description: 'Test sensor that sets error interval above give value.'
+category: 'Test'
+sensor_id: test_sensor
+settings:
+  result_logging: TRUE
+  thresholds:
+    type: 'exceeds'
+    warning: 5
+    critical: 10
