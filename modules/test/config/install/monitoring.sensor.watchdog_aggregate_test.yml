@@ -9,7 +9,5 @@ settings:
     warning: 1
     critical: 2
   table: 'watchdog'
-  conditions:
-    -
-      field: 'type'
-      value: 'test_watchdog_aggregate_sensor'
+  time_interval_field: 'timestamp'
+  time_interval_value: 86400

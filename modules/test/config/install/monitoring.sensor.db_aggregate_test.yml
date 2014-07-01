@@ -1,0 +1,21 @@
+id: db_aggregate_test
+label: 'DB Aggregate test'
+description: 'Tests the generic DB aggregate sensor.'
+category: 'Test'
+sensor_id: entity_aggregator
+value_label: 'Druplicons'
+result_logging: TRUE
+caching_time: 3600
+settings:
+  entity_type: 'node'
+  thresholds:
+    type: 'falls'
+    warning: 2
+    critical: 1
+  table: 'watchdog'
+  time_interval_field: 'created'
+  time_interval_value: 86400
+  conditions:
+    -
+      field: 'type'
+      value: 'page'

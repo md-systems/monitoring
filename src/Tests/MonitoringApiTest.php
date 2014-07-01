@@ -10,6 +10,7 @@ use Drupal\monitoring\Result\SensorResultInterface;
 use Drupal\monitoring\Sensor\DisabledSensorException;
 use Drupal\monitoring\Sensor\NonExistingSensorException;
 use Drupal\monitoring\SensorRunner;
+use Drupal\monitoring\Entity\SensorInfo;
 
 /**
  * Tests for Monitoring API.
@@ -353,7 +354,9 @@ class MonitoringApiTest extends MonitoringUnitTestBase {
       'sensor_status' => SensorResultInterface::STATUS_OK,
     );
     \Drupal::state()->set('monitoring_test.sensor_result_data', $test_sensor_result_data);
-    monitoring_sensor_manager()->saveSettings('test_sensor', array('result_logging' => TRUE));
+    $sensor = SensorInfo::load('test_sensor');
+    $sensor->settings['result_logging'] = TRUE;
+    $sensor->save();
     $this->runSensor('test_sensor');
 
     $logs = $this->loadSensorLog('test_sensor');
@@ -365,7 +368,8 @@ class MonitoringApiTest extends MonitoringUnitTestBase {
     $this->assertEqual($log->sensor_message->value, 'Value 1, test message');
 
     // Set log_calls sensor settings to false - that should prevent logging.
-    monitoring_sensor_manager()->saveSettings('test_sensor', array('result_logging' => FALSE));
+    $sensor->settings['result_logging'] = FALSE;
+    $sensor->save();
     debug(\Drupal::config('monitoring.settings')->get('test_sensor'));
     /** @var SensorRunner $runner */
     $runner = \Drupal::service('monitoring.sensor_runner');
@@ -388,7 +392,8 @@ class MonitoringApiTest extends MonitoringUnitTestBase {
     // Set the logging strategy to "Log all events".
     \Drupal::config('monitoring.settings')->set('sensor_call_logging', 'all')->save();
     // Running the sensor with 'result_logging' settings FALSE must record the call.
-    monitoring_sensor_manager()->saveSettings('test_sensor', array('result_logging' => FALSE));
+    $sensor->settings['result_logging'] = FALSE;
+    $sensor->save();
     $this->container->set('monitoring.sensor_runner', NULL);
     $this->runSensor('test_sensor');
     $logs = $this->loadSensorLog('test_sensor');
@@ -397,38 +402,13 @@ class MonitoringApiTest extends MonitoringUnitTestBase {
     // Set the logging strategy to "No logging".
     \Drupal::config('monitoring.settings')->set('sensor_call_logging', 'none')->save();
     // Despite log_calls TRUE we should not log any call.
-    monitoring_sensor_manager()->saveSettings('test_sensor', array('result_logging' => TRUE));
+    $sensor->settings['result_logging'] = TRUE;
+    $sensor->save();
     $this->container->set('monitoring.sensor_runner', NULL);
     $logs = $this->loadSensorLog('test_sensor');
     $this->runSensor('test_sensor');
     $this->assertEqual(count($logs), 3);
 
-  }
-
-  /**
-   * Test sensor info hook precedence.
-   *
-   * Test if custom sensor info hook implementation takes precedence from
-   * the local implementation.
-   *
-   * We need to run this test as last as it includes a file that will result
-   * in other tests failures.
-   */
-  function testSensorInfoPrecedence() {
-    // == Test monitoring sensor info. == //
-
-    $sensor_info = monitoring_sensor_info();
-    // The integration hook must be loaded.
-    $this->assertTrue(isset($sensor_info['test_sensor_integration']));
-
-    // Include file with custom hook implementation.
-    require_once drupal_get_path('module', 'monitoring_test') . '/monitoring_test.custom_hook.inc';
-    monitoring_sensor_manager()->resetCache();
-    // Reset the module implements cache.
-    \Drupal::moduleHandler()->resetImplementations();
-    $sensor_info = monitoring_sensor_info();
-    // The custom hook must take precedence.
-    $this->assertFalse(isset($sensor_info['test_sensor_integration']));
   }
 
   /**

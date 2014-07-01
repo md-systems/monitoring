@@ -26,7 +26,7 @@ abstract class MonitoringUnitTestBase extends DrupalUnitTestBase {
   function setUp() {
     parent::setUp();
 
-    $this->installSchema('monitoring', array('monitoring_sensor_result'));
+    $this->installEntitySchema('monitoring_sensor_result');
     $this->installConfig(array('monitoring'));
 
     require_once drupal_get_path('module', 'monitoring') . '/monitoring.setup.inc';
