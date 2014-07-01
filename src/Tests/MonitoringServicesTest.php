@@ -6,7 +6,7 @@
 
 namespace Drupal\monitoring\Tests;
 
-use Drupal\Component\Utility\Json;
+use Drupal\Component\Serialization\Json;
 use Drupal\monitoring\Entity\SensorInfo;
 use Drupal\rest\Tests\RESTTestBase;
 
@@ -76,19 +76,19 @@ class MonitoringServicesTest extends RESTTestBase {
     $this->assertResponse(200);
 
     foreach (monitoring_sensor_info() as $sensor_name => $sensor_info) {
-      $this->assertEqual($response_data[$sensor_name]['sensor'], $sensor_info->getName());
+      $this->assertEqual($response_data[$sensor_name]['id'], $sensor_info->getName());
       $this->assertEqual($response_data[$sensor_name]['label'], $sensor_info->getLabel());
       $this->assertEqual($response_data[$sensor_name]['category'], $sensor_info->getCategory());
       $this->assertEqual($response_data[$sensor_name]['description'], $sensor_info->getDescription());
       $this->assertEqual($response_data[$sensor_name]['numeric'], $sensor_info->isNumeric());
       $this->assertEqual($response_data[$sensor_name]['value_label'], $sensor_info->getValueLabel());
       $this->assertEqual($response_data[$sensor_name]['caching_time'], $sensor_info->getCachingTime());
-      $this->assertEqual($response_data[$sensor_name]['time_interval'], $sensor_info->getTimeIntervalValue());
-      $this->assertEqual($response_data[$sensor_name]['enabled'], $sensor_info->isEnabled());
+      $this->assertEqual($response_data[$sensor_name]['settings']['time_interval_value'], $sensor_info->getTimeIntervalValue());
+      $this->assertEqual($response_data[$sensor_name]['status'], $sensor_info->isEnabled());
       $this->assertEqual($response_data[$sensor_name]['uri'], url('monitoring-sensor-info/' . $sensor_info->getName(), array('absolute' => TRUE)));
 
       if ($sensor_info->isDefiningThresholds()) {
-        $this->assertEqual($response_data[$sensor_name]['thresholds'], $sensor_info->getSetting('thresholds'));
+        $this->assertEqual($response_data[$sensor_name]['settings']['thresholds'], $sensor_info->getSetting('thresholds'));
       }
     }
 

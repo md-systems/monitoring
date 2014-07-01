@@ -1,0 +1,8 @@
+id: test_sensor_info
+label: 'Test sensor info'
+description: 'To test correct sensor info hook implementation precedence.'
+sensor_id: test_sensor
+numeric: TRUE
+value_label: 'Test label'
+settings:
+

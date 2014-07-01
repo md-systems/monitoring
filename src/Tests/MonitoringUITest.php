@@ -76,7 +76,7 @@ class MonitoringUITest extends MonitoringTestBase {
     $sensor_info = $this->sensorManager->getSensorInfoByName('db_aggregate_test');
     $this->drupalGet('admin/config/system/monitoring/sensors/db_aggregate_test');
     // Test for the default value.
-    $this->assertFieldByName($form_key . '[time_interval_value]', $sensor_info->getTimeIntervalValue());
+    $this->assertFieldByName($form_key .'[settings][time_interval_value]', $sensor_info->getTimeIntervalValue());
 
     // Update the time interval and test for the updated value.
     $time_interval = 10800;
@@ -288,7 +288,7 @@ class MonitoringUITest extends MonitoringTestBase {
     $data = array();
     $sensor_info = $this->sensorManager->getSensorInfoByName($sensor_name);
     foreach ($thresholds as $key => $value) {
-      $form_field_name = $sensor_info->getName() . '[thresholds][' . $key . ']';
+      $form_field_name = 'settings' . '[thresholds][' . $key . ']';
       $data[$form_field_name] = $value;
     }
     $this->drupalPostForm('admin/config/system/monitoring/sensors/' . $sensor_info->getName(), $data, t('Save'));
@@ -307,9 +307,9 @@ class MonitoringUITest extends MonitoringTestBase {
   protected function assertThresholdSettingsUIDefaults($sensor_name, $thresholds) {
     $sensor_info = $this->sensorManager->getSensorInfoByName($sensor_name);
     $this->drupalGet('admin/config/system/monitoring/sensors/' . $sensor_name);
-    $this->assertTitle(t('@label settings (@category) | Drupal', array('@label' => $sensor_info->getLabel(), '@category' => $sensor_info->getCategory())));
+    $this->assertTitle('Edit Monitoring Sensor | Drupal');
     foreach ($thresholds as $key => $value) {
-      $form_field_name = $sensor_name . '[thresholds][' . $key . ']';
+      $form_field_name = 'settings' . '[thresholds][' . $key . ']';
       $this->assertFieldByName($form_field_name, $value);
     }
   }

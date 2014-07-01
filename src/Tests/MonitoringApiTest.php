@@ -52,8 +52,8 @@ class MonitoringApiTest extends MonitoringUnitTestBase {
       'description' => 'To test correct sensor info hook implementation precedence.',
       'settings' => array(),
     );
-    \Drupal::state()->set('monitoring_test.sensor_info', $sensor_info_data);
     monitoring_sensor_manager()->resetCache();
+    $test_sensorInfo = SensorInfo::load('test_sensor_info');
     $sensor_info = monitoring_sensor_manager()->getSensorInfoByName('test_sensor_info');
 
     $this->assertEqual($sensor_info->getLabel(), $sensor_info_data['label']);
@@ -67,13 +67,14 @@ class MonitoringApiTest extends MonitoringUnitTestBase {
 
     // @todo - override remaining attributes.
     $sensor_info_data['numeric'] = FALSE;
+    $test_sensorInfo->numeric = FALSE;
     // Define custom value label and NO value type. In this setup the sensor
     // defined value label must be used.
     $sensor_info_data['value_label'] = 'Test label';
-    \Drupal::state()->set('monitoring_test.sensor_info', $sensor_info_data);
+    $test_sensorInfo->value_label = 'Test label';
+    $test_sensorInfo->save();
     monitoring_sensor_manager()->resetCache();
     $sensor_info = monitoring_sensor_manager()->getSensorInfoByName('test_sensor_info');
-
     // Test all custom defined.
     // Flag numeric must be false.
     $this->assertEqual($sensor_info->isNumeric(), FALSE);
@@ -83,8 +84,10 @@ class MonitoringApiTest extends MonitoringUnitTestBase {
     // Test value label provided by the monitoring_value_types().
     // Set the value type to one defined by the monitoring_value_types().
     $sensor_info_data['value_type'] = 'time_interval';
+    $test_sensorInfo->value_type = 'time_interval';
+    $test_sensorInfo->value_label = '';
+    $test_sensorInfo->save();
     unset($sensor_info_data['value_label']);
-    \Drupal::state()->set('monitoring_test.sensor_info',  $sensor_info_data);
     monitoring_sensor_manager()->resetCache();
     $sensor_info = monitoring_sensor_manager()->getSensorInfoByName('test_sensor_info');
     $value_types = monitoring_value_types();
@@ -326,17 +329,16 @@ class MonitoringApiTest extends MonitoringUnitTestBase {
     $this->assertNull($result->getValue());
 
     // Test variable-based overrides.
-    \Drupal::config('monitoring.sensor_info')->set('test_sensor', array(
-      'label' => 'Overridden sensor',
-      'settings' => array(
-        'caching_time' => 1,
-        'new setting' => 'example value',
-      )
-    ))->save();
+    $test_sensorInfo = SensorInfo::load('test_sensor');
+    $test_sensorInfo->caching_time = 1;
+    $test_sensorInfo->label = 'Overridden sensor';
+    $test_sensorInfo->settings['new setting'] = 'example value';
+    $test_sensorInfo->save();
+
     monitoring_sensor_manager()->resetCache();
     $info = monitoring_sensor_manager()->getSensorInfoByName('test_sensor');
     $this->assertEqual('Overridden sensor', $info->getLabel());
-    $this->assertEqual(1, $info->getSetting('caching_time'));
+    $this->assertEqual(1, $info->getCachingTime());
     $this->assertEqual('example value', $info->getSetting('new setting'));
   }
 
