@@ -22,7 +22,7 @@ use Drupal\Core\Config\Entity\ConfigEntityInterface;
  *     "list_builder" = "\Drupal\Core\Config\Entity\ConfigEntityListBuilder"
  *   },
  *   admin_permission = "administer sensors",
- *   config_prefix = "sensor.multigraph",
+ *   config_prefix = "multigraph",
  *   entity_keys = {
  *     "id" = "id",
  *     "label" = "label"
@@ -53,13 +53,6 @@ class Multigraph extends ConfigEntityBase {
   public $description = '';
 
   /**
-   * The multigraph category.
-   *
-   * @var string
-   */
-  public $category = 'Other';
-
-  /**
    * The aggregated sensor info entities.
    *
    * @var SensorInfo[]
@@ -67,9 +60,10 @@ class Multigraph extends ConfigEntityBase {
   public $sensors = array();
 
   /**
-   * The multigraph id.
+   * The multigraph name.
    *
    * @return string
+   *   The name of the Multigraph
    */
   public function getName() {
     return $this->id;
@@ -107,15 +101,5 @@ class Multigraph extends ConfigEntityBase {
    */
   public function getResultClass() {
     return '\Drupal\monitoring\Result\SensorResult';
-  }
-
-  /**
-   * Gets multigraph categories.
-   *
-   * @return string
-   *   Categories.
-   */
-  public function getCategory() {
-    return $this->category;
   }
 }
