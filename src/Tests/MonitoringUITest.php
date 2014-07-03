@@ -76,12 +76,12 @@ class MonitoringUITest extends MonitoringTestBase {
     $sensor_info = $this->sensorManager->getSensorInfoByName('db_aggregate_test');
     $this->drupalGet('admin/config/system/monitoring/sensors/db_aggregate_test');
     // Test for the default value.
-    $this->assertFieldByName($form_key .'[settings][time_interval_value]', $sensor_info->getTimeIntervalValue());
+    $this->assertFieldByName('settings[time_interval_value]', $sensor_info->getTimeIntervalValue());
 
     // Update the time interval and test for the updated value.
     $time_interval = 10800;
     $this->drupalPostForm('admin/config/system/monitoring/sensors/db_aggregate_test', array(
-      $form_key . '[time_interval_value]' => $time_interval,
+      'settings[time_interval_value]' => $time_interval,
     ), t('Save'));
 
     $this->sensorManager->resetCache();
@@ -96,7 +96,7 @@ class MonitoringUITest extends MonitoringTestBase {
     // Update the time interval and set it to no restriction.
     $time_interval = 0;
     $this->drupalPostForm('admin/config/system/monitoring/sensors/db_aggregate_test', array(
-      $form_key . '[time_interval_value]' => $time_interval,
+      'settings[time_interval_value]' => $time_interval,
     ), t('Save'));
 
     $this->sensorManager->resetCache();

@@ -88,7 +88,7 @@ class MonitoringServicesTest extends RESTTestBase {
       $this->assertEqual($response_data[$sensor_name]['uri'], url('monitoring-sensor-info/' . $sensor_info->getName(), array('absolute' => TRUE)));
 
       if ($sensor_info->isDefiningThresholds()) {
-        $this->assertEqual($response_data[$sensor_name]['settings']['thresholds'], $sensor_info->getSetting('thresholds'));
+        $this->assertEqual($response_data[$sensor_name]['thresholds'], $sensor_info->getSetting('thresholds'));
       }
     }
 

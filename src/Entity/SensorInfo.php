@@ -375,6 +375,7 @@ class SensorInfo extends ConfigEntityBase {
    */
   public function getDefinition() {
     $info_array = array(
+      'sensor' => $this->getName(),
       'label' => $this->getLabel(),
       'category' => $this->getCategory(),
       'description' => $this->getDescription(),
@@ -415,7 +416,6 @@ class SensorInfo extends ConfigEntityBase {
     parent::calculateDependencies();
     // Ensure the field is dependent on the provider of the entity type.
     $plugin_type = monitoring_sensor_manager()->getDefinition($this->sensor_id);
-drupal_set_message(print_r($plugin_type,TRUE));
     $this->addDependency('module', $plugin_type['provider']);
     return $this->dependencies;
   }
