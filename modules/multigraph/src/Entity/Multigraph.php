@@ -7,7 +7,6 @@
 namespace Drupal\monitoring_multigraph\Entity;
 
 use Drupal\Core\Config\Entity\ConfigEntityBase;
-use Drupal\Core\Config\Entity\ConfigEntityInterface;
 
 /**
  * Represents an aggregation of related sensors, called a multigraph.
@@ -19,7 +18,10 @@ use Drupal\Core\Config\Entity\ConfigEntityInterface;
  *   id = "monitoring_multigraph",
  *   label = @Translation("Multigraph"),
  *   controllers = {
- *     "list_builder" = "\Drupal\Core\Config\Entity\ConfigEntityListBuilder"
+ *     "list_builder" = "\Drupal\monitoring_multigraph\MultigraphListBuilder",
+ *     "form" = {
+ *       "add" = "\Drupal\monitoring_multigraph\Form\MultigraphForm"
+ *     }
  *   },
  *   admin_permission = "administer sensors",
  *   config_prefix = "multigraph",

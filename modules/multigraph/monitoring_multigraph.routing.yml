@@ -5,3 +5,11 @@ monitoring.multigraphs_overview:
     _title: 'Multigraph Overview'
   requirements:
     _permission: 'administer monitoring'
+
+monitoring.multigraph_add:
+  path: '/admin/config/system/monitoring/multigraphs/add'
+  defaults:
+    _entity_form: 'monitoring_multigraph.add'
+    _title: 'Add Multigraph'
+  requirements:
+    _permission: 'administer monitoring'

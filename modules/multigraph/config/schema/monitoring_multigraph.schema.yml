@@ -1,0 +1,13 @@
+monitoring_multigraph.*:
+  type: mapping
+  label: 'Monitoring Multigraph'
+  mapping:
+    id:
+      type: string
+      label: 'Machine-readable name'
+    label:
+      type: label
+      label: 'Multigraph Label'
+    description:
+      type: text
+      label: 'Description'
