@@ -407,4 +407,17 @@ class SensorInfo extends ConfigEntityBase {
     // In the end, the label's order is determined.
     return ($a->getLabel() < $b->getLabel()) ? -1 : 1;
   }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function calculateDependencies() {
+    parent::calculateDependencies();
+    // Ensure the field is dependent on the provider of the entity type.
+    $plugin_type = monitoring_sensor_manager()->getDefinition($this->sensor_id);
+drupal_set_message(print_r($plugin_type,TRUE));
+    $this->addDependency('module', $plugin_type['provider']);
+    return $this->dependencies;
+  }
+
 }

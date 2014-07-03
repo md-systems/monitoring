@@ -97,14 +97,14 @@ class MonitoringSensorInfoResource extends ResourceBase {
       catch (NonExistingSensorException $e) {
         throw new NotFoundHttpException($e->getMessage(), $e);
       }
-      $response = $info->toArray();
+      $response = $info->getDefinition();
       $response['uri'] = \Drupal::request()->getUriForPath('/monitoring-sensor-info/' . $sensor_name);
       return new ResourceResponse($response);
     }
 
     $list = array();
     foreach ($this->sensorManager->getSensorInfo() as $sensor_name => $sensor_info) {
-      $list[$sensor_name] = $sensor_info->toArray();
+      $list[$sensor_name] = $sensor_info->getDefinition();
       $list[$sensor_name]['uri'] = \Drupal::request()->getUriForPath('/monitoring-sensor-info/' . $sensor_name);
     }
     return new ResourceResponse($list);
