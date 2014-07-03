@@ -9,5 +9,5 @@ settings:
     type: 'inner_interval'
     warning_low: 1
     critical_low: 4
-    warning_high: 6
-    critical_high: 9
+    critical_high: 6
+    warning_high: 9

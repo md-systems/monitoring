@@ -107,7 +107,7 @@ class SensorInfo extends ConfigEntityBase {
    *
    * @var bool
    */
-  public $numeric;
+  public $numeric = TRUE;
 
   /**
    * The sensor caching time.
@@ -242,7 +242,7 @@ class SensorInfo extends ConfigEntityBase {
    *   TRUE if the sensor value is numeric.
    */
   public function isNumeric() {
-    return ($this->numeric != NULL) ? $this->numeric : TRUE;
+    return $this->numeric;
   }
 
   /**
