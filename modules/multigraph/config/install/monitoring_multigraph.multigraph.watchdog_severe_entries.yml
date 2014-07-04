@@ -1,0 +1,11 @@
+id: watchdog_severe_entries
+label: 'Watchdog severe entries'
+description: 'Watchdog entries with severity Warning or higher'
+sensors:
+  - dblog_404
+  - dblog_event_severity_alert
+  - dblog_event_severity_critical
+  - dblog_event_severity_emergency
+  - dblog_event_severity_error
+  - dblog_event_severity_warning
+  - dblog_image_missing_style
