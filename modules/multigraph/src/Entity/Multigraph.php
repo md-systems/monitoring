@@ -96,6 +96,26 @@ class Multigraph extends ConfigEntityBase {
   }
 
   /**
+   * Gets the aggregated sensor info entities.
+   *
+   * @return SensorInfo[]
+   *   The aggregated sensors.
+   */
+  public function getSensors() {
+    return $this->sensors;
+  }
+
+  /**
+   * Sets aggregated sensor info entities.
+   *
+   * @param SensorInfo[] $sensors
+   *   The sensors to be aggregated.
+   */
+  public function setSensors(array $sensors) {
+    $this->sensors = $sensors;
+  }
+
+  /**
    * Gets multigraph result class.
    *
    * @return string

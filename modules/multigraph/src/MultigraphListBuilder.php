@@ -23,6 +23,7 @@ class MultigraphListBuilder extends ConfigEntityListBuilder {
   public function buildHeader() {
     $header['label'] = t('Label');
     $header['description'] = t('Description');
+    $header['sensors'] = t('Sensors');
     return $header + parent::buildHeader();
   }
 
@@ -32,6 +33,16 @@ class MultigraphListBuilder extends ConfigEntityListBuilder {
   public function buildRow(EntityInterface $entity) {
     $row['label'] = $this->getLabel($entity);
     $row['description'] = $entity->getDescription();
+
+    // Format sensors list.
+    $sensor_ids = $entity->getSensors();
+    $sensors = \Drupal::entityManager()
+      ->getStorage('monitoring_sensor')
+      ->loadMultiple($sensor_ids);
+    $getLabel_f = function($sensor) {
+      return t($sensor->getLabel());
+    };
+    $row['sensors'] = implode(', ', array_map($getLabel_f, $sensors));
     return $row + parent::buildRow($entity);
   }
 }

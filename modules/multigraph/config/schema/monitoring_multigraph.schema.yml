@@ -11,3 +11,6 @@ monitoring_multigraph.*:
     description:
       type: text
       label: 'Description'
+    sensors:
+      type: sequence
+      label: 'Sensors'
