@@ -57,8 +57,20 @@ class MultigraphForm extends EntityForm {
       '#value' => $this->t('Save'),
     );
 
+    $form['sensors'] = $this->makeSensorSelector();
+
+    return $form;
+  }
+
+  /**
+   * Creates a selector for available sensors.
+   * @return array
+   *   Form component for selecting sensors to include in the multigraph.
+   */
+  private function makeSensorSelector() {
     // Find sensors that can be included.
     $sensor_ids = \Drupal::entityQuery('monitoring_sensor')
+      ->condition('numeric', TRUE)
       ->condition('status', TRUE)
       ->execute();
     /** @var SensorInfo[] $sensors */
@@ -81,15 +93,13 @@ class MultigraphForm extends EntityForm {
       );
     }
 
-    // Tableselect component for the sensors to include .
-    $form['sensors'] = array(
+    return array(
       '#type' => 'tableselect',
       '#title' => t('Aggregated sensors'),
       '#header' => $header,
       '#options' => $options,
+      '#default_value' => $this->entity->getSensors(),
     );
-
-    return $form;
   }
 
   /**
@@ -105,14 +115,7 @@ class MultigraphForm extends EntityForm {
   public function save(array $form, array &$form_state) {
     /** @var Multigraph $multigraph */
     $multigraph = $this->entity;
-
-    // Tableselect stores selected items in an awkward format, so reformat.
-    $not_zero = function($x) {
-      return $x != '0';
-    };
-    $sensor_ids = array_values($multigraph->getSensors());
-    $multigraph->setSensors(array_filter($sensor_ids, $not_zero));
-
+    $multigraph->setSensors(array_filter($multigraph->getSensors()));
     $multigraph->save();
     $form_state['redirect_route']['route_name'] = 'monitoring.multigraphs_overview';
     drupal_set_message($this->t('Multigraph settings saved.'));

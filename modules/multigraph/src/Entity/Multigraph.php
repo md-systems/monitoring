@@ -20,7 +20,9 @@ use Drupal\Core\Config\Entity\ConfigEntityBase;
  *   controllers = {
  *     "list_builder" = "\Drupal\monitoring_multigraph\MultigraphListBuilder",
  *     "form" = {
- *       "add" = "\Drupal\monitoring_multigraph\Form\MultigraphForm"
+ *       "add" = "\Drupal\monitoring_multigraph\Form\MultigraphForm",
+ *       "edit" = "\Drupal\monitoring_multigraph\Form\MultigraphForm",
+ *       "delete" = "\Drupal\monitoring_multigraph\Form\MultigraphDeleteForm"
  *     }
  *   },
  *   admin_permission = "administer sensors",
@@ -28,6 +30,10 @@ use Drupal\Core\Config\Entity\ConfigEntityBase;
  *   entity_keys = {
  *     "id" = "id",
  *     "label" = "label"
+ *   },
+ *   links = {
+ *     "delete-form" = "monitoring.multigraph_delete",
+ *     "edit-form" = "monitoring.multigraph_edit"
  *   }
  * )
  */

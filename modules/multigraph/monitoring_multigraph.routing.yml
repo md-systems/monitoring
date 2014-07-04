@@ -13,3 +13,19 @@ monitoring.multigraph_add:
     _title: 'Add Multigraph'
   requirements:
     _permission: 'administer monitoring'
+
+monitoring.multigraph_edit:
+  path: '/admin/config/system/monitoring/multigraphs/{monitoring_multigraph}'
+  defaults:
+    _entity_form: 'monitoring_multigraph.edit'
+    _title: 'Edit Multigraph'
+  requirements:
+    _permission: 'administer monitoring'
+
+monitoring.multigraph_delete:
+  path: '/admin/config/system/monitoring/multigraphs/{monitoring_multigraph}/delete'
+  defaults:
+    _entity_form: 'monitoring_multigraph.delete'
+    _title: 'Delete Multigraph'
+  requirements:
+    _permission: 'administer monitoring'
