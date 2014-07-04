@@ -8,6 +8,7 @@ namespace Drupal\monitoring\Entity;
 
 use Drupal\Core\Config\Entity\ConfigEntityBase;
 use Drupal\Core\Config\Entity\ConfigEntityInterface;
+use Drupal\Core\Entity\EntityStorageInterface;
 
 /**
  * Represents a sensor info entity class.
@@ -179,7 +180,7 @@ class SensorInfo extends ConfigEntityBase {
     $sensor = monitoring_sensor_manager()->createInstance($this->sensor_id, $configuration);
     return $sensor;
   }
-  
+
   /**
    * Gets sensor result class.
    *
@@ -420,4 +421,11 @@ class SensorInfo extends ConfigEntityBase {
     return $this->dependencies;
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  public function postSave(EntityStorageInterface $storage, $update = TRUE) {
+    parent::postSave($storage, $update);
+    \Drupal::service('monitoring.sensor_runner')->resetCache(array($this->id));
+  }
 }

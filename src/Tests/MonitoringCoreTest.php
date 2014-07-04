@@ -7,6 +7,7 @@ namespace Drupal\monitoring\Tests;
 use Drupal\Component\Utility\String;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\file\FileUsage\FileUsageInterface;
+use Drupal\monitoring\Entity\SensorInfo;
 
 
 /**
@@ -75,6 +76,14 @@ class MonitoringCoreTest extends MonitoringTestBase {
 
     // ======= SensorQueue tests ======= //
 
+    $sensorInfo = SensorInfo::create(array(
+      'id' => 'core_queue_monitoring_test',
+      'sensor_id' => 'queue_size',
+      'settings' => array(
+        'queue' => 'monitoring_test'
+      )
+    ));
+    $sensorInfo->save();
     $queue = \Drupal::queue('monitoring_test');
     $queue->createItem(array());
     $queue->createItem(array());
@@ -83,6 +92,14 @@ class MonitoringCoreTest extends MonitoringTestBase {
 
     // ======= SensorCoreRequirements tests ======= //
 
+    $sensorInfo = SensorInfo::create(array(
+      'id' => 'core_requirements_monitoring_test',
+      'sensor_id' => 'core_requirements',
+      'settings' => array(
+        'module' => 'monitoring_test'
+      )
+    ));
+    $sensorInfo->save();
     $result = $this->runSensor('core_requirements_monitoring_test');
     $this->assertTrue($result->isOk());
     $this->assertEqual($result->getMessage(), 'Requirements check OK');
@@ -105,9 +122,11 @@ class MonitoringCoreTest extends MonitoringTestBase {
     \Drupal::state()->set('monitoring_test.requirements', $requirements);
 
     // Set requirements exclude keys into the sensor settings.
-    $settings = monitoring_sensor_settings_get('core_requirements_monitoring_test');
+    $sensorInfo = SensorInfo::load('core_requirements_monitoring_test');
+    $settings = $sensorInfo->getSettings();
     $settings['exclude keys'] = array('requirement_excluded');
-    monitoring_sensor_settings_save('core_requirements_monitoring_test', $settings);
+    $sensorInfo->settings = $settings;
+    $sensorInfo->save();
 
     // We still should have OK status but with different message
     $result = $this->runSensor('core_requirements_monitoring_test');
@@ -226,10 +245,10 @@ class MonitoringCoreTest extends MonitoringTestBase {
     // ======= SensorGitDirtyTree tests ======= //
 
     // Enable the sensor and set cmd to output something
-    monitoring_sensor_settings_save('monitoring_git_dirty_tree', array(
-      'enabled' => TRUE,
-      'cmd' => 'echo "dummy output\nanother dummy output"',
-    ));
+    $sensorInfo = SensorInfo::load('monitoring_git_dirty_tree');
+    $sensorInfo->status = TRUE;
+    $sensorInfo->settings['cmd'] = 'echo "dummy output\nanother dummy output"';
+    $sensorInfo->save();
     $result = monitoring_sensor_run('monitoring_git_dirty_tree', TRUE, TRUE);
     $this->assertTrue($result->isCritical());
     // The verbose output should contain the cmd output.
@@ -238,10 +257,9 @@ class MonitoringCoreTest extends MonitoringTestBase {
     $this->assertEqual($result->getValue(), 2);
 
     // Now echo empty string
-    monitoring_sensor_settings_save('monitoring_git_dirty_tree', array(
-      'enabled' => TRUE,
-      'cmd' => 'echo ""',
-    ));
+    $sensorInfo->settings['cmd'] = 'echo ""';
+    $sensorInfo->save();
+
     $result = $this->runSensor('monitoring_git_dirty_tree');
     $this->assertTrue($result->isOk());
     // The message should say that it is ok.
@@ -285,11 +303,11 @@ class MonitoringCoreTest extends MonitoringTestBase {
     $result = $this->runSensor('node_new_all');
     $this->assertEqual($result->getValue(), 3);
 
-    variable_set('theme_default', 'bartik');
+    \Drupal::config('system.theme')->set('default', 'bartik');
     $result = $this->runSensor('core_theme_default');
     $this->assertTrue($result->isOk());
 
-    variable_set('theme_default', 'garland');
+    \Drupal::config('system.theme')->set('default', 'garland');
     $result = $this->runSensor('core_theme_default');
     $this->assertTrue($result->isCritical());
   }

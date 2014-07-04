@@ -120,9 +120,9 @@ class MonitoringUITest extends MonitoringTestBase {
     // result the oldest.
     $this->runSensor('test_sensor');
     $cid = 'monitoring_sensor_result:test_sensor';
-    $cache = \Drupal::cache('config')->get($cid);
+    $cache = \Drupal::cache('default')->get($cid);
     $cache->data['timestamp'] = $cache->data['timestamp'] - 1000;
-    \Drupal::cache('config')->set(
+    \Drupal::cache('default')->set(
       $cid,
       $cache->data,
       REQUEST_TIME + 3600,
