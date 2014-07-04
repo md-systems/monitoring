@@ -7,6 +7,7 @@
 namespace Drupal\monitoring_multigraph\Entity;
 
 use Drupal\Core\Config\Entity\ConfigEntityBase;
+use Drupal\monitoring\Entity\SensorInfo;
 
 /**
  * Represents an aggregation of related sensors, called a multigraph.
@@ -63,7 +64,7 @@ class Multigraph extends ConfigEntityBase {
   /**
    * The aggregated sensor info entities.
    *
-   * @var SensorInfo[]
+   * @var string[]
    */
   public $sensors = array();
 
@@ -108,17 +109,19 @@ class Multigraph extends ConfigEntityBase {
    *   The aggregated sensors.
    */
   public function getSensors() {
-    return $this->sensors;
+    return \Drupal::entityManager()
+      ->getStorage('monitoring_sensor')
+      ->loadMultiple($this->sensors);
   }
 
   /**
-   * Sets aggregated sensor info entities.
+   * Add a sensor to aggregate.
    *
-   * @param SensorInfo[] $sensors
-   *   The sensors to be aggregated.
+   * @param SensorInfo $sensor
+   *   The new sensor that should be aggregated by the multigraph.
    */
-  public function setSensors(array $sensors) {
-    $this->sensors = $sensors;
+  public function addSensor(SensorInfo $sensor) {
+    $this->sensors += array($sensor->getName());
   }
 
   /**

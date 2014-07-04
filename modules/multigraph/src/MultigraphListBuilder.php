@@ -35,10 +35,7 @@ class MultigraphListBuilder extends ConfigEntityListBuilder {
     $row['description'] = $entity->getDescription();
 
     // Format sensors list.
-    $sensor_ids = $entity->getSensors();
-    $sensors = \Drupal::entityManager()
-      ->getStorage('monitoring_sensor')
-      ->loadMultiple($sensor_ids);
+    $sensors = $entity->getSensors();
     $getLabel_f = function($sensor) {
       return t($sensor->getLabel());
     };
