@@ -165,6 +165,12 @@ class MultigraphForm extends EntityForm {
    *   The form state structure array.
    */
   public function addSensorSubmit(array $form, array &$form_state) {
+
+    // Forget checked tableselect boxes, all should be checked.
+    if (isset($form_state['input']['sensors'])) {
+      unset($form_state['input']['sensors']);
+    }
+
     $this->entity = $this->buildEntity($form, $form_state);
     $form_state['rebuild'] = TRUE;
 
@@ -174,7 +180,7 @@ class MultigraphForm extends EntityForm {
     // Add any selected sensor to entity.
     if (isset($form_state['values']['sensor_add_select'])) {
       $sensor_name = $form_state['values']['sensor_add_select'];
-      $multigraph->addSensor($this->sensors[$sensor_name]); // @todo sometimes 0
+      $multigraph->addSensor($this->sensors[$sensor_name]);
     }
 
     // @todo: This is necessary because there are two different instances of the
