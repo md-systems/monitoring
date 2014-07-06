@@ -9,3 +9,6 @@ caching_time: 3600
 settings:
   table: 'comment'
   time_interval_value: '86400'
+dependencies:
+  module:
+    - comment

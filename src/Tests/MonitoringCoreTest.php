@@ -92,6 +92,7 @@ class MonitoringCoreTest extends MonitoringTestBase {
 
     // ======= SensorCoreRequirements tests ======= //
 
+    // @todo - This should not be necessary after sensor requirements are updated.
     $sensorInfo = SensorInfo::create(array(
       'id' => 'core_requirements_monitoring_test',
       'sensor_id' => 'core_requirements',
@@ -303,11 +304,11 @@ class MonitoringCoreTest extends MonitoringTestBase {
     $result = $this->runSensor('node_new_all');
     $this->assertEqual($result->getValue(), 3);
 
-    \Drupal::config('system.theme')->set('default', 'bartik');
+    \Drupal::config('system.theme')->set('default', 'bartik')->save();
     $result = $this->runSensor('core_theme_default');
     $this->assertTrue($result->isOk());
 
-    \Drupal::config('system.theme')->set('default', 'garland');
+    \Drupal::config('system.theme')->set('default', 'garland')->save();
     $result = $this->runSensor('core_theme_default');
     $this->assertTrue($result->isCritical());
   }

@@ -9,6 +9,7 @@ namespace Drupal\monitoring;
 use Drupal\Core\Entity\EntityForm;
 use Drupal\monitoring\Sensor\NonExistingSensorException;
 use Drupal\monitoring\Sensor\Sensor;
+use Drupal\monitoring\Entity\SensorInfo;
 use Drupal\monitoring\Sensor\SensorConfigurableInterface;
 use Drupal\monitoring\Sensor\SensorManager;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -135,6 +136,15 @@ class SensorForm extends EntityForm {
         '#suffix' => '</div>',
       );
     }
+    $settings = $sensor_info->getSettings();
+    foreach ($settings as $key => $value) {
+      if (!isset($form['settings'][$key])) {
+        $form['settings'][$key] = array(
+          '#type' => 'value',
+          '#value' => $value
+        );
+      }
+    }
     $form['actions']['submit'] = array(
       '#type' => 'submit',
       '#value' => $this->t('Save'),
@@ -186,5 +196,15 @@ class SensorForm extends EntityForm {
     $sensor_info->save();
     $form_state['redirect_route']['route_name'] = 'monitoring.sensors_overview_settings';
     drupal_set_message($this->t('Sensor settings saved.'));
+  }
+
+  /**
+   * Settings form page title callback.
+   */
+  public function formTitle($monitoring_sensor) {
+    if ($sensor_info = SensorInfo::load($monitoring_sensor)) {
+      return $this->t('@label settings (@category)', array('@category' => $sensor_info->getCategory(), '@label' => $sensor_info->getLabel()));
+    }
+    return '';
   }
 }

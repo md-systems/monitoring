@@ -327,19 +327,6 @@ class MonitoringApiTest extends MonitoringUnitTestBase {
     \Drupal::state()->set('monitoring_test.sensor_result_data', $test_sensor_result_data);
     $result = $this->runSensor('test_sensor');
     $this->assertNull($result->getValue());
-
-    // Test variable-based overrides.
-    $test_sensorInfo = SensorInfo::load('test_sensor');
-    $test_sensorInfo->caching_time = 1;
-    $test_sensorInfo->label = 'Overridden sensor';
-    $test_sensorInfo->settings['new setting'] = 'example value';
-    $test_sensorInfo->save();
-
-    monitoring_sensor_manager()->resetCache();
-    $info = monitoring_sensor_manager()->getSensorInfoByName('test_sensor');
-    $this->assertEqual('Overridden sensor', $info->getLabel());
-    $this->assertEqual(1, $info->getCachingTime());
-    $this->assertEqual('example value', $info->getSetting('new setting'));
   }
 
   /**

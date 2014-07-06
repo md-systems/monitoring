@@ -307,7 +307,7 @@ class MonitoringUITest extends MonitoringTestBase {
   protected function assertThresholdSettingsUIDefaults($sensor_name, $thresholds) {
     $sensor_info = $this->sensorManager->getSensorInfoByName($sensor_name);
     $this->drupalGet('admin/config/system/monitoring/sensors/' . $sensor_name);
-    $this->assertTitle('Edit Monitoring Sensor | Drupal');
+    $this->assertTitle(t('@label settings (@category) | Drupal', array('@label' => $sensor_info->getLabel(), '@category' => $sensor_info->getCategory())));
     foreach ($thresholds as $key => $value) {
       $form_field_name = 'settings' . '[thresholds][' . $key . ']';
       $this->assertFieldByName($form_field_name, $value);
