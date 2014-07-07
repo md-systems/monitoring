@@ -358,6 +358,7 @@ class MonitoringCoreTest extends MonitoringTestBase {
     // Install the comment module to test the correct procedure of removing
     // sensors.
     $module_handler->install(array('comment'));
+    monitoring_sensor_manager()->enableSensor('comment_new');
 
     // Now we should be back to normal.
     $result = $this->runSensor('monitoring_disappeared_sensors');
@@ -566,6 +567,7 @@ class MonitoringCoreTest extends MonitoringTestBase {
     $this->assertEqual($result->getValue(), 2);
 
     // Filter for time period.
+    $sensor_info->settings['conditions'] = array();
     $sensor_info->settings['time_interval_value'] = 10;
     $sensor_info->settings['time_interval_field'] = 'timestamp';
     $sensor_info->save();

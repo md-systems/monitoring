@@ -5,6 +5,8 @@
  */
 
 use Drupal\Component\Utility\String;
+use Drupal\Core\Config\Config;
+use Drupal\Core\Config\FileStorage;
 use Drupal\Core\Template\Attribute;
 use Drupal\monitoring\Sensor\NonExistingSensorException;
 use Drupal\monitoring\Entity\SensorResultEntity;
@@ -444,7 +446,45 @@ function monitoring_clear_missing_sensor_submit($form, &$form_state) {
  * sure that the list is up to date.
  */
 function monitoring_modules_installed($modules) {
-  monitoring_sensor_manager()->resetCache();
+  // Don't do anything if we're currently syncing.
+  if (\Drupal::service('config.installer')->isSyncing()) {
+    return;
+  }
+
+  $old_state = \Drupal::configFactory()->getOverrideState();
+  \Drupal::configFactory()->setOverrideState(FALSE);
+
+  $active_store = \Drupal::service('config.storage');
+
+  $base_path = drupal_get_path('module', 'monitoring');
+  foreach ($modules as $module) {
+    $path = $base_path . '/config/optional/' . $module;
+    if (file_exists($path)) {
+      $source_storage = new FileStorage($path);
+
+      $config_to_install = $source_storage->listAll();
+      $data = $source_storage->readMultiple($config_to_install);
+      $config_to_install = array_diff($config_to_install, \Drupal::service('config.storage')->listAll());
+
+      foreach ($config_to_install as $name) {
+        $new_config = new Config($name, $active_store, \Drupal::service('event_dispatcher'), \Drupal::service('config.typed'));
+        if ($data[$name] !== FALSE) {
+          $new_config->setData($data[$name]);
+        }
+        if ($entity_type = \Drupal::service('config.manager')->getEntityTypeIdByName($name)) {
+          \Drupal::entityManager()
+            ->getStorage($entity_type)
+            ->create($new_config->get())
+            ->save();
+        }
+        else {
+          $new_config->save();
+        }
+      }
+    }
+  }
+
+  \Drupal::configFactory()->setOverrideState($old_state);
 }
 
 /**

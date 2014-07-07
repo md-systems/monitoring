@@ -415,9 +415,15 @@ class SensorInfo extends ConfigEntityBase {
    */
   public function calculateDependencies() {
     parent::calculateDependencies();
-    // Ensure the field is dependent on the provider of the entity type.
-    $plugin_type = monitoring_sensor_manager()->getDefinition($this->sensor_id);
-    $this->addDependency('module', $plugin_type['provider']);
+    // Include the module of the sensor plugin as dependency and also allow it
+    // to add additional dependencies based on the configuration.
+    $instance = $this->getPlugin();
+    $definition = $instance->getPluginDefinition();
+    $this->addDependency('module', $definition['provider']);
+    // If a plugin is configurable, calculate its dependencies.
+    if ($plugin_dependencies = $instance->calculateDependencies()) {
+      $this->addDependencies($plugin_dependencies);
+    }
     return $this->dependencies;
   }
 
@@ -428,4 +434,7 @@ class SensorInfo extends ConfigEntityBase {
     parent::postSave($storage, $update);
     \Drupal::service('monitoring.sensor_runner')->resetCache(array($this->id));
   }
+
+
+
 }

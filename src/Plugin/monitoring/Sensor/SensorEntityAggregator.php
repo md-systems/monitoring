@@ -11,6 +11,7 @@ use Drupal\Component\Utility\String;
 use Drupal\monitoring\Result\SensorResultInterface;
 use Drupal;
 use Drupal\monitoring\Sensor\Sensors\SensorDatabaseAggregatorBase;
+use Drupal\Core\Entity\DependencyTrait;
 
 /**
  * Entity database aggregator.
@@ -27,6 +28,8 @@ use Drupal\monitoring\Sensor\Sensors\SensorDatabaseAggregatorBase;
  * The table specified in the sensor info must be the base table of the entity.
  */
 class SensorEntityAggregator extends SensorDatabaseAggregatorBase {
+
+  use DependencyTrait;
 
   /**
    * Local variable to store the field that is used as aggregate.
@@ -69,7 +72,7 @@ class SensorEntityAggregator extends SensorDatabaseAggregatorBase {
    */
   public function runSensor(SensorResultInterface $result) {
     $query_result = $this->getEntityQueryAggregate()->execute();
-    $entity_type = $this->getEntityTypeFromTable($this->getEntityType());
+    $entity_type = $this->getEntityType();
     $entity_info = \Drupal::entityManager()->getDefinition($entity_type);
 
     if (isset($query_result[0][$entity_info->getKey('id') . '_count'])) {
@@ -90,20 +93,13 @@ class SensorEntityAggregator extends SensorDatabaseAggregatorBase {
   }
 
   /**
-   * Returns the entity type for a given base table.
-   *
-   * @param string $base_table
-   *   The name of base table.
-   *
-   * @return string
-   *   The entity type that is stored in the given base table.
+   * {@inheritdoc}
    */
-  protected function getEntityTypeFromTable($base_table) {
-    foreach (\Drupal::entityManager()->getDefinitions() as $entity_type => $entity_info) {
-      if ($entity_info->getBaseTable() == $base_table) {
-        return $entity_type;
-      }
-    }
-    return NULL;
+  public function calculateDependencies() {
+    $entity_type_id = $this->getEntityType();
+    $entity_type = \Drupal::entityManager()->getDefinition($entity_type_id);
+    $this->addDependency('module', $entity_type->getProvider());
+    return $this->dependencies;
   }
+
 }

@@ -1,7 +1,7 @@
 #Schema for the configuration of the monitoring module.
 
 monitoring.sensor.*:
-  type: mapping
+  type: config_entity
   label: 'Monitoring Sensor'
   mapping:
     id:

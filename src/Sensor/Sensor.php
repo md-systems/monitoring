@@ -97,4 +97,8 @@ abstract class Sensor implements SensorInterface {
   public function getPluginDefinition() {
     return $this->pluginDefinition;
   }
+
+  public function calculateDependencies() {
+    return array();
+  }
 }
