@@ -1,0 +1,18 @@
+<?php
+/**
+ * @file
+ * Aggregate sensors to report accumulated values.
+ */
+
+/**
+ * Implements hook_theme().
+ */
+function monitoring_multigraph_theme() {
+  return array(
+    'monitoring_multigraph_sensor_table' => array(
+      'file' => 'monitoring_multigraph.theme.inc',
+      'render element' => 'sensors',
+    ),
+  );
+}
+

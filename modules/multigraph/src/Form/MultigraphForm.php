@@ -105,31 +105,24 @@ class MultigraphForm extends EntityForm {
       ),
     );
 
-    // Headers and content for the tableselect.
-    $header = array(
-      'category' => t('Category'),
-      'title' => t('Title'),
-      'description' => t('Description'),
+    $form['sensors'] = array(
+      '#theme' => 'monitoring_multigraph_sensor_table',
     );
 
-    $options = array();
     foreach ($multigraph->getSensors() as $sensor) {
-      $options[$sensor->id()] = array(
-        'category' => $sensor->getCategory(),
-        'title' => $sensor->getLabel(),
-        'description' => $sensor->getDescription(),
+      $form['sensors'][$sensor->id()] = array(
+        '#sensor' => $sensor,
+        'title' => array(
+          'data' => array(
+            '#type' => 'textfield',
+            '#default_value' => $sensor->getLabel(),
+            '#title' => t('Custom sensor label'),
+            '#title_display' => 'invisible',
+            '#required' => TRUE,
+          ),
+        ),
       );
     }
-
-    $form['sensors'] = array(
-      '#type' => 'tableselect',
-      '#title' => t('Aggregated sensors'),
-      '#header' => $header,
-      '#options' => $options,
-      '#default_value' => $multigraph->getSensors(),
-      '#prefix' => '<div id="selected-sensors">',
-      '#suffix' => '</div>',
-    );
 
     return $form;
   }
