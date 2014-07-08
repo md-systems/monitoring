@@ -43,6 +43,20 @@ class MultigraphWebTest extends WebTestBase {
   protected $appendString = ' (test)';
 
   /**
+   * Label of pre-installed multigraph.
+   *
+   * @var string
+   */
+  protected $preinstalledMultigraphLabel = 'Watchdog severe entries';
+
+  /**
+   * Description of pre-installed multigraph.
+   *
+   * @var string
+   */
+  protected $preinstalledMultigraphDescription = 'Watchdog entries with severity Warning or higher';
+
+  /**
    * Modules to enable.
    *
    * @var array
@@ -76,7 +90,7 @@ class MultigraphWebTest extends WebTestBase {
   }
 
   /**
-   * Multigraph (monitoring sensor bundle) creation.
+   * Create multigraph.
    */
   public function doTestMultigraphAdd() {
     // Add a few sensors.
@@ -110,17 +124,14 @@ class MultigraphWebTest extends WebTestBase {
   }
 
   /**
-   * Multigraph (monitoring sensor bundle) edit.
+   * Edit multigraph.
    */
   public function doTestMultigraphEdit() {
-    $label_before_editing = 'Watchdog severe entries';
-    $description_before_editing = 'Watchdog entries with severity Warning or higher';
-
     // Go to multigraph overview and test editing pre-installed multigraph.
     $this->drupalGet('admin/config/system/monitoring/multigraphs');
     // Check label, description and sensors (before editing).
-    $this->assertText($label_before_editing);
-    $this->assertText($description_before_editing);
+    $this->assertText($this->preinstalledMultigraphLabel);
+    $this->assertText($this->preinstalledMultigraphDescription);
     $this->assertText('404, Alert, Critical, Emergency, Error');
 
     // Edit.
@@ -129,8 +140,8 @@ class MultigraphWebTest extends WebTestBase {
 
     // Change label, description and add a sensor.
     $values = array(
-      'label' => $label_before_editing . $this->appendString,
-      'description' => $description_before_editing . $this->appendString,
+      'label' => $this->preinstalledMultigraphLabel . $this->appendString,
+      'description' => $this->preinstalledMultigraphDescription . $this->appendString,
       'sensor_add_select' => 'user_successful_logins',
     );
     $this->drupalPostForm(NULL, $values, t('Add sensor'));
@@ -144,12 +155,39 @@ class MultigraphWebTest extends WebTestBase {
     // (drupalPostAjaxForm() lets us target the button precisely.)
     $this->drupalPostAjaxForm('admin/config/system/monitoring/multigraphs/watchdog_severe_entries', array(), array('remove_dblog_404' => t('Remove')));
     $this->assertNoText(t('Page not found errors logged by watchdog'));
+    // Save.
     $this->drupalPostForm(NULL, array(), t('Save'));
 
-    // Go back to multigraph overview, clear cache and check changed values.
+    // Go back to multigraph overview and check changed values.
     $this->drupalGet('admin/config/system/monitoring/multigraphs');
-    $this->assertText($label_before_editing . $this->appendString);
-    $this->assertText($description_before_editing . $this->appendString);
+    $this->assertText($this->preinstalledMultigraphLabel . $this->appendString);
+    $this->assertText($this->preinstalledMultigraphDescription . $this->appendString);
     $this->assertText('Alert, Critical, Emergency, Error, Successful user logins');
+  }
+
+  /**
+   * Delete multigraph.
+   */
+  public function doTestMultigraphDelete() {
+    // Go to multigraph overview and check for pre-installed multigraph.
+    $this->drupalGet('admin/config/system/monitoring/multigraphs');
+    // Check label and description (before deleting).
+    $this->assertText($this->preinstalledMultigraphLabel);
+    $this->assertText($this->preinstalledMultigraphDescription);
+
+    // Edit.
+    $this->drupalGet('admin/config/system/monitoring/multigraphs/watchdog_severe_entries');
+    $this->assertText('Edit Multigraph');
+
+    // Delete.
+    $this->clickLink('Delete');
+    $this->assertText('Are you sure you want to delete the Watchdog severe entries multigraph?');
+    $this->drupalPostForm('admin/config/system/monitoring/multigraphs/watchdog_severe_entries/delete', array(), t('Delete'));
+
+    // Go back to multigraph overview and check that multigraph is deleted.
+    $this->drupalGet('admin/config/system/monitoring/multigraphs');
+    $this->assertRaw('The ' . $this->preinstalledMultigraphLabel . $this->appendString . ' multigraph has been deleted');
+    $this->assertNoText($this->preinstalledMultigraphLabel);
+    $this->assertNoText($this->preinstalledMultigraphDescription);
   }
 }
