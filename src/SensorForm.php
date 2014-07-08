@@ -64,6 +64,20 @@ class SensorForm extends EntityForm {
       '#default_value' => $sensor_info->getDescription(),
     );
 
+    $form['value_label'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Value Label'),
+      '#maxlength' => 255,
+      '#default_value' => $sensor_info->getValueLabel(),
+    );
+
+    $form['caching_time'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Cache Time'),
+      '#maxlength' => 255,
+      '#default_value' => $sensor_info->getCachingTime(),
+    );
+
     if ($sensor_info->isNew()) {
       $plugin_types = array();
       foreach (monitoring_sensor_manager()->getDefinitions() as $plugin_id => $definition) {
