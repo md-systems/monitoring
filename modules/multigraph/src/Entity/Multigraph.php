@@ -111,15 +111,15 @@ class Multigraph extends ConfigEntityBase {
    */
   public function getSensors() {
     $sensors = array();
-    foreach ($this->sensors as $weight => $entry) {
+    foreach ($this->sensors as $name => $entry) {
       /** @var SensorInfo $sensor */
       $sensor = \Drupal::entityManager()
         ->getStorage('monitoring_sensor')
-        ->load($entry['name']);
+        ->load($name);
       if ($entry['label']) {
         $sensor->label = $entry['label'];
       }
-      $sensors[$weight] = $sensor;
+      $sensors[$entry['weight']] = $sensor;
     }
     return $sensors;
   }

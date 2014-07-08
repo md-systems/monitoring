@@ -17,8 +17,6 @@ monitoring_multigraph.*:
       sequence:
         - type: mapping
           mapping:
-            name:
-              type: string
             weight:
               type: integer
             label:

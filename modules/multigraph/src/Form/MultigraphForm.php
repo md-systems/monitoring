@@ -105,51 +105,71 @@ class MultigraphForm extends EntityForm {
       ),
     );
 
-    // Table for included sensors. Let the theme hook format it as a table.
+    // Table for included sensors.
     $form['sensors'] = array(
-      '#theme' => 'monitoring_multigraph_sensor_table',
-    );
+        '#type' => 'table',
+        '#header' => array(
+          'category' => t('Category'),
+          'label' => t('Sensor label'),
+          'description' => t('Description'),
+          'weight' => t('Weight'),
+          'operations' => t('Operations'),
+        ),
+        '#prefix' => '<div id="selected-sensors">',
+        '#suffix' => '</div>',
+        '#empty' => t(
+          'Select and add sensors above to include them in this multigraph.'
+        ),
+        '#tabledrag' => array(
+          array(
+            'action' => 'order',
+            'relationship' => 'sibling',
+            'group' => 'sensors-table-weight',
+          ),
+        ),
+      );
 
     // Fill the sensors element with form elements.
     foreach ($multigraph->getSensors() as $sensor) {
       $form['sensors'][$sensor->id()] = array(
-        '#sensor' => $sensor,
-        'name' => array(
-          '#type' => 'value',
-          '#value' => $sensor->getName(),
-        ),
-        'weight' => array(
-          'data' => array(
-            '#type' => 'weight',
-            '#title' => t('Weight'),
-            '#title_display' => 'invisible',
-            //'#default_value' => $weight,
-          ),
+        'category' => array(
+          '#markup' => $sensor->getCategory(),
         ),
         'label' => array(
-          'data' => array(
-            '#type' => 'textfield',
-            '#default_value' => $sensor->getLabel(),
-            '#title' => t('Custom sensor label'),
-            '#title_display' => 'invisible',
-            '#required' => TRUE,
+          '#type' => 'textfield',
+          '#default_value' => $sensor->getLabel(),
+          '#title' => t('Custom sensor label'),
+          '#title_display' => 'invisible',
+          '#required' => TRUE,
+        ),
+        'description' => array(
+          '#markup' => $sensor->getDescription(),
+        ),
+        'weight' => array(
+          '#type' => 'weight',
+          '#title' => t('Weight'),
+          '#title_display' => 'invisible',
+          '#default_value' => 0,
+          '#attributes' => array(
+            'class' => array('sensors-table-weight'),
           ),
         ),
         'operations' => array(
-          'data' => array(
-            '#type' => 'submit',
-            '#value' => t('Remove'),
-            '#description' => t('Exclude sensor from multigraph'),
-            '#name' => 'remove_' . $sensor->getName(),
-            '#ajax' => array(
-              'wrapper' => 'selected-sensors',
-              'callback' => array($this, 'sensorsReplace'),
-              'method' => 'replace',
-            ),
-            '#submit' => array(
-              array($this, 'removeSensorSubmit'),
-            ),
+          '#type' => 'submit',
+          '#value' => t('Remove'),
+          '#description' => t('Exclude sensor from multigraph'),
+          '#name' => 'remove_' . $sensor->getName(),
+          '#ajax' => array(
+            'wrapper' => 'selected-sensors',
+            'callback' => array($this, 'sensorsReplace'),
+            'method' => 'replace',
           ),
+          '#submit' => array(
+            array($this, 'removeSensorSubmit'),
+          ),
+        ),
+        '#attributes' => array(
+          'class' => array('draggable'),
         ),
       );
     }
@@ -239,8 +259,6 @@ class MultigraphForm extends EntityForm {
 
     // Clean entity properties, whose structure was imposed by form array.
     foreach ($multigraph->sensors as &$sensor) {
-      $sensor['weight'] = $sensor['weight']['data'];
-      $sensor['label'] = $sensor['label']['data'];
       unset($sensor['operations']);
     }
 
