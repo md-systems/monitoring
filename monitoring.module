@@ -7,16 +7,10 @@
 use Drupal\Component\Utility\String;
 use Drupal\Core\Config\Config;
 use Drupal\Core\Config\FileStorage;
+use Drupal\Core\Extension\Extension;
 use Drupal\Core\Template\Attribute;
-use Drupal\monitoring\Sensor\NonExistingSensorException;
-use Drupal\monitoring\Entity\SensorResultEntity;
 use Drupal\monitoring\Entity\SensorInfo;
 use Drupal\monitoring\Result\SensorResultInterface;
-use Drupal\monitoring\Sensor\SensorManager;
-use Drupal\monitoring\SensorRunner;
-use Symfony\Component\DependencyInjection\Exception\InvalidArgumentException;
-use Drupal\views\Plugin\views\area\View;
-use Symfony\Component\HttpFoundation\RedirectResponse;
 
 /**
  * Returns an instance of the sensor manager.
@@ -120,28 +114,6 @@ function monitoring_sensor_run_multiple($sensor_names = array(), $force_run = FA
   $runner = \Drupal::service('monitoring.sensor_runner');
   $results = $runner->runSensors($sensors_info, $force_run, $verbose);
   return $results;
-}
-
-/**
- * Implements hook_entity_info().
- */
-function monitoring_entity_info() {
-  $info['monitoring_sensor_result'] = array(
-    'label' => t('Monitoring sensor result'),
-    'module' => 'monitoring',
-    'controller class' => 'Drupal\monitoring\Controller\SensorResultController',
-    'metadata controller class' => 'Drupal\monitoring\Controller\SensorResultMetadataController',
-    'views controller class' => 'Drupal\monitoring\Controller\SensorResultViewsController',
-    'entity class' => 'Drupal\monitoring\Entity\SensorResultEntity',
-    'base table' => 'monitoring_sensor_result',
-    'uri callback' => 'entity_class_uri',
-    'label callback' => 'entity_class_label',
-    'entity keys' => array(
-      'id' => 'record_id',
-    ),
-  );
-
-  return $info;
 }
 
 /**
@@ -451,14 +423,39 @@ function monitoring_modules_installed($modules) {
     return;
   }
 
+  if (in_array('monitoring', $modules)) {
+    // If modules is in the list of new modules to install, look for optional
+    // configuration in all modules, including those that are already installed.
+    $modules = array();
+    foreach (\Drupal::moduleHandler()->getModuleList() as $extension) {
+      $modules[] = $extension->getName();
+    }
+  }
+
   $old_state = \Drupal::configFactory()->getOverrideState();
   \Drupal::configFactory()->setOverrideState(FALSE);
 
-  $active_store = \Drupal::service('config.storage');
+  // Loop over all installed modules and in each of them, look for optional
+  // configuration to install.
+  foreach (\Drupal::moduleHandler()->getModuleList() as $extension) {
+    monitoring_install_optional_configuration($modules, $extension);
+  }
 
-  $base_path = drupal_get_path('module', 'monitoring');
+  \Drupal::configFactory()->setOverrideState($old_state);
+}
+
+/**
+ * Installs optional configuration for a module.
+ *
+ * @param array $modules
+ *   List of new modules.
+ * @param \Drupal\Core\Extension\Extension $extension
+ *   Extension object for a module to look for configuration to install.
+ */
+function monitoring_install_optional_configuration($modules, Extension $extension) {
+  $active_store = \Drupal::service('config.storage');
   foreach ($modules as $module) {
-    $path = $base_path . '/config/optional/' . $module;
+    $path = $extension->getPath() . '/config/optional/' . $module;
     if (file_exists($path)) {
       $source_storage = new FileStorage($path);
 
@@ -483,18 +480,6 @@ function monitoring_modules_installed($modules) {
       }
     }
   }
-
-  \Drupal::configFactory()->setOverrideState($old_state);
-}
-
-/**
- * Implements hook_modules_installed().
- *
- * Uninstalled modules can change the available sensors, reset the cache to make
- * sure that the list is up to date.
- */
-function monitoring_modules_uninstalled($modules) {
-  monitoring_sensor_manager()->resetCache();
 }
 
 /**
