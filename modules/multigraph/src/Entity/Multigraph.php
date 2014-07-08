@@ -117,7 +117,7 @@ class Multigraph extends ConfigEntityBase {
         ->getStorage('monitoring_sensor')
         ->load($entry['name']);
       if ($entry['label']) {
-        $sensor->label = $entry['label']['data'];
+        $sensor->label = $entry['label'];
       }
       $sensors[$weight] = $sensor;
     }
