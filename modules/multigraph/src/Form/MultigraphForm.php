@@ -22,6 +22,13 @@ class MultigraphForm extends EntityForm {
   protected $sensors = array();
 
   /**
+   * {@inheritdoc}
+   */
+  public function getFormId() {
+    return 'monitoring_multigraph_edit';
+  }
+
+  /**
    * Construct the form by finding and storing all available sensors.
    */
   public function __construct() {
@@ -112,7 +119,16 @@ class MultigraphForm extends EntityForm {
     foreach ($multigraph->getSensors() as $sensor) {
       $form['sensors'][$sensor->id()] = array(
         '#sensor' => $sensor,
-        'title' => array(
+        'name' => array(
+          '#type' => 'value',
+          '#value' => $sensor->getName(),
+        ),
+        'weight' => array(
+          '#type' => 'weight',
+          '#title' => t('Weight'),
+          '#title_display' => 'invisible',
+        ),
+        'label' => array(
           'data' => array(
             '#type' => 'textfield',
             '#default_value' => $sensor->getLabel(),
@@ -170,11 +186,19 @@ class MultigraphForm extends EntityForm {
     /** @var Multigraph $multigraph */
     $multigraph = $this->entity;
 
+    if (isset($form_state['values']['sensors'])) {
+      foreach ($form_state['values']['sensors'] as $name => $values) {
+        $multigraph->addSensor($this->sensors[$name], NULL, $values['label']);
+      }
+    }
+
+    /*
     // Add any selected sensor to entity.
     if (isset($form_state['values']['sensor_add_select'])) {
       $sensor_name = $form_state['values']['sensor_add_select'];
       $multigraph->addSensor($this->sensors[$sensor_name]);
     }
+    */
 
     // @todo: This is necessary because there are two different instances of the
     //   form object. Core should handle this.

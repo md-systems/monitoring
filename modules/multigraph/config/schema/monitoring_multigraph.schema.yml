@@ -14,3 +14,15 @@ monitoring_multigraph.*:
     sensors:
       type: sequence
       label: 'Sensors'
+      sequence:
+        - type: mapping
+          mapping:
+            name:
+              type: string
+            weight:
+              type: integer
+            label:
+              type: mapping
+              mapping:
+                data:
+                  type: string
