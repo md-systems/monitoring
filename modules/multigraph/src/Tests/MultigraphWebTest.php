@@ -124,7 +124,7 @@ class MultigraphWebTest extends WebTestBase {
   }
 
   /**
-   * Edit multigraph.
+   * Edit multigraph (tests all changeable input fields).
    */
   public function doTestMultigraphEdit() {
     // Go to multigraph overview and test editing pre-installed multigraph.
@@ -147,8 +147,14 @@ class MultigraphWebTest extends WebTestBase {
     $this->drupalPostForm(NULL, $values, t('Add sensor'));
     $this->assertText('Successful user logins by Watchdog');
 
-    // Save form.
-    $this->drupalPostForm(NULL, array(), t('Save'));
+    // Change weights and save form.
+    $this->drupalPostForm(NULL, array(
+      'sensors[user_successful_logins][weight]' => -2,
+      'sensors[dblog_event_severity_error][weight]' => -1,
+      'sensors[dblog_event_severity_critical][weight]' => 0,
+      'sensors[dblog_event_severity_emergency][weight]' => 1,
+      'sensors[dblog_event_severity_alert][weight]' => 2,
+    ), t('Save'));
     $this->assertText(t('Multigraph settings saved.'));
 
     // Remove a sensor.
@@ -162,7 +168,7 @@ class MultigraphWebTest extends WebTestBase {
     $this->drupalGet('admin/config/system/monitoring/multigraphs');
     $this->assertText($this->preinstalledMultigraphLabel . $this->appendString);
     $this->assertText($this->preinstalledMultigraphDescription . $this->appendString);
-    $this->assertText('Alert, Critical, Emergency, Error, Successful user logins');
+    $this->assertText('Successful user logins, Error, Critical, Emergency, Alert');
   }
 
   /**
