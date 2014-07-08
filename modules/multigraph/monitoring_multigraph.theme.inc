@@ -27,7 +27,7 @@ function theme_monitoring_multigraph_sensor_table(array $variables) {
     $sensor = $sensors[$key]['#sensor'];
     $options[$sensor->getName()] = array(
       'category' => $sensor->getCategory(),
-      'title' => $sensors[$key]['title'],
+      'label' => $sensors[$key]['label'],
       'description' => $sensor->getDescription(),
     );
   }
@@ -37,7 +37,7 @@ function theme_monitoring_multigraph_sensor_table(array $variables) {
     '#rows' => $options,
     '#header' => array(
       'category' => t('Category'),
-      'title' => t('Sensor label'),
+      'label' => t('Sensor label'),
       'description' => t('Description'),
     ),
     '#prefix' => '<div id="selected-sensors">',

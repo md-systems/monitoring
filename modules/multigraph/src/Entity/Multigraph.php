@@ -64,6 +64,10 @@ class Multigraph extends ConfigEntityBase {
   /**
    * The aggregated sensor info entities.
    *
+   * This is an indexed array, where each element contains:
+   *   - name: machine name of the sensor
+   *   - label: custom sensor label for the multigraph
+   *
    * @var string[]
    */
   public $sensors = array();
@@ -80,10 +84,6 @@ class Multigraph extends ConfigEntityBase {
 
   /**
    * Gets multigraph label.
-   *
-   * The multigraph label might not be self-explaining enough or unique without
-   * the category, the category should always be present when the label is
-   * displayed.
    *
    * @return string
    *   Multigraph label.
@@ -106,12 +106,22 @@ class Multigraph extends ConfigEntityBase {
    * Gets the aggregated sensor info entities.
    *
    * @return SensorInfo[]
-   *   The aggregated sensors.
+   *   The aggregated sensors as an indexed array, where keys are weight and
+   *   values are sensors.
    */
   public function getSensors() {
-    return \Drupal::entityManager()
-      ->getStorage('monitoring_sensor')
-      ->loadMultiple($this->sensors);
+    $sensors = array();
+    foreach ($this->sensors as $weight => $entry) {
+      /** @var SensorInfo $sensor */
+      $sensor = \Drupal::entityManager()
+        ->getStorage('monitoring_sensor')
+        ->load($entry['name']);
+      if ($entry['label']) {
+        $sensor->label = $entry['label']['data'];
+      }
+      $sensors[$weight] = $sensor;
+    }
+    return $sensors;
   }
 
   /**
@@ -119,9 +129,17 @@ class Multigraph extends ConfigEntityBase {
    *
    * @param SensorInfo $sensor
    *   The new sensor that should be aggregated by the multigraph.
+   * @param integer $weight
+   *   (optional) The weight of the sensor within the multigraph.
+   * @param integer $label
+   *   (optional) Custom label for the sensor within the multigraph.
    */
-  public function addSensor(SensorInfo $sensor) {
-    $this->sensors += array($sensor->getName());
+  public function addSensor(SensorInfo $sensor, $weight = NULL, $label = NULL) {
+    // @todo Respect $weight
+    $this->sensors[$sensor->getName()] = array(
+      'name' => $sensor->getName(),
+      'label' => array('data' => $label ? $label : $sensor->getLabel()),
+    );
   }
 
   /**
