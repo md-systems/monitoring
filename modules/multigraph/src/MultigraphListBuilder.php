@@ -8,6 +8,7 @@
 namespace Drupal\monitoring_multigraph;
 
 use Drupal\Core\Config\Entity\ConfigEntityListBuilder;
+use Drupal\Core\Entity\EntityInterface;
 use Drupal\monitoring_multigraph\Entity\Multigraph;
 
 /**
@@ -30,7 +31,8 @@ class MultigraphListBuilder extends ConfigEntityListBuilder {
   /**
    * {@inheritdoc}
    */
-  public function buildRow(Multigraph $entity) {
+  public function buildRow(EntityInterface $entity) {
+    /** @var Multigraph $entity */
     $row['label'] = $this->getLabel($entity);
     $row['description'] = $entity->getDescription();
 

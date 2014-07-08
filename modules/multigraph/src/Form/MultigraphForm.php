@@ -97,7 +97,7 @@ class MultigraphForm extends EntityForm {
       '#value' => t('Add sensor'),
       '#ajax' => array(
         'wrapper' => 'selected-sensors',
-        'callback' => array($this, 'addSensorReplace'),
+        'callback' => array($this, 'sensorsReplace'),
         'method' => 'replace',
       ),
       '#submit' => array(
@@ -132,6 +132,22 @@ class MultigraphForm extends EntityForm {
             '#required' => TRUE,
           ),
         ),
+        'operations' => array(
+          'data' => array(
+            '#type' => 'submit',
+            '#value' => t('Remove'),
+            '#description' => t('Exclude sensor from multigraph'),
+            '#name' => 'remove_' . $sensor->getName(),
+            '#ajax' => array(
+              'wrapper' => 'selected-sensors',
+              'callback' => array($this, 'sensorsReplace'),
+              'method' => 'replace',
+            ),
+            '#submit' => array(
+              array($this, 'removeSensorSubmit'),
+            ),
+          ),
+        ),
       );
     }
 
@@ -156,12 +172,12 @@ class MultigraphForm extends EntityForm {
    * @return array
    *   The updated form component for the selected sensors.
    */
-  public function addSensorReplace(array $form, array &$form_state) {
+  public function sensorsReplace(array $form, array &$form_state) {
     return $form['sensors'];
   }
 
   /**
-   * Add sensor to entity when 'Add sensor' button is pressed.
+   * Adds sensor to entity when 'Add sensor' button is pressed.
    *
    * @param array $form
    *   The form structure array
@@ -180,6 +196,31 @@ class MultigraphForm extends EntityForm {
       $sensor_name = $form_state['values']['sensor_add_select'];
       $multigraph->addSensor($this->sensors[$sensor_name]);
     }
+
+    // @todo: This is necessary because there are two different instances of the
+    //   form object. Core should handle this.
+    $form_state['build_info']['callback_object'] = $form_state['controller'];
+  }
+
+  /**
+   * Removes sensor from entity when 'Remove' button is pressed for sensor.
+   *
+   * @param array $form
+   *   The form structure array
+   * @param array $form_state
+   *   The form state structure array.
+   */
+  public function removeSensorSubmit(array $form, array &$form_state) {
+    $this->entity = $this->buildEntity($form, $form_state);
+    $form_state['rebuild'] = TRUE;
+
+    /** @var Multigraph $multigraph */
+    $multigraph = $this->entity;
+
+    // Remove sensor as indicated by triggering_element.
+    $button_name = $form_state['triggering_element']['#name'];
+    $sensor_name = substr($button_name, strlen('remove_'));
+    $multigraph->removeSensor($sensor_name);
 
     // @todo: This is necessary because there are two different instances of the
     //   form object. Core should handle this.

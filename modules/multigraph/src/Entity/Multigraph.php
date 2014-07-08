@@ -125,7 +125,7 @@ class Multigraph extends ConfigEntityBase {
   }
 
   /**
-   * Include a sensor.
+   * Includes a sensor.
    *
    * @param SensorInfo $sensor
    *   The new sensor that should be aggregated by the multigraph.
@@ -140,6 +140,16 @@ class Multigraph extends ConfigEntityBase {
       'name' => $sensor->getName(),
       'label' => array('data' => $label ? $label : $sensor->getLabel()),
     );
+  }
+
+  /**
+   * Excludes a sensor that has previously been included.
+   *
+   * @param string $name
+   *   Machine name of included sensor.
+   */
+  public function removeSensor($name) {
+    unset($this->sensors[$name]);
   }
 
   /**
