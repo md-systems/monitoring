@@ -136,9 +136,9 @@ class Multigraph extends ConfigEntityBase {
    */
   public function addSensor(SensorInfo $sensor, $weight = NULL, $label = NULL) {
     // @todo Respect $weight
-    $this->sensors[] = array(
+    $this->sensors[$sensor->getName()] = array(
       'name' => $sensor->getName(),
-      'label' => $label ? $label : $sensor->getLabel(),
+      'label' => array('data' => $label ? $label : $sensor->getLabel()),
     );
   }
 

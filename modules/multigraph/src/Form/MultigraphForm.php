@@ -17,6 +17,7 @@ class MultigraphForm extends EntityForm {
 
   /**
    * The available sensors that can be selected.
+   *
    * @var SensorInfo[] $sensors
    */
   protected $sensors = array();
@@ -84,14 +85,13 @@ class MultigraphForm extends EntityForm {
       '#value' => $this->t('Save'),
     );
 
-    // Add selector components for available sensors.
-
-    // Create an array suitable for the sensor_add_select component.
+    // Create an array suitable for the sensor_add_select element.
     $sensors_options = array();
     foreach ($this->sensors as $sensor) {
       $sensors_options[$sensor->getName()] = $sensor->getLabel();
     }
 
+    // Selector elements for available sensors.
     $form['sensor_add_select'] = array(
       '#type' => 'select',
       '#title' => t('Add sensor'),
@@ -112,10 +112,12 @@ class MultigraphForm extends EntityForm {
       ),
     );
 
+    // Table for included sensors. Let the theme hook format it as a table.
     $form['sensors'] = array(
       '#theme' => 'monitoring_multigraph_sensor_table',
     );
 
+    // Fill the sensors element with form elements.
     foreach ($multigraph->getSensors() as $sensor) {
       $form['sensors'][$sensor->id()] = array(
         '#sensor' => $sensor,
@@ -174,31 +176,17 @@ class MultigraphForm extends EntityForm {
    *   The form state structure array.
    */
   public function addSensorSubmit(array $form, array &$form_state) {
-
-    // Forget checked tableselect boxes, all should be checked.
-    if (isset($form_state['input']['sensors'])) {
-      unset($form_state['input']['sensors']);
-    }
-
     $this->entity = $this->buildEntity($form, $form_state);
     $form_state['rebuild'] = TRUE;
 
     /** @var Multigraph $multigraph */
     $multigraph = $this->entity;
 
-    if (isset($form_state['values']['sensors'])) {
-      foreach ($form_state['values']['sensors'] as $name => $values) {
-        $multigraph->addSensor($this->sensors[$name], NULL, $values['label']);
-      }
-    }
-
-    /*
     // Add any selected sensor to entity.
     if (isset($form_state['values']['sensor_add_select'])) {
       $sensor_name = $form_state['values']['sensor_add_select'];
       $multigraph->addSensor($this->sensors[$sensor_name]);
     }
-    */
 
     // @todo: This is necessary because there are two different instances of the
     //   form object. Core should handle this.
