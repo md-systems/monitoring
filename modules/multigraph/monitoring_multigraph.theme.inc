@@ -12,7 +12,7 @@ use \Drupal\Core\Render\Element;
  *
  * @param array $variables
  *   An associative array containing:
- *     - sensors: A list of associative arrays containing:
+ *     - sensors: A list of associative arrays, each containing:
  *       - #sensor: A SensorInfo object.
  *       - other Form API element properties.
  *

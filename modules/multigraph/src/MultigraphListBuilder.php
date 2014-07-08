@@ -2,18 +2,18 @@
 
 /**
  * @file
- * Contains \Drupal\monitoring\SensorListBuilder.
+ * Contains \Drupal\monitoring_multigraph\MultigraphListBuilder.
  */
 
 namespace Drupal\monitoring_multigraph;
 
 use Drupal\Core\Config\Entity\ConfigEntityListBuilder;
-use Drupal\Core\Entity\EntityInterface;
+use Drupal\monitoring_multigraph\Entity\Multigraph;
 
 /**
- * Defines a class to build a listing of monitoring entities.
+ * Defines a class to build a listing of monitoring multigraphs.
  *
- * @see \Drupal\monitoring\Entity\SensorInfo
+ * @see \Drupal\monitoring_multigraph\Entity\Multigraph
  */
 class MultigraphListBuilder extends ConfigEntityListBuilder {
 
@@ -30,16 +30,16 @@ class MultigraphListBuilder extends ConfigEntityListBuilder {
   /**
    * {@inheritdoc}
    */
-  public function buildRow(EntityInterface $entity) {
+  public function buildRow(Multigraph $entity) {
     $row['label'] = $this->getLabel($entity);
     $row['description'] = $entity->getDescription();
 
     // Format sensors list.
-    $sensors = $entity->getSensors();
-    $getLabel_f = function($sensor) {
-      return t($sensor->getLabel());
-    };
-    $row['sensors'] = implode(', ', array_map($getLabel_f, $sensors));
+    foreach ($entity->getSensors() as $sensor) {
+      $row['sensors'][] = $sensor->getLabel();
+    }
+    $row['sensors'] = implode(', ', $row['sensors']);
+
     return $row + parent::buildRow($entity);
   }
 }

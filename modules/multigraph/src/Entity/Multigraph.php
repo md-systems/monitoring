@@ -12,8 +12,8 @@ use Drupal\monitoring\Entity\SensorInfo;
 /**
  * Represents an aggregation of related sensors, called a multigraph.
  *
- * A multigraph can be read like a sensor info entity, but its result is
- * calculated directly from aggregated sensor info entities.
+ * A multigraph can be read like a sensor, but its result is calculated directly
+ * from the included sensors.
  *
  * @ConfigEntityType(
  *   id = "monitoring_multigraph",
@@ -62,7 +62,7 @@ class Multigraph extends ConfigEntityBase {
   public $description = '';
 
   /**
-   * The aggregated sensor info entities.
+   * The included sensors.
    *
    * This is an indexed array, where each element contains:
    *   - name: machine name of the sensor
@@ -73,7 +73,7 @@ class Multigraph extends ConfigEntityBase {
   public $sensors = array();
 
   /**
-   * The multigraph name.
+   * Gets the multigraph name.
    *
    * @return string
    *   The name of the Multigraph
@@ -83,7 +83,7 @@ class Multigraph extends ConfigEntityBase {
   }
 
   /**
-   * Gets multigraph label.
+   * Gets the multigraph label.
    *
    * @return string
    *   Multigraph label.
@@ -93,7 +93,7 @@ class Multigraph extends ConfigEntityBase {
   }
 
   /**
-   * Gets multigraph description.
+   * Gets the multigraph description.
    *
    * @return string
    *   Sensor description.
@@ -103,11 +103,11 @@ class Multigraph extends ConfigEntityBase {
   }
 
   /**
-   * Gets the aggregated sensor info entities.
+   * Gets the included sensors.
    *
    * @return SensorInfo[]
-   *   The aggregated sensors as an indexed array, where keys are weight and
-   *   values are sensors.
+   *   The included sensors as an indexed array, where keys are weights and
+   *   values are sensors with custom labels.
    */
   public function getSensors() {
     $sensors = array();
@@ -125,13 +125,13 @@ class Multigraph extends ConfigEntityBase {
   }
 
   /**
-   * Add a sensor to aggregate.
+   * Include a sensor.
    *
    * @param SensorInfo $sensor
    *   The new sensor that should be aggregated by the multigraph.
-   * @param integer $weight
+   * @param int $weight
    *   (optional) The weight of the sensor within the multigraph.
-   * @param integer $label
+   * @param string $label
    *   (optional) Custom label for the sensor within the multigraph.
    */
   public function addSensor(SensorInfo $sensor, $weight = NULL, $label = NULL) {

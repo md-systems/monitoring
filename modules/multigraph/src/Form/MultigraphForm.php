@@ -23,13 +23,6 @@ class MultigraphForm extends EntityForm {
   protected $sensors = array();
 
   /**
-   * {@inheritdoc}
-   */
-  public function getFormId() {
-    return 'monitoring_multigraph_edit';
-  }
-
-  /**
    * Construct the form by finding and storing all available sensors.
    */
   public function __construct() {
