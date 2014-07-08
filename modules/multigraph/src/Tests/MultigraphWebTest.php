@@ -40,7 +40,7 @@ class MultigraphWebTest extends WebTestBase {
    *
    * @var array
    */
-  public static $modules = array('monitoring', 'monitoring_multigraph');
+  public static $modules = array('node', 'monitoring', 'monitoring_multigraph');
 
   /**
    * {@inheritdoc}
