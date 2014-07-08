@@ -12,7 +12,7 @@ use \Drupal\Core\Render\Element;
  *
  * @param array $variables
  *   An associative array containing:
- *     - sensors: A list of associative arrays containing:
+ *     - sensors: A list of associative arrays, each containing:
  *       - #sensor: A SensorInfo object.
  *       - other Form API element properties.
  *
@@ -29,6 +29,7 @@ function theme_monitoring_multigraph_sensor_table(array $variables) {
       'category' => $sensor->getCategory(),
       'label' => $sensors[$key]['label'],
       'description' => $sensor->getDescription(),
+      'operations' => $sensors[$key]['operations'],
     );
   }
 
@@ -39,6 +40,7 @@ function theme_monitoring_multigraph_sensor_table(array $variables) {
       'category' => t('Category'),
       'label' => t('Sensor label'),
       'description' => t('Description'),
+      'operations' => t('Operations'),
     ),
     '#prefix' => '<div id="selected-sensors">',
     '#suffix' => '</div>',
