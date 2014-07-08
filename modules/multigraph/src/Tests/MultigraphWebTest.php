@@ -36,6 +36,13 @@ class MultigraphWebTest extends WebTestBase {
   protected $adminUser;
 
   /**
+   * String that is appended to values for testing.
+   *
+   * @var string
+   */
+  protected $appendString = ' (test)';
+
+  /**
    * Modules to enable.
    *
    * @var array
@@ -65,42 +72,84 @@ class MultigraphWebTest extends WebTestBase {
     $this->drupalLogin($this->adminUser);
 
     $this->doTestMultigraphAdd();
+    $this->doTestMultigraphEdit();
   }
 
   /**
-   * Flag creation.
+   * Multigraph (monitoring sensor bundle) creation.
    */
   public function doTestMultigraphAdd() {
     // Add a few sensors.
-    $edit0 = array(
+    $values = array(
       'label' => $this->label,
       'id' => $this->id,
       'description' => $this->description,
       'sensor_add_select' => 'dblog_404',
     );
-    $this->drupalPostForm('admin/config/system/monitoring/multigraphs/add', $edit0, t('Add sensor'));
-    $this->assertText(t('Page not found errors'));
+    $this->drupalPostForm('admin/config/system/monitoring/multigraphs/add', $values, t('Add sensor'));
+    $this->assertText(t('Page not found errors logged by watchdog'));
 
-    $this->drupalPostForm('admin/config/system/monitoring/multigraphs/add', array(
-      'sensor_add_select' => 'node_new_page',
+    $this->drupalPostForm(NULL, array(
+      'sensor_add_select' => 'maillog_records_count',
     ), t('Add sensor'));
-    $this->assertText(t('New Basic page nodes'));
+    $this->assertText(t('Maillog records count'));
 
-    $this->drupalPostForm('admin/config/system/monitoring/multigraphs/add', array(
+    $this->drupalPostForm(NULL, array(
       'sensor_add_select' => 'user_successful_logins',
     ), t('Add sensor'));
     $this->assertText(t('Successful user logins'));
 
     // And last but not least, change all sensor label values and save form.
-    $this->drupalPostForm('admin/config/system/monitoring/multigraphs/add', array(
-      'sensors[dblog_404][label][data]' => 'Page not found errors (test)',
-      'sensors[node_new_article][label][data]' => 'New Article nodes (test)',
-      'sensors[user_successful_logins][label][data]' => 'Successful user logins (test)',
+    $this->drupalPostForm(NULL, array(
+      'sensors[dblog_404][label][data]' => 'Page not found errors' . $this->appendString,
+      'sensors[maillog_records_count][label][data]' => 'Maillog records count' . $this->appendString,
+      'sensors[user_successful_logins][label][data]' => 'Successful user logins' . $this->appendString,
     ), t('Save'));
     $this->assertText(t('Multigraph settings saved.'));
-    $this->assertText(t('New Article nodes (test), Page not found errors (test), Successful user logins (test)'));
+    $this->assertText(t('Page not found errors' . $this->appendString . ', Maillog records count' . $this->appendString . ', Successful user logins' . $this->appendString));
+  }
 
-    // Check for fieldset titles.
-    $this->assertText(t('Add Multigraph'));
+  /**
+   * Multigraph (monitoring sensor bundle) edit.
+   */
+  public function doTestMultigraphEdit() {
+    $label_before_editing = 'Watchdog severe entries';
+    $description_before_editing = 'Watchdog entries with severity Warning or higher';
+
+    // Go to multigraph overview and test editing pre-installed multigraph.
+    $this->drupalGet('admin/config/system/monitoring/multigraphs');
+    // Check label, description and sensors (before editing).
+    $this->assertText($label_before_editing);
+    $this->assertText($description_before_editing);
+    $this->assertText('404, Alert, Critical, Emergency, Error');
+
+    // Edit.
+    $this->drupalGet('admin/config/system/monitoring/multigraphs/watchdog_severe_entries');
+    $this->assertText('Edit Multigraph');
+
+    // Change label, description and add a sensor.
+    $values = array(
+      'label' => $label_before_editing . $this->appendString,
+      'description' => $description_before_editing . $this->appendString,
+      'sensor_add_select' => 'user_successful_logins',
+    );
+    $this->drupalPostForm(NULL, $values, t('Add sensor'));
+    $this->assertText('Successful user logins by Watchdog');
+
+    // Save form.
+    $this->drupalPostForm(NULL, array(), t('Save'));
+    $this->assertText(t('Multigraph settings saved.'));
+
+    // Remove a sensor.
+    // (drupalPostAjaxForm() lets us target the button precisely.)
+    $this->drupalPostAjaxForm('admin/config/system/monitoring/multigraphs/watchdog_severe_entries', array(), array('remove_dblog_404' => t('Remove')));
+    $this->assertNoText(t('Page not found errors logged by watchdog'));
+    $this->drupalPostForm(NULL, array(), t('Save'));
+
+    // Go back to multigraph overview, clear cache and check changed values.
+    $this->drupalGet('admin/config/system/monitoring/multigraphs');
+    $this->assertText($label_before_editing . $this->appendString);
+    $this->assertText($description_before_editing . $this->appendString);
+    $this->assertText('Alert, Critical, Emergency, Error, Successful user logins');
   }
 }
