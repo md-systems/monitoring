@@ -107,30 +107,31 @@ class MultigraphForm extends EntityForm {
 
     // Table for included sensors.
     $form['sensors'] = array(
-        '#type' => 'table',
-        '#header' => array(
-          'category' => t('Category'),
-          'label' => t('Sensor label'),
-          'description' => t('Description'),
-          'weight' => t('Weight'),
-          'operations' => t('Operations'),
+      '#type' => 'table',
+      '#header' => array(
+        'category' => t('Category'),
+        'label' => t('Sensor label'),
+        'description' => t('Description'),
+        'weight' => t('Weight'),
+        'operations' => t('Operations'),
+      ),
+      '#prefix' => '<div id="selected-sensors">',
+      '#suffix' => '</div>',
+      '#empty' => t(
+        'Select and add sensors above to include them in this multigraph.'
+      ),
+      '#tabledrag' => array(
+        array(
+          'action' => 'order',
+          'relationship' => 'sibling',
+          'group' => 'sensors-table-weight',
         ),
-        '#prefix' => '<div id="selected-sensors">',
-        '#suffix' => '</div>',
-        '#empty' => t(
-          'Select and add sensors above to include them in this multigraph.'
-        ),
-        '#tabledrag' => array(
-          array(
-            'action' => 'order',
-            'relationship' => 'sibling',
-            'group' => 'sensors-table-weight',
-          ),
-        ),
-      );
+      ),
+    );
 
     // Fill the sensors element with form elements.
-    foreach ($multigraph->getSensors() as $sensor) {
+
+    foreach ($multigraph->getSensors() as $weight => $sensor) {
       $form['sensors'][$sensor->id()] = array(
         'category' => array(
           '#markup' => $sensor->getCategory(),
@@ -149,7 +150,7 @@ class MultigraphForm extends EntityForm {
           '#type' => 'weight',
           '#title' => t('Weight'),
           '#title_display' => 'invisible',
-          '#default_value' => 0,
+          '#default_value' => $weight,
           '#attributes' => array(
             'class' => array('sensors-table-weight'),
           ),
@@ -217,7 +218,7 @@ class MultigraphForm extends EntityForm {
     // Add any selected sensor to entity.
     if (isset($form_state['values']['sensor_add_select'])) {
       $sensor_name = $form_state['values']['sensor_add_select'];
-      $multigraph->addSensor($this->sensors[$sensor_name]);
+      $multigraph->addSensor($sensor_name);
     }
 
     // @todo: This is necessary because there are two different instances of the

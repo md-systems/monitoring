@@ -64,8 +64,9 @@ class Multigraph extends ConfigEntityBase {
   /**
    * The included sensors.
    *
-   * This is an indexed array, where each element contains:
-   *   - name: machine name of the sensor
+   * This is an associative array, where keys are sensor machine names and each
+   * value contains:
+   *   - weight: the sensor weight for this multigraph
    *   - label: custom sensor label for the multigraph
    *
    * @var string[]
@@ -127,18 +128,19 @@ class Multigraph extends ConfigEntityBase {
   /**
    * Includes a sensor.
    *
-   * @param SensorInfo $sensor
-   *   The new sensor that should be aggregated by the multigraph.
-   * @param int $weight
-   *   (optional) The weight of the sensor within the multigraph.
+   * @param string $name
+   *   The machine name of the sensor that should be included by the multigraph.
    * @param string $label
    *   (optional) Custom label for the sensor within the multigraph.
    */
-  public function addSensor(SensorInfo $sensor, $weight = NULL, $label = NULL) {
-    // @todo Respect $weight
-    $this->sensors[$sensor->getName()] = array(
-      'name' => $sensor->getName(),
-      'label' => array('data' => $label ? $label : $sensor->getLabel()),
+  public function addSensor($name, $label = NULL) {
+    $this->sensors[$name] = array(
+      'name' => $name,
+      'label' => $label,
+      'weight' => 1 + max(array_map(
+        function ($mapping) { return $mapping['weight']; },
+        $this->sensors
+      )),
     );
   }
 
