@@ -16,30 +16,32 @@ use Drupal\search_api\Entity\Index;
  */
 function monitoring_install() {
 
-  // Declares initial set of NodeType sensors.
-  foreach (NodeType::loadMultiple() as $node_type) {
-    $sensor = SensorInfo::create(array(
-      'id' => 'node_new_' . $node_type->type,
-      'label' => String::format('New @type nodes', array('@type' => $node_type->name)),
-      'description' => String::format('New nodes of type @type', array('@type' => $node_type->name)),
-      'sensor_id' => 'database_aggregator',
-      'value_label' => String::format('@type nodes', array('@type' => $node_type->name)),
-      'category' => 'Content',
-      'status' => TRUE,
-      'caching_time' => 600,
-      'settings' => array(
-        'thresholds' => array(
-          'type' => 'falls',
+  // Declares initial set of NodeType sensors (if module exists).
+  if (\Drupal::moduleHandler()->moduleExists('node')) {
+    foreach (NodeType::loadMultiple() as $node_type) {
+      $sensor = SensorInfo::create(array(
+        'id' => 'node_new_' . $node_type->type,
+        'label' => String::format('New @type nodes', array('@type' => $node_type->name)),
+        'description' => String::format('New nodes of type @type', array('@type' => $node_type->name)),
+        'sensor_id' => 'database_aggregator',
+        'value_label' => String::format('@type nodes', array('@type' => $node_type->name)),
+        'category' => 'Content',
+        'status' => TRUE,
+        'caching_time' => 600,
+        'settings' => array(
+          'thresholds' => array(
+            'type' => 'falls',
+          ),
+          'table' => 'node_field_data',
+          'conditions' => array(
+            array('field' => 'type', 'value' => $node_type->type),
+          ),
+          'time_interval_field' => 'created',
+          'time_interval_value' => 60 * 60 * 24,
         ),
-        'table' => 'node_field_data',
-        'conditions' => array(
-          array('field' => 'type', 'value' => $node_type->type),
-        ),
-        'time_interval_field' => 'created',
-        'time_interval_value' => 60 * 60 * 24,
-      ),
-    ));
-    $sensor->save();
+      ));
+      $sensor->save();
+    }
   }
 
   // Declares initial set of search api sensors (if module exists).
