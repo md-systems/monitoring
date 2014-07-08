@@ -21,11 +21,11 @@ use \Drupal\Core\Render\Element;
  */
 function theme_monitoring_multigraph_sensor_table(array $variables) {
   $sensors = $variables['sensors'];
-  $options = array();
+  $rows = array();
   foreach (Element::children($sensors) as $key) {
     /** @var SensorInfo $sensor */
     $sensor = $sensors[$key]['#sensor'];
-    $options[$sensor->getName()] = array(
+    $rows[$sensor->getName()] = array(
       'category' => $sensor->getCategory(),
       'label' => $sensors[$key]['label'],
       'description' => $sensor->getDescription(),
@@ -35,7 +35,7 @@ function theme_monitoring_multigraph_sensor_table(array $variables) {
 
   $table = array(
     '#type' => 'table',
-    '#rows' => $options,
+    '#rows' => $rows,
     '#header' => array(
       'category' => t('Category'),
       'label' => t('Sensor label'),

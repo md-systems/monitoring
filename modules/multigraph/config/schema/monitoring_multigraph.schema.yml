@@ -22,7 +22,4 @@ monitoring_multigraph.*:
             weight:
               type: integer
             label:
-              type: mapping
-              mapping:
-                data:
-                  type: string
+              type: string

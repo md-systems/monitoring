@@ -119,9 +119,12 @@ class MultigraphForm extends EntityForm {
           '#value' => $sensor->getName(),
         ),
         'weight' => array(
-          '#type' => 'weight',
-          '#title' => t('Weight'),
-          '#title_display' => 'invisible',
+          'data' => array(
+            '#type' => 'weight',
+            '#title' => t('Weight'),
+            '#title_display' => 'invisible',
+            //'#default_value' => $weight,
+          ),
         ),
         'label' => array(
           'data' => array(
@@ -233,6 +236,14 @@ class MultigraphForm extends EntityForm {
   public function save(array $form, array &$form_state) {
     /** @var Multigraph $multigraph */
     $multigraph = $this->entity;
+
+    // Clean entity properties, whose structure was imposed by form array.
+    foreach ($multigraph->sensors as &$sensor) {
+      $sensor['weight'] = $sensor['weight']['data'];
+      $sensor['label'] = $sensor['label']['data'];
+      unset($sensor['operations']);
+    }
+
     $multigraph->save();
     $form_state['redirect_route']['route_name'] = 'monitoring.multigraphs_overview';
     drupal_set_message($this->t('Multigraph settings saved.'));
