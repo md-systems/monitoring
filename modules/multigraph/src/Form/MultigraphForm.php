@@ -73,7 +73,7 @@ class MultigraphForm extends EntityForm {
     // Fieldset for sensor list elements.
     $form['sensor_add'] = array(
       '#type' => 'fieldset',
-      '#title' => t('Included sensors'),
+      '#title' => t('Sensors'),
       '#prefix' => '<div id="selected-sensors">',
       '#suffix' => '</div>',
     );
@@ -87,7 +87,7 @@ class MultigraphForm extends EntityForm {
     // Select element for available sensors.
     $form['sensor_add']['sensor_add_select'] = array(
       '#type' => 'select',
-      '#title' => t('Add sensor'),
+      '#title' => t('Available sensors'),
       '#options' => $sensors_options,
       '#description' => t('Choose a sensor to add.'),
       '#empty_value' => '',
@@ -95,7 +95,7 @@ class MultigraphForm extends EntityForm {
 
     $form['sensor_add']['sensor_add_button'] = array(
       '#type' => 'submit',
-      '#value' => t('Add sensor'),
+      '#value' => t('Add'),
       '#ajax' => array(
         'wrapper' => 'selected-sensors',
         'callback' => array($this, 'sensorsReplace'),
@@ -103,9 +103,6 @@ class MultigraphForm extends EntityForm {
       ),
       '#submit' => array(
         array($this, 'addSensorSubmit'),
-      ),
-      '#attributes' => array(
-        'class' => array('form-item'),
       ),
     );
 
