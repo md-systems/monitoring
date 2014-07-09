@@ -69,13 +69,15 @@ class SensorForm extends EntityForm {
       '#title' => t('Value Label'),
       '#maxlength' => 255,
       '#default_value' => $sensor_info->getValueLabel(),
+      '#description' => t("Value Label of the Sensor"),
     );
 
     $form['caching_time'] = array(
-      '#type' => 'textfield',
+      '#type' => 'number',
       '#title' => t('Cache Time'),
-      '#maxlength' => 255,
+      '#maxlength' => 10,
       '#default_value' => $sensor_info->getCachingTime(),
+      '#description' => t("Caching time for the sensor"),
     );
 
     if ($sensor_info->isNew()) {
