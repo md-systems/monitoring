@@ -16,24 +16,9 @@ use Drupal\monitoring_multigraph\Entity\Multigraph;
 class MultigraphForm extends EntityForm {
 
   /**
-   * The available sensors that can be selected.
-   *
-   * @var SensorInfo[] $sensors
-   */
-  protected $sensors = array();
-
-  /**
    * Construct the form by finding and storing all available sensors.
    */
   public function __construct() {
-    // Find sensors that can be included.
-    $sensor_ids = \Drupal::entityQuery('monitoring_sensor')
-      ->condition('numeric', TRUE)
-      ->condition('status', TRUE)
-      ->execute();
-    $this->sensors = \Drupal::entityManager()
-      ->getStorage('monitoring_sensor')
-      ->loadMultiple($sensor_ids);
   }
 
   /**
@@ -44,6 +29,16 @@ class MultigraphForm extends EntityForm {
     $form['#tree'] = TRUE;
     /** @var Multigraph $multigraph */
     $multigraph = $this->entity;
+
+    // Find sensors that can be included.
+    $sensor_ids = \Drupal::entityQuery('monitoring_sensor')
+      ->condition('numeric', TRUE)
+      ->condition('status', TRUE)
+      ->execute();
+    /** @var SensorInfo[] $sensors */
+    $sensors = \Drupal::entityManager()
+      ->getStorage('monitoring_sensor')
+      ->loadMultiple($sensor_ids);
 
     $form['label'] = array(
       '#type' => 'textfield',
@@ -80,7 +75,7 @@ class MultigraphForm extends EntityForm {
 
     // Create an array suitable for the sensor_add_select element.
     $sensors_options = array();
-    foreach ($this->sensors as $sensor) {
+    foreach ($sensors as $sensor) {
       $sensors_options[$sensor->getName()] = $sensor->getLabel();
     }
 
