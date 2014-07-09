@@ -20,7 +20,7 @@ use Drupal\Core\Entity\DependencyTrait;
  *   id = "entity_aggregator",
  *   label = @Translation("Entity Aggregator"),
  *   description = @Translation("Utilises the entity query aggregate functionality."),
- *   addable = FALSE
+ *   addable = TRUE
  * )
  *
  * It utilises the entity query aggregate functionality.
@@ -102,4 +102,34 @@ class SensorEntityAggregator extends SensorDatabaseAggregatorBase {
     return $this->dependencies;
   }
 
+  /**
+   * Adds UI for variables entity_type and conditions.
+   */
+  public function settingsForm($form, &$form_state) {
+    $form = parent::settingsForm($form, $form_state);
+    $entity_types = array();
+    foreach (\Drupal::entityManager()->getDefinitions() as $entity_type_id => $entity_type) {
+      $entity_types[$entity_type_id] = $entity_type->getLabel();
+    }
+    $form['entity_type'] = array(
+      '#type' => 'select',
+      '#options' => $entity_types,
+      '#title' => t('Entity Type'),
+      '#required' => TRUE,
+    );
+
+    $form['conditions'][1]['field'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Condition\'s Field'),
+      '#maxlength' => 255,
+      '#description' => t(''),
+    );
+    $form['conditions'][1]['value'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Condition\'s Value'),
+      '#maxlength' => 255,
+      '#description' => t(''),
+    );
+    return $form;
+  }
 }
