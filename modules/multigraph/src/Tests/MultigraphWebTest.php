@@ -61,7 +61,7 @@ class MultigraphWebTest extends WebTestBase {
    *
    * @var array
    */
-  public static $modules = array('node', 'monitoring', 'monitoring_multigraph');
+  public static $modules = array('dblog', 'node', 'monitoring', 'monitoring_multigraph');
 
   /**
    * {@inheritdoc}
@@ -87,6 +87,7 @@ class MultigraphWebTest extends WebTestBase {
 
     $this->doTestMultigraphAdd();
     $this->doTestMultigraphEdit();
+    $this->doTestMultigraphDelete();
   }
 
   /**
@@ -115,9 +116,9 @@ class MultigraphWebTest extends WebTestBase {
 
     // And last but not least, change all sensor label values and save form.
     $this->drupalPostForm(NULL, array(
-      'sensors[dblog_404][label][data]' => 'Page not found errors' . $this->appendString,
-      'sensors[maillog_records_count][label][data]' => 'Maillog records count' . $this->appendString,
-      'sensors[user_successful_logins][label][data]' => 'Successful user logins' . $this->appendString,
+      'sensors[dblog_404][label]' => 'Page not found errors' . $this->appendString,
+      'sensors[maillog_records_count][label]' => 'Maillog records count' . $this->appendString,
+      'sensors[user_successful_logins][label]' => 'Successful user logins' . $this->appendString,
     ), t('Save'));
     $this->assertText(t('Multigraph settings saved.'));
     $this->assertText(t('Page not found errors' . $this->appendString . ', Maillog records count' . $this->appendString . ', Successful user logins' . $this->appendString));
@@ -147,8 +148,14 @@ class MultigraphWebTest extends WebTestBase {
     $this->drupalPostForm(NULL, $values, t('Add sensor'));
     $this->assertText('Successful user logins by Watchdog');
 
+    // Remove a sensor.
+    // (drupalPostAjaxForm() lets us target the button precisely.)
+    $this->drupalPostAjaxForm(NULL, array(), array('remove_dblog_404' => t('Remove')));
+    $this->assertNoText(t('Page not found errors logged by watchdog'));
+    $this->drupalPostForm(NULL, array(), t('Save'));
+
     // Change weights and save form.
-    $this->drupalPostForm(NULL, array(
+    $this->drupalPostForm('admin/config/system/monitoring/multigraphs/watchdog_severe_entries', array(
       'sensors[user_successful_logins][weight]' => -2,
       'sensors[dblog_event_severity_error][weight]' => -1,
       'sensors[dblog_event_severity_critical][weight]' => 0,
@@ -156,13 +163,6 @@ class MultigraphWebTest extends WebTestBase {
       'sensors[dblog_event_severity_alert][weight]' => 2,
     ), t('Save'));
     $this->assertText(t('Multigraph settings saved.'));
-
-    // Remove a sensor.
-    // (drupalPostAjaxForm() lets us target the button precisely.)
-    $this->drupalPostAjaxForm('admin/config/system/monitoring/multigraphs/watchdog_severe_entries', array(), array('remove_dblog_404' => t('Remove')));
-    $this->assertNoText(t('Page not found errors logged by watchdog'));
-    // Save.
-    $this->drupalPostForm(NULL, array(), t('Save'));
 
     // Go back to multigraph overview and check changed values.
     $this->drupalGet('admin/config/system/monitoring/multigraphs');
@@ -181,18 +181,12 @@ class MultigraphWebTest extends WebTestBase {
     $this->assertText($this->preinstalledMultigraphLabel);
     $this->assertText($this->preinstalledMultigraphDescription);
 
-    // Edit.
-    $this->drupalGet('admin/config/system/monitoring/multigraphs/watchdog_severe_entries');
-    $this->assertText('Edit Multigraph');
-
     // Delete.
-    $this->clickLink('Delete');
-    $this->assertText('Are you sure you want to delete the Watchdog severe entries multigraph?');
     $this->drupalPostForm('admin/config/system/monitoring/multigraphs/watchdog_severe_entries/delete', array(), t('Delete'));
+    $this->assertText('The ' . $this->preinstalledMultigraphLabel . $this->appendString . ' multigraph has been deleted');
 
     // Go back to multigraph overview and check that multigraph is deleted.
     $this->drupalGet('admin/config/system/monitoring/multigraphs');
-    $this->assertRaw('The ' . $this->preinstalledMultigraphLabel . $this->appendString . ' multigraph has been deleted');
     $this->assertNoText($this->preinstalledMultigraphLabel);
     $this->assertNoText($this->preinstalledMultigraphDescription);
   }

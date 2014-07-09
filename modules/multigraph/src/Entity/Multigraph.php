@@ -125,6 +125,8 @@ class Multigraph extends ConfigEntityBase {
       }
       $sensors[$entry['weight']] = $sensor;
     }
+    ksort($sensors);
+
     return $sensors;
   }
 
@@ -140,10 +142,10 @@ class Multigraph extends ConfigEntityBase {
     $this->sensors[$name] = array(
       'name' => $name,
       'label' => $label,
-      'weight' => 1 + max(array_map(
-        function ($mapping) { return $mapping['weight']; },
+      'weight' => $this->sensors ? 1 + max(array_map(
+        function ($mapping) {return $mapping['weight'];},
         $this->sensors
-      )),
+      )) : 0,
     );
   }
 
