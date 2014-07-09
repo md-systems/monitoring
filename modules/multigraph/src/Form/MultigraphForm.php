@@ -90,6 +90,7 @@ class MultigraphForm extends EntityForm {
       '#title' => t('Add sensor'),
       '#options' => $sensors_options,
       '#description' => t('Choose a sensor to add.'),
+      '#empty_value' => '',
     );
 
     $form['sensor_add_button'] = array(
@@ -130,10 +131,6 @@ class MultigraphForm extends EntityForm {
       ),
     );
 
-    // Get sensor status values.
-    $sensor_runner = \Drupal::service('monitoring.sensor_runner');
-    $results = $sensor_runner->runSensors();
-
     // Fill the sensors element with form elements.
     foreach ($multigraph->getSensors() as $weight => $sensor) {
       $form['sensors'][$sensor->id()] = array(
@@ -151,7 +148,7 @@ class MultigraphForm extends EntityForm {
           '#markup' => $sensor->getDescription(),
         ),
         'message' => array(
-          '#markup' => $results[$sensor->id()]->getMessage(),
+          '#markup' => monitoring_sensor_run($sensor->id())->getMessage(),
         ),
         'weight' => array(
           '#type' => 'weight',
@@ -266,8 +263,10 @@ class MultigraphForm extends EntityForm {
     $multigraph = $this->entity;
 
     // Clean entity properties, whose structure was imposed by form array.
-    foreach ($multigraph->sensors as &$sensor) {
-      unset($sensor['operations']);
+    if ($multigraph->sensors) {
+      foreach ($multigraph->sensors as &$sensor) {
+        unset($sensor['operations']);
+      }
     }
 
     $multigraph->save();
