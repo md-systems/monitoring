@@ -102,17 +102,17 @@ class MultigraphWebTest extends WebTestBase {
       'sensor_add_select' => 'dblog_404',
     );
     $this->drupalPostForm('admin/config/system/monitoring/multigraphs/add', $values, t('Add sensor'));
-    $this->assertText(t('Page not found errors logged by watchdog'));
+    $this->assertText(t('Sensor "Page not found errors" added. You have unsaved changes.'));
 
     $this->drupalPostForm(NULL, array(
       'sensor_add_select' => 'maillog_records_count',
     ), t('Add sensor'));
-    $this->assertText(t('Maillog records count'));
+    $this->assertText(t('Sensor "Maillog records count" added. You have unsaved changes.'));
 
     $this->drupalPostForm(NULL, array(
       'sensor_add_select' => 'user_successful_logins',
     ), t('Add sensor'));
-    $this->assertText(t('Successful user logins'));
+    $this->assertText(t('Sensor "Successful user logins" added. You have unsaved changes.'));
 
     // And last but not least, change all sensor label values and save form.
     $this->drupalPostForm(NULL, array(
@@ -146,12 +146,12 @@ class MultigraphWebTest extends WebTestBase {
       'sensor_add_select' => 'user_successful_logins',
     );
     $this->drupalPostForm(NULL, $values, t('Add sensor'));
-    $this->assertText('Successful user logins by Watchdog');
+    $this->assertText('Sensor "Successful user logins" added. You have unsaved changes.');
 
     // Remove a sensor.
     // (drupalPostAjaxForm() lets us target the button precisely.)
     $this->drupalPostAjaxForm(NULL, array(), array('remove_dblog_404' => t('Remove')));
-    $this->assertNoText(t('Page not found errors logged by watchdog'));
+    $this->assertText(t('Sensor "Page not found errors" removed.  You have unsaved changes.'));
     $this->drupalPostForm(NULL, array(), t('Save'));
 
     // Change weights and save form.

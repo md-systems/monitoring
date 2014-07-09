@@ -6,6 +6,9 @@
 
 namespace Drupal\monitoring_multigraph\Form;
 
+use Drupal\Core\Ajax\AjaxResponse;
+use Drupal\Core\Ajax\AlertCommand;
+use Drupal\Core\Ajax\InsertCommand;
 use Drupal\Core\Entity\EntityForm;
 use Drupal\monitoring\Entity\SensorInfo;
 use Drupal\monitoring_multigraph\Entity\Multigraph;
@@ -217,11 +220,13 @@ class MultigraphForm extends EntityForm {
     // Add any selected sensor to entity.
     if (isset($form_state['values']['sensor_add_select'])) {
       $sensor_name = $form_state['values']['sensor_add_select'];
+      $sensor_label = \Drupal::entityManager()->getStorage('monitoring_sensor')->load($sensor_name)->getLabel();
       $multigraph->addSensor($sensor_name);
+      drupal_set_message($this->t('Sensor "@sensor_label" added. You have unsaved changes.', array('@sensor_label' => $sensor_label)), 'warning');
     }
 
     // @todo: This is necessary because there are two different instances of the
-    //   form object. Core should handle this.
+    // form object. Core should handle this.
     $form_state['build_info']['callback_object'] = $form_state['controller'];
   }
 
@@ -243,10 +248,12 @@ class MultigraphForm extends EntityForm {
     // Remove sensor as indicated by triggering_element.
     $button_name = $form_state['triggering_element']['#name'];
     $sensor_name = substr($button_name, strlen('remove_'));
+    $sensor_label = \Drupal::entityManager()->getStorage('monitoring_sensor')->load($sensor_name)->getLabel();
     $multigraph->removeSensor($sensor_name);
+    drupal_set_message($this->t('Sensor "@sensor_label" removed.  You have unsaved changes.', array('@sensor_label' => $sensor_label)), 'warning');
 
     // @todo: This is necessary because there are two different instances of the
-    //   form object. Core should handle this.
+    // form object. Core should handle this.
     $form_state['build_info']['callback_object'] = $form_state['controller'];
   }
 
