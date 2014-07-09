@@ -7,11 +7,11 @@
 
 namespace Drupal\monitoring_multigraph\Plugin\rest\resource;
 
-use Drupal\rest\Plugin\ResourceBase;
-use Drupal\Core\Config\Entity\ConfigEntityBase;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Drupal\rest\ResourceResponse;
 use Symfony\Component\Routing\Route;
+use Drupal\rest\Plugin\ResourceBase;
+use Drupal\rest\ResourceResponse;
+use Drupal\monitoring_multigraph\Entity\Multigraph;
 
 /**
  * Provides a resource for monitoring multigraphs.
@@ -55,15 +55,17 @@ class MonitoringMultigraphResource extends ResourceBase {
    * Responds to multigraph GET requests.
    *
    * @param string $multigraph_name
-   *   (optional) The multigraph name, returns a list of all sensors when empty.
+   *   (optional) The multigraph name, returns a list of all multigraphs when
+   *   empty.
    *
    * @return \Drupal\rest\ResourceResponse
-   *   The response containing the sensor info.
+   *   The response containing the multigraph.
    *
    * @throws \Symfony\Component\HttpKernel\Exception\HttpException
    */
   public function get($multigraph_name = NULL) {
     if ($multigraph_name) {
+      /** @var Multigraph $multigraph */
       $multigraph = \Drupal::entityManager()
         ->getStorage('monitoring_multigraph')
         ->load($multigraph_name);
@@ -80,7 +82,7 @@ class MonitoringMultigraphResource extends ResourceBase {
       ->getStorage('monitoring_multigraph')
       ->loadMultiple();
     foreach ($multigraphs as $name => $multigraph) {
-      /** @var ConfigEntityBase $multigraph */
+      /** @var Multigraph $multigraph */
       $list[$name] = $multigraph->getDefinition();
       $list[$name]['uri'] = \Drupal::request()->getUriForPath('/monitoring-multigraph/' . $name);
     }
