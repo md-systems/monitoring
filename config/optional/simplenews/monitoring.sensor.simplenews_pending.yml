@@ -5,3 +5,6 @@ category: Simplenews
 sensor_id: simplenews_pending
 value_label: 'Pending items'
 status: FALSE
+dependencies:
+  module:
+    - simplenews

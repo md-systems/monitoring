@@ -9,6 +9,7 @@ namespace Drupal\monitoring;
 use Drupal\Core\Entity\EntityForm;
 use Drupal\monitoring\Sensor\NonExistingSensorException;
 use Drupal\monitoring\Sensor\Sensor;
+use Drupal\monitoring\Entity\SensorInfo;
 use Drupal\monitoring\Sensor\SensorConfigurableInterface;
 use Drupal\monitoring\Sensor\SensorManager;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -61,6 +62,22 @@ class SensorForm extends EntityForm {
       '#title' => t('Description'),
       '#maxlength' => 255,
       '#default_value' => $sensor_info->getDescription(),
+    );
+
+    $form['value_label'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Value Label'),
+      '#maxlength' => 255,
+      '#default_value' => $sensor_info->getValueLabel(),
+      '#description' => t("Value Label of the Sensor"),
+    );
+
+    $form['caching_time'] = array(
+      '#type' => 'number',
+      '#title' => t('Cache Time'),
+      '#maxlength' => 10,
+      '#default_value' => $sensor_info->getCachingTime(),
+      '#description' => t("Caching time for the sensor"),
     );
 
     if ($sensor_info->isNew()) {
@@ -135,6 +152,15 @@ class SensorForm extends EntityForm {
         '#suffix' => '</div>',
       );
     }
+    $settings = $sensor_info->getSettings();
+    foreach ($settings as $key => $value) {
+      if (!isset($form['settings'][$key])) {
+        $form['settings'][$key] = array(
+          '#type' => 'value',
+          '#value' => $value
+        );
+      }
+    }
     $form['actions']['submit'] = array(
       '#type' => 'submit',
       '#value' => $this->t('Save'),
@@ -183,8 +209,26 @@ class SensorForm extends EntityForm {
   public function save(array $form, array &$form_state) {
     /** @var Sensor $sensor */
     $sensor_info = $this->entity;
+    if ($sensor_info->sensor_id == 'entity_aggregator') {
+      $this->entity->settings['conditions'] = array(
+	array(
+          'field' => $sensor_info->settings['conditions'][1]['field'],
+	  'value' => $sensor_info->settings['conditions'][1]['value'],
+      ));
+      unset($sensor_info->settings['conditions'][1]);
+    }
     $sensor_info->save();
     $form_state['redirect_route']['route_name'] = 'monitoring.sensors_overview_settings';
     drupal_set_message($this->t('Sensor settings saved.'));
+  }
+
+  /**
+   * Settings form page title callback.
+   */
+  public function formTitle($monitoring_sensor) {
+    if ($sensor_info = SensorInfo::load($monitoring_sensor)) {
+      return $this->t('@label settings (@category)', array('@category' => $sensor_info->getCategory(), '@label' => $sensor_info->getLabel()));
+    }
+    return '';
   }
 }

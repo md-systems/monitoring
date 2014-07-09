@@ -8,6 +8,7 @@ namespace Drupal\monitoring\Entity;
 
 use Drupal\Core\Config\Entity\ConfigEntityBase;
 use Drupal\Core\Config\Entity\ConfigEntityInterface;
+use Drupal\Core\Entity\EntityStorageInterface;
 
 /**
  * Represents a sensor info entity class.
@@ -179,7 +180,7 @@ class SensorInfo extends ConfigEntityBase {
     $sensor = monitoring_sensor_manager()->createInstance($this->sensor_id, $configuration);
     return $sensor;
   }
-  
+
   /**
    * Gets sensor result class.
    *
@@ -375,6 +376,7 @@ class SensorInfo extends ConfigEntityBase {
    */
   public function getDefinition() {
     $info_array = array(
+      'sensor' => $this->getName(),
       'label' => $this->getLabel(),
       'category' => $this->getCategory(),
       'description' => $this->getDescription(),
@@ -407,4 +409,32 @@ class SensorInfo extends ConfigEntityBase {
     // In the end, the label's order is determined.
     return ($a->getLabel() < $b->getLabel()) ? -1 : 1;
   }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function calculateDependencies() {
+    parent::calculateDependencies();
+    // Include the module of the sensor plugin as dependency and also allow it
+    // to add additional dependencies based on the configuration.
+    $instance = $this->getPlugin();
+    $definition = $instance->getPluginDefinition();
+    $this->addDependency('module', $definition['provider']);
+    // If a plugin is configurable, calculate its dependencies.
+    if ($plugin_dependencies = $instance->calculateDependencies()) {
+      $this->addDependencies($plugin_dependencies);
+    }
+    return $this->dependencies;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function postSave(EntityStorageInterface $storage, $update = TRUE) {
+    parent::postSave($storage, $update);
+    \Drupal::service('monitoring.sensor_runner')->resetCache(array($this->id));
+  }
+
+
+
 }

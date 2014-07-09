@@ -48,7 +48,7 @@ monitoring.sensor_edit:
   path: '/admin/config/system/monitoring/sensors/{monitoring_sensor}'
   defaults:
     _entity_form: 'monitoring_sensor.edit'
-    _title: 'Edit Monitoring Sensor'
+    _title_callback: '\Drupal\monitoring\SensorForm::formTitle'
   requirements:
     _permission: 'administer monitoring'
 

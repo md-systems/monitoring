@@ -120,9 +120,8 @@ class SensorEnabledModules extends SensorConfigurable {
     // the expected modules list as currently enabled modules.
     if (empty($expected_modules)) {
       $expected_modules = $monitoring_enabled_modules;
-      $settings = monitoring_sensor_settings_get('monitoring_enabled_modules');
-      $settings['modules'] = $monitoring_enabled_modules;
-      monitoring_sensor_settings_save('monitoring_enabled_modules', $settings);
+      $this->info->settings['modules'] = $monitoring_enabled_modules;
+      $this->info->save();
     }
 
     // Check for modules not being installed but expected.

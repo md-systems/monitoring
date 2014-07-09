@@ -5,8 +5,9 @@
  */
 namespace Drupal\monitoring\Tests;
 use Drupal\Component\Utility\String;
-use Drupal\Core\Field\FieldDefinitionInterface;
+use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\file\FileUsage\FileUsageInterface;
+use Drupal\monitoring\Entity\SensorInfo;
 
 
 /**
@@ -75,6 +76,14 @@ class MonitoringCoreTest extends MonitoringTestBase {
 
     // ======= SensorQueue tests ======= //
 
+    $sensorInfo = SensorInfo::create(array(
+      'id' => 'core_queue_monitoring_test',
+      'sensor_id' => 'queue_size',
+      'settings' => array(
+        'queue' => 'monitoring_test'
+      )
+    ));
+    $sensorInfo->save();
     $queue = \Drupal::queue('monitoring_test');
     $queue->createItem(array());
     $queue->createItem(array());
@@ -83,6 +92,15 @@ class MonitoringCoreTest extends MonitoringTestBase {
 
     // ======= SensorCoreRequirements tests ======= //
 
+    // @todo - This should not be necessary after sensor requirements are updated.
+    $sensorInfo = SensorInfo::create(array(
+      'id' => 'core_requirements_monitoring_test',
+      'sensor_id' => 'core_requirements',
+      'settings' => array(
+        'module' => 'monitoring_test'
+      )
+    ));
+    $sensorInfo->save();
     $result = $this->runSensor('core_requirements_monitoring_test');
     $this->assertTrue($result->isOk());
     $this->assertEqual($result->getMessage(), 'Requirements check OK');
@@ -105,9 +123,11 @@ class MonitoringCoreTest extends MonitoringTestBase {
     \Drupal::state()->set('monitoring_test.requirements', $requirements);
 
     // Set requirements exclude keys into the sensor settings.
-    $settings = monitoring_sensor_settings_get('core_requirements_monitoring_test');
+    $sensorInfo = SensorInfo::load('core_requirements_monitoring_test');
+    $settings = $sensorInfo->getSettings();
     $settings['exclude keys'] = array('requirement_excluded');
-    monitoring_sensor_settings_save('core_requirements_monitoring_test', $settings);
+    $sensorInfo->settings = $settings;
+    $sensorInfo->save();
 
     // We still should have OK status but with different message
     $result = $this->runSensor('core_requirements_monitoring_test');
@@ -226,10 +246,10 @@ class MonitoringCoreTest extends MonitoringTestBase {
     // ======= SensorGitDirtyTree tests ======= //
 
     // Enable the sensor and set cmd to output something
-    monitoring_sensor_settings_save('monitoring_git_dirty_tree', array(
-      'enabled' => TRUE,
-      'cmd' => 'echo "dummy output\nanother dummy output"',
-    ));
+    $sensorInfo = SensorInfo::load('monitoring_git_dirty_tree');
+    $sensorInfo->status = TRUE;
+    $sensorInfo->settings['cmd'] = 'echo "dummy output\nanother dummy output"';
+    $sensorInfo->save();
     $result = monitoring_sensor_run('monitoring_git_dirty_tree', TRUE, TRUE);
     $this->assertTrue($result->isCritical());
     // The verbose output should contain the cmd output.
@@ -238,10 +258,9 @@ class MonitoringCoreTest extends MonitoringTestBase {
     $this->assertEqual($result->getValue(), 2);
 
     // Now echo empty string
-    monitoring_sensor_settings_save('monitoring_git_dirty_tree', array(
-      'enabled' => TRUE,
-      'cmd' => 'echo ""',
-    ));
+    $sensorInfo->settings['cmd'] = 'echo ""';
+    $sensorInfo->save();
+
     $result = $this->runSensor('monitoring_git_dirty_tree');
     $this->assertTrue($result->isOk());
     // The message should say that it is ok.
@@ -285,11 +304,11 @@ class MonitoringCoreTest extends MonitoringTestBase {
     $result = $this->runSensor('node_new_all');
     $this->assertEqual($result->getValue(), 3);
 
-    variable_set('theme_default', 'bartik');
+    \Drupal::config('system.theme')->set('default', 'bartik')->save();
     $result = $this->runSensor('core_theme_default');
     $this->assertTrue($result->isOk());
 
-    variable_set('theme_default', 'garland');
+    \Drupal::config('system.theme')->set('default', 'garland')->save();
     $result = $this->runSensor('core_theme_default');
     $this->assertTrue($result->isCritical());
   }
@@ -339,6 +358,7 @@ class MonitoringCoreTest extends MonitoringTestBase {
     // Install the comment module to test the correct procedure of removing
     // sensors.
     $module_handler->install(array('comment'));
+    monitoring_sensor_manager()->enableSensor('comment_new');
 
     // Now we should be back to normal.
     $result = $this->runSensor('monitoring_disappeared_sensors');
@@ -399,11 +419,10 @@ class MonitoringCoreTest extends MonitoringTestBase {
   function testSensorInstalledModulesUI() {
     $account = $this->drupalCreateUser(array('administer monitoring'));
     $this->drupalLogin($account);
-    $form_key = 'monitoring_enabled_modules';
 
     // Test submitting the defaults and enabling the sensor.
     $this->drupalPostForm('admin/config/system/monitoring/sensors/monitoring_enabled_modules', array(
-      $form_key . '[enabled]' => TRUE,
+      'status' => TRUE,
     ), t('Save'));
     // Reset the sensor info so that it reflects changes done via POST.
     monitoring_sensor_manager()->resetCache();
@@ -413,8 +432,8 @@ class MonitoringCoreTest extends MonitoringTestBase {
 
     // Expect the contact and book modules to be installed.
     $this->drupalPostForm('admin/config/system/monitoring/sensors/monitoring_enabled_modules', array(
-      $form_key . '[modules][contact]' => TRUE,
-      $form_key . '[modules][book]' => TRUE,
+      'settings[modules][contact]' => TRUE,
+      'settings[modules][book]' => TRUE,
     ), t('Save'));
     // Reset the sensor info so that it reflects changes done via POST.
     monitoring_sensor_manager()->resetCache();
@@ -428,8 +447,8 @@ class MonitoringCoreTest extends MonitoringTestBase {
     // and the sensor should escalate to CRITICAL.
     $this->drupalPostForm('admin/config/system/monitoring/sensors/monitoring_enabled_modules', array(
       // Do not require contact and book as they are not installed.
-      $form_key . '[modules][contact]' => FALSE,
-      $form_key . '[modules][book]' => FALSE,
+      'settings[modules][contact]' => FALSE,
+      'settings[modules][book]' => FALSE,
     ), t('Save'));
     // Reset the sensor info so that it reflects changes done via POST.
     monitoring_sensor_manager()->resetCache();
@@ -450,7 +469,9 @@ class MonitoringCoreTest extends MonitoringTestBase {
       $form_key . '[allow_additional]' => TRUE,
     ), t('Save'));
     */
-    monitoring_sensor_manager()->saveSettings('monitoring_enabled_modules', array('allow_additional' => TRUE));
+    $sensor_info = SensorInfo::load('monitoring_enabled_modules');
+    $sensor_info->settings['allow_additional'] = TRUE;
+    $sensor_info->save();
     $result = $this->runSensor('monitoring_enabled_modules');
     $this->assertTrue($result->isOk());
   }
@@ -475,17 +496,16 @@ class MonitoringCoreTest extends MonitoringTestBase {
     $this->assertEqual($result->getValue(), 1);
 
     // Allow additional modules and run the sensor - it should not escalate now.
-    $settings = monitoring_sensor_settings_get('monitoring_enabled_modules');
-    $settings['allow_additional'] = TRUE;
-    monitoring_sensor_settings_save('monitoring_enabled_modules', $settings);
+    $sensor_info = SensorInfo::load('monitoring_enabled_modules');
+    $sensor_info->settings['allow_additional'] = TRUE;
+    $sensor_info->save();
     $result = $this->runSensor('monitoring_enabled_modules');
     $this->assertTrue($result->isOk());
 
     // Add comment module to be expected and disable the module. The sensor
     // should escalate to critical.
-    $settings = monitoring_sensor_settings_get('monitoring_enabled_modules');
-    $settings['modules']['contact'] = 'contact';
-    monitoring_sensor_settings_save('monitoring_enabled_modules', $settings);
+    $sensor_info->settings['modules']['contact'] = 'contact';
+    $sensor_info->save();
     \Drupal::moduleHandler()->uninstall(array('contact'));
     $result = $this->runSensor('monitoring_enabled_modules');
     $this->assertTrue($result->isCritical());
@@ -499,11 +519,11 @@ class MonitoringCoreTest extends MonitoringTestBase {
   function testGenericDBAggregate() {
 
     // Aggregate by watchdog type.
-    monitoring_sensor_settings_save('watchdog_aggregate_test', array(
-      'conditions' => array(
-        array('field' => 'type', 'value' => 'test_type'),
-      ),
-    ));
+    $sensor_info = SensorInfo::load('watchdog_aggregate_test');
+    $sensor_info->settings['conditions'] = array(
+      array('field' => 'type', 'value' => 'test_type'),
+    );
+    $sensor_info->save();
     watchdog('test_type', $this->randomName());
     watchdog('test_type', $this->randomName());
     watchdog('other_test_type', $this->randomName());
@@ -511,11 +531,10 @@ class MonitoringCoreTest extends MonitoringTestBase {
     $this->assertEqual($result->getValue(), 2);
 
     // Aggregate by watchdog message.
-    monitoring_sensor_settings_save('watchdog_aggregate_test', array(
-      'conditions' => array(
-        array('field' => 'message', 'value' => 'test_message'),
-      )
-    ));
+    $sensor_info->settings['conditions'] = array(
+      array('field' => 'message', 'value' => 'test_message'),
+    );
+    $sensor_info->save();
     watchdog($this->randomName(), 'test_message');
     watchdog($this->randomName(), 'another_test_message');
     watchdog($this->randomName(), 'another_test_message');
@@ -523,11 +542,10 @@ class MonitoringCoreTest extends MonitoringTestBase {
     $this->assertEqual($result->getValue(), 1);
 
     // Aggregate by watchdog severity.
-    monitoring_sensor_settings_save('watchdog_aggregate_test', array(
-      'conditions' => array(
-        array('field' => 'severity', 'value' => WATCHDOG_CRITICAL),
-      )
-    ));
+    $sensor_info->settings['conditions'] = array(
+      array('field' => 'severity', 'value' => WATCHDOG_CRITICAL),
+    );
+    $sensor_info->save();
     watchdog($this->randomName(), $this->randomName(), array(), WATCHDOG_CRITICAL);
     watchdog($this->randomName(), $this->randomName(), array(), WATCHDOG_CRITICAL);
     watchdog($this->randomName(), $this->randomName(), array(), WATCHDOG_CRITICAL);
@@ -536,11 +554,10 @@ class MonitoringCoreTest extends MonitoringTestBase {
     $this->assertEqual($result->getValue(), 4);
 
     // Aggregate by watchdog location.
-    monitoring_sensor_settings_save('watchdog_aggregate_test', array(
-      'conditions' => array(
-        array('field' => 'location', 'value' => 'http://some.url.dev'),
-      )
-    ));
+    $sensor_info->settings['conditions'] = array(
+      array('field' => 'location', 'value' => 'http://some.url.dev'),
+    );
+    $sensor_info->save();
     // Update the two test_type watchdog entries with a custom location.
     db_update('watchdog')
       ->fields(array('location' => 'http://some.url.dev'))
@@ -550,10 +567,10 @@ class MonitoringCoreTest extends MonitoringTestBase {
     $this->assertEqual($result->getValue(), 2);
 
     // Filter for time period.
-    monitoring_sensor_settings_save('watchdog_aggregate_test', array(
-      'time_interval_value' => 10,
-      'time_interval_field' => 'timestamp',
-    ));
+    $sensor_info->settings['conditions'] = array();
+    $sensor_info->settings['time_interval_value'] = 10;
+    $sensor_info->settings['time_interval_field'] = 'timestamp';
+    $sensor_info->save();
 
     // Make all system watchdog messages older than the configured time period.
     db_update('watchdog')
@@ -565,11 +582,10 @@ class MonitoringCoreTest extends MonitoringTestBase {
     $this->assertEqual($result->getValue(), $count_latest);
 
     // Test for thresholds and statuses.
-    monitoring_sensor_settings_save('watchdog_aggregate_test', array(
-      'conditions' => array(
-        array('field' => 'type', 'value' => 'test_watchdog_aggregate_sensor'),
-      )
-    ));
+    $sensor_info->settings['conditions'] = array(
+      array('field' => 'type', 'value' => 'test_watchdog_aggregate_sensor'),
+    );
+    $sensor_info->save();
     $result = $this->runSensor('watchdog_aggregate_test');
     $this->assertTrue($result->isOk());
     $this->assertEqual($result->getValue(), 0);
@@ -600,20 +616,19 @@ class MonitoringCoreTest extends MonitoringTestBase {
       ->execute();
 
     // Test for the node type1.
-    $settings = monitoring_sensor_settings_get('db_aggregate_test');
-    $settings['conditions'] = array(
+    $sensor_info = SensorInfo::load('db_aggregate_test');
+    $sensor_info->settings['conditions'] = array(
       'test' => array('field' => 'type', 'value' => $type1->type),
     );
-    monitoring_sensor_settings_save('db_aggregate_test', $settings);
+    $sensor_info->save();
     $result = $this->runSensor('db_aggregate_test');
     $this->assertEqual($result->getValue(), '1');
 
     // Test for node type2.
-    $settings = monitoring_sensor_settings_get('db_aggregate_test');
-    $settings['conditions'] = array(
+    $sensor_info->settings['conditions'] = array(
       'test' => array('field' => 'type', 'value' => $type2->type),
     );
-    monitoring_sensor_settings_save('db_aggregate_test', $settings);
+    $sensor_info->save();
     $result = $this->runSensor('db_aggregate_test');
     // There should be two nodes with node type2 and created in last 24 hours.
     $this->assertEqual($result->getValue(), 2);
@@ -623,7 +638,7 @@ class MonitoringCoreTest extends MonitoringTestBase {
 
     entity_create('field_config', array(
       'name' => 'term_reference',
-      'cardinality' => FieldDefinitionInterface::CARDINALITY_UNLIMITED,
+      'cardinality' => FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED,
       'entity_type' => 'node',
       'type' => 'taxonomy_term_reference',
       'entity_types' => array('node'),
@@ -657,7 +672,7 @@ class MonitoringCoreTest extends MonitoringTestBase {
 
     entity_create('field_config', array(
       'name' => 'term_reference2',
-      'cardinality' => FieldDefinitionInterface::CARDINALITY_UNLIMITED,
+      'cardinality' => FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED,
       'entity_type' => 'node',
       'type' => 'taxonomy_term_reference',
       'entity_types' => array('node'),
@@ -720,27 +735,25 @@ class MonitoringCoreTest extends MonitoringTestBase {
 
     // Update the sensor to look for nodes with a reference to term1 in the
     // first field.
-    $settings = monitoring_sensor_settings_get('db_aggregate_test');
-    $settings['table'] = 'node';
-    $settings['conditions'] = array(
+    $sensor_info->settings['conditions'] = array(
       'test' => array('field' => 'term_reference.target_id', 'value' => $term1->id()),
     );
-    monitoring_sensor_settings_save('db_aggregate_test', $settings);
+    $sensor_info->settings['table'] = 'node';
+    $sensor_info->save();
     $result = $this->runSensor('db_aggregate_test');
     // There should be three nodes with that reference.
     $this->assertEqual($result->getValue(), 3);
 
     // Update the sensor to look for nodes with a reference to term1 in the
     // first field and term2 in the second.
-    $settings = monitoring_sensor_settings_get('db_aggregate_test');
-    $settings['conditions'] = array(
+    $sensor_info->settings['conditions'] = array(
       'test' => array('field' => 'term_reference.target_id', 'value' => $term1->id()),
       'test2' => array(
         'field' => 'term_reference2.target_id',
         'value' => $term2->id()
       ),
     );
-    monitoring_sensor_settings_save('db_aggregate_test', $settings);
+    $sensor_info->save();
     $result = $this->runSensor('db_aggregate_test');
     // There should be one nodes with those references.
     $this->assertEqual($result->getValue(), 1);

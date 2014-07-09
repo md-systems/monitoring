@@ -40,7 +40,13 @@ class SensorDisappearedSensors extends SensorConfigurable {
    * Adds UI to clear the missing sensor status.
    */
   public function settingsForm($form, &$form_state) {
-    $result = monitoring_sensor_run($this->info->getName());
+    try {
+      $result = monitoring_sensor_run($this->info->getName());
+    } catch (\Exception $e) {
+      // @todo: Figure out why this happens.
+      drupal_set_message($e->getMessage(), 'error');
+      return array();
+    }
     $form = parent::settingsForm($form, $form_state);
 
     if ($result->isCritical()) {

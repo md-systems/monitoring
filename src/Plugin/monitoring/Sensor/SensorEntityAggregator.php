@@ -11,6 +11,7 @@ use Drupal\Component\Utility\String;
 use Drupal\monitoring\Result\SensorResultInterface;
 use Drupal;
 use Drupal\monitoring\Sensor\Sensors\SensorDatabaseAggregatorBase;
+use Drupal\Core\Entity\DependencyTrait;
 
 /**
  * Entity database aggregator.
@@ -19,7 +20,7 @@ use Drupal\monitoring\Sensor\Sensors\SensorDatabaseAggregatorBase;
  *   id = "entity_aggregator",
  *   label = @Translation("Entity Aggregator"),
  *   description = @Translation("Utilises the entity query aggregate functionality."),
- *   addable = FALSE
+ *   addable = TRUE
  * )
  *
  * It utilises the entity query aggregate functionality.
@@ -27,6 +28,8 @@ use Drupal\monitoring\Sensor\Sensors\SensorDatabaseAggregatorBase;
  * The table specified in the sensor info must be the base table of the entity.
  */
 class SensorEntityAggregator extends SensorDatabaseAggregatorBase {
+
+  use DependencyTrait;
 
   /**
    * Local variable to store the field that is used as aggregate.
@@ -69,7 +72,7 @@ class SensorEntityAggregator extends SensorDatabaseAggregatorBase {
    */
   public function runSensor(SensorResultInterface $result) {
     $query_result = $this->getEntityQueryAggregate()->execute();
-    $entity_type = $this->getEntityTypeFromTable($this->getEntityType());
+    $entity_type = $this->getEntityType();
     $entity_info = \Drupal::entityManager()->getDefinition($entity_type);
 
     if (isset($query_result[0][$entity_info->getKey('id') . '_count'])) {
@@ -90,20 +93,43 @@ class SensorEntityAggregator extends SensorDatabaseAggregatorBase {
   }
 
   /**
-   * Returns the entity type for a given base table.
-   *
-   * @param string $base_table
-   *   The name of base table.
-   *
-   * @return string
-   *   The entity type that is stored in the given base table.
+   * {@inheritdoc}
    */
-  protected function getEntityTypeFromTable($base_table) {
-    foreach (\Drupal::entityManager()->getDefinitions() as $entity_type => $entity_info) {
-      if ($entity_info->getBaseTable() == $base_table) {
-        return $entity_type;
-      }
+  public function calculateDependencies() {
+    $entity_type_id = $this->getEntityType();
+    $entity_type = \Drupal::entityManager()->getDefinition($entity_type_id);
+    $this->addDependency('module', $entity_type->getProvider());
+    return $this->dependencies;
+  }
+
+  /**
+   * Adds UI for variables entity_type and conditions.
+   */
+  public function settingsForm($form, &$form_state) {
+    $form = parent::settingsForm($form, $form_state);
+    $entity_types = array();
+    foreach (\Drupal::entityManager()->getDefinitions() as $entity_type_id => $entity_type) {
+      $entity_types[$entity_type_id] = $entity_type->getLabel();
     }
-    return NULL;
+    $form['entity_type'] = array(
+      '#type' => 'select',
+      '#options' => $entity_types,
+      '#title' => t('Entity Type'),
+      '#required' => TRUE,
+    );
+
+    $form['conditions'][1]['field'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Condition\'s Field'),
+      '#maxlength' => 255,
+      '#description' => t(''),
+    );
+    $form['conditions'][1]['value'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Condition\'s Value'),
+      '#maxlength' => 255,
+      '#description' => t(''),
+    );
+    return $form;
   }
 }
