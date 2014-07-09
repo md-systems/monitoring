@@ -102,6 +102,9 @@ class MultigraphForm extends EntityForm {
       '#submit' => array(
         array($this, 'addSensorSubmit'),
       ),
+      '#attributes' => array(
+        'class' => array('form-item'),
+      ),
     );
 
     // Table for included sensors.
