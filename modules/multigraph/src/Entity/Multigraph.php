@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * @todo
+ * Contains \Drupal\monitoring_multigraph\Entity\Multigraph.
  */
 
 namespace Drupal\monitoring_multigraph\Entity;
@@ -111,6 +111,9 @@ class Multigraph extends ConfigEntityBase {
    *   values are sensors with custom labels.
    */
   public function getSensors() {
+    if (!$this->sensors) {
+      return array();
+    }
     $sensors = array();
     foreach ($this->sensors as $name => $entry) {
       /** @var SensorInfo $sensor */
