@@ -1,5 +1,5 @@
 monitoring_multigraph.*:
-  type: mapping
+  type: config_entity
   label: 'Monitoring Multigraph'
   mapping:
     id:

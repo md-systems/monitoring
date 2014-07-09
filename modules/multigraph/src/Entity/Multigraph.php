@@ -104,6 +104,28 @@ class Multigraph extends ConfigEntityBase {
   }
 
   /**
+   * Compiles entity properties into an associative array.
+   *
+   * @return array
+   *   An associative array containing the following multigraph info:
+   *     - id: The machine name
+   *     - label
+   *     - description
+   *     - sensors: An associative array of included sensors, where keys are
+   *       sensor machine names and values are associative arrays, containing:
+   *         - weight
+   *         - label: A custom label of the sensor for this multigraph
+   */
+  public function getDefinition() {
+    return array(
+      'id' => $this->id(),
+      'label' => $this->getLabel(),
+      'description' => $this->getDescription(),
+      'sensors' => $this->sensors,
+    );
+  }
+
+  /**
    * Gets the included sensors.
    *
    * @return SensorInfo[]
