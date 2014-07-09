@@ -112,6 +112,7 @@ class MultigraphForm extends EntityForm {
         'category' => t('Category'),
         'label' => t('Sensor label'),
         'description' => t('Description'),
+        'message' => t('Sensor message'),
         'weight' => t('Weight'),
         'operations' => t('Operations'),
       ),
@@ -129,8 +130,11 @@ class MultigraphForm extends EntityForm {
       ),
     );
 
-    // Fill the sensors element with form elements.
+    // Get sensor status values.
+    $sensor_runner = \Drupal::service('monitoring.sensor_runner');
+    $results = $sensor_runner->runSensors();
 
+    // Fill the sensors element with form elements.
     foreach ($multigraph->getSensors() as $weight => $sensor) {
       $form['sensors'][$sensor->id()] = array(
         'category' => array(
@@ -145,6 +149,9 @@ class MultigraphForm extends EntityForm {
         ),
         'description' => array(
           '#markup' => $sensor->getDescription(),
+        ),
+        'message' => array(
+          '#markup' => $results[$sensor->id()]->getMessage(),
         ),
         'weight' => array(
           '#type' => 'weight',
