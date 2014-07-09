@@ -6,9 +6,6 @@
 
 namespace Drupal\monitoring_multigraph\Form;
 
-use Drupal\Core\Ajax\AjaxResponse;
-use Drupal\Core\Ajax\AlertCommand;
-use Drupal\Core\Ajax\InsertCommand;
 use Drupal\Core\Entity\EntityForm;
 use Drupal\monitoring\Entity\SensorInfo;
 use Drupal\monitoring_multigraph\Entity\Multigraph;
@@ -38,6 +35,8 @@ class MultigraphForm extends EntityForm {
       ->condition('numeric', TRUE)
       ->condition('status', TRUE)
       ->execute();
+    $sensor_ids = array_diff($sensor_ids, $multigraph->getSensorNames());
+    ksort($sensor_ids);
     /** @var SensorInfo[] $sensors */
     $sensors = \Drupal::entityManager()
       ->getStorage('monitoring_sensor')
@@ -71,9 +70,12 @@ class MultigraphForm extends EntityForm {
       '#default_value' => $multigraph->getDescription(),
     );
 
-    $form['actions']['submit'] = array(
-      '#type' => 'submit',
-      '#value' => $this->t('Save'),
+    // Fieldset for sensor list elements.
+    $form['sensor_add'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Included sensors'),
+      '#prefix' => '<div id="selected-sensors">',
+      '#suffix' => '</div>',
     );
 
     // Create an array suitable for the sensor_add_select element.
@@ -82,8 +84,8 @@ class MultigraphForm extends EntityForm {
       $sensors_options[$sensor->getName()] = $sensor->getLabel();
     }
 
-    // Selector elements for available sensors.
-    $form['sensor_add_select'] = array(
+    // Select element for available sensors.
+    $form['sensor_add']['sensor_add_select'] = array(
       '#type' => 'select',
       '#title' => t('Add sensor'),
       '#options' => $sensors_options,
@@ -91,7 +93,7 @@ class MultigraphForm extends EntityForm {
       '#empty_value' => '',
     );
 
-    $form['sensor_add_button'] = array(
+    $form['sensor_add']['sensor_add_button'] = array(
       '#type' => 'submit',
       '#value' => t('Add sensor'),
       '#ajax' => array(
@@ -108,7 +110,7 @@ class MultigraphForm extends EntityForm {
     );
 
     // Table for included sensors.
-    $form['sensors'] = array(
+    $form['sensor_add']['sensors'] = array(
       '#type' => 'table',
       '#header' => array(
         'category' => t('Category'),
@@ -132,9 +134,9 @@ class MultigraphForm extends EntityForm {
       ),
     );
 
-    // Fill the sensors element with form elements.
+    // Fill the sensors table with form elements for each sensor.
     foreach ($multigraph->getSensors() as $weight => $sensor) {
-      $form['sensors'][$sensor->id()] = array(
+      $form['sensor_add']['sensors'][$sensor->id()] = array(
         'category' => array(
           '#markup' => $sensor->getCategory(),
         ),
@@ -180,18 +182,16 @@ class MultigraphForm extends EntityForm {
       );
     }
 
+    $form['actions']['submit'] = array(
+      '#type' => 'submit',
+      '#value' => $this->t('Save'),
+    );
+
     return $form;
   }
 
   /**
-   * {@inheritdoc}
-   */
-  public function validate(array $form, array &$form_state) {
-    parent::validate($form, $form_state);
-  }
-
-  /**
-   * Returns the updated 'sensors' form component for replacement by ajax.
+   * Returns the updated 'sensors_add' fieldset for replacement by ajax.
    *
    * @param array $form
    *   The updated form structure array.
@@ -202,7 +202,14 @@ class MultigraphForm extends EntityForm {
    *   The updated form component for the selected sensors.
    */
   public function sensorsReplace(array $form, array &$form_state) {
-    return $form['sensors'];
+    return $form['sensor_add'];
+  }
+
+  public function submit(array $form, array &$form_state) {
+    // Disregard the sensor_add fieldset in the form structure.
+    $form_state['values'] += $form_state['values']['sensor_add'];
+    unset($form['sensor_add']);
+    parent::submit($form, $form_state);
   }
 
   /**
@@ -214,15 +221,14 @@ class MultigraphForm extends EntityForm {
    *   The form state structure array.
    */
   public function addSensorSubmit(array $form, array &$form_state) {
-    $this->entity = $this->buildEntity($form, $form_state);
     $form_state['rebuild'] = TRUE;
 
     /** @var Multigraph $multigraph */
     $multigraph = $this->entity;
 
     // Add any selected sensor to entity.
-    if (isset($form_state['values']['sensor_add_select'])) {
-      $sensor_name = $form_state['values']['sensor_add_select'];
+    if (isset($form_state['values']['sensor_add']['sensor_add_select'])) {
+      $sensor_name = $form_state['values']['sensor_add']['sensor_add_select'];
       $sensor_label = \Drupal::entityManager()->getStorage('monitoring_sensor')->load($sensor_name)->getLabel();
       $multigraph->addSensor($sensor_name);
       drupal_set_message($this->t('Sensor "@sensor_label" added. You have unsaved changes.', array('@sensor_label' => $sensor_label)), 'warning');
@@ -242,7 +248,6 @@ class MultigraphForm extends EntityForm {
    *   The form state structure array.
    */
   public function removeSensorSubmit(array $form, array &$form_state) {
-    $this->entity = $this->buildEntity($form, $form_state);
     $form_state['rebuild'] = TRUE;
 
     /** @var Multigraph $multigraph */

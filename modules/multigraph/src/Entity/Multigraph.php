@@ -153,6 +153,16 @@ class Multigraph extends ConfigEntityBase {
   }
 
   /**
+   * Gets the machine names of the sensors included in this multigraph.
+   *
+   * @return string[]
+   *   An indexed array containing the id's of the included sensors.
+   */
+  public function getSensorNames() {
+    return $this->sensors ? array_keys($this->sensors) : array();
+  }
+
+  /**
    * Includes a sensor.
    *
    * @param string $name
