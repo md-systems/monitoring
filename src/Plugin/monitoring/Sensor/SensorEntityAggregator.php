@@ -107,28 +107,41 @@ class SensorEntityAggregator extends SensorDatabaseAggregatorBase {
    */
   public function settingsForm($form, &$form_state) {
     $form = parent::settingsForm($form, $form_state);
-    $entity_types = array();
-    foreach (\Drupal::entityManager()->getDefinitions() as $entity_type_id => $entity_type) {
-      $entity_types[$entity_type_id] = $entity_type->getLabel();
-    }
-    $form['entity_type'] = array(
-      '#type' => 'select',
-      '#options' => $entity_types,
-      '#title' => t('Entity Type'),
-      '#required' => TRUE,
-    );
+    $field = '';
+    $field_value = '';
+    $settings = $this->info->getSettings();
 
-    $form['conditions'][1]['field'] = array(
+    if (isset($this->info->settings['entity_type'])) {
+      $form['old_entity_type'] = array(
+        '#type' => 'textfield',
+        '#default_value' => \Drupal::entityManager()->getDefinition($this->getEntityType())->getClass(),
+	'#maxlength' => 255,
+        '#title' => t('Entity Type'),
+        '#attributes' => array('readonly' => 'readonly'),
+      );
+      $field = $settings['conditions'][0]['field'];
+      $field_value = $settings['conditions'][0]['value'];
+    }
+    else {
+      $form['entity_type'] = array(
+        '#type' => 'select',
+        '#options' => \Drupal::entityManager()->getEntityTypeLabels(),
+        '#title' => t('Entity Type'),
+        '#required' => TRUE,
+      );
+    }
+
+    $form['conditions'][0]['field'] = array(
       '#type' => 'textfield',
       '#title' => t('Condition\'s Field'),
       '#maxlength' => 255,
-      '#description' => t(''),
+      '#default_value' => $field,
     );
-    $form['conditions'][1]['value'] = array(
+    $form['conditions'][0]['value'] = array(
       '#type' => 'textfield',
       '#title' => t('Condition\'s Value'),
       '#maxlength' => 255,
-      '#description' => t(''),
+      '#default_value' => $field_value,
     );
     return $form;
   }
