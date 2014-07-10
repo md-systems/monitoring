@@ -17,7 +17,8 @@ use Drupal\monitoring\Sensor\SensorThresholds;
  * @Sensor(
  *   id = "test_sensor",
  *   label = @Translation("Test Sensor"),
- *   description = @Translation("Test sensor to report status as provided by external arguments.")
+ *   description = @Translation("Test sensor to report status as provided by external arguments."),
+ *   addable = TRUE
  * )
  *
  */
