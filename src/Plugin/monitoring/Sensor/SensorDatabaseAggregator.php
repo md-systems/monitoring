@@ -18,7 +18,7 @@ use Drupal\monitoring\Sensor\Sensors\SensorDatabaseAggregatorBase;
  *   id = "database_aggregator",
  *   label = @Translation("Simple Database Aggregator"),
  *   description = @Translation("Simple database aggregator able to query a single db table."),
- *   addable = FALSE
+ *   addable = TRUE
  * )
  *
  */
@@ -107,4 +107,38 @@ class SensorDatabaseAggregator extends SensorDatabaseAggregatorBase {
     $result->setValue($records_count);
   }
 
+  /**
+   * Adds UI for variables table and conditions.
+   */
+  public function settingsForm($form, &$form_state) {
+    $form = parent::settingsForm($form, $form_state);
+    $field = '';
+    $field_value = '';
+    $settings = $this->info->getSettings();
+    $form['table'] = array(
+      '#type' => 'textfield',
+      '#default_value' => $this->info->getSetting('table'),
+      '#maxlength' => 255,
+      '#title' => t('Table'),
+      '#required' => TRUE,
+    );
+    if (isset($this->info->settings['table'])) {
+      $field = $settings['conditions'][0]['field'];
+      $field_value = $settings['conditions'][0]['value'];
+    }
+
+    $form['conditions'][0]['field'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Condition\'s Field'),
+      '#maxlength' => 255,
+      '#default_value' => $field,
+    );
+    $form['conditions'][0]['value'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Condition\'s Value'),
+      '#maxlength' => 255,
+      '#default_value' => $field_value,
+    );
+    return $form;
+  }
 }
