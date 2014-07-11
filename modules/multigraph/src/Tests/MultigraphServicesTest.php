@@ -12,7 +12,12 @@ use Drupal\rest\Tests\RESTTestBase;
 use Drupal\Core\Session\AccountInterface;
 
 /**
- * Tests for monitoring multigraph.
+ * Tests for REST services provided by Monitoring Multigraph.
+ *
+ * @group monitoring
+ * @group monitoring_multigraph
+ * @requires module monitoring
+ * @requires module monitoring_multigraph
  */
 class MonitoringMultigraphServicesTest extends RESTTestBase {
 
@@ -35,17 +40,6 @@ class MonitoringMultigraphServicesTest extends RESTTestBase {
    * @var AccountInterface
    */
   protected $servicesAccount;
-
-  /**
-   * {@inheritdoc}
-   */
-  public static function getInfo() {
-    return array(
-      'name' => 'Monitoring multigraph services',
-      'description' => 'Tests multigraph services.',
-      'group' => 'Monitoring',
-    );
-  }
 
   /**
    * {@inheritdoc}

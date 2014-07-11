@@ -10,6 +10,11 @@ use Drupal\simpletest\WebTestBase;
 
 /**
  * Tests the Multigraph forms (add/edit/delete).
+ *
+ * @group monitoring
+ * @group monitoring_multigraph
+ * @requires module monitoring
+ * @requires module monitoring_multigraph
  */
 class MultigraphWebTest extends WebTestBase {
 
@@ -67,17 +72,6 @@ class MultigraphWebTest extends WebTestBase {
     'monitoring',
     'monitoring_multigraph',
   );
-
-  /**
-   * {@inheritdoc}
-   */
-  public static function getInfo() {
-    return array(
-      'name' => 'Sensor multigraph form/s',
-      'description' => 'Tests then sensor multigraph forms.',
-      'group' => 'Monitoring',
-    );
-  }
 
   /**
    * Configures test base and executes test cases.
