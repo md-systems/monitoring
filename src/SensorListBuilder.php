@@ -58,7 +58,7 @@ class SensorListBuilder extends ConfigEntityListBuilder implements FormInterface
    * {@inheritdoc}
    */
   public function render() {
-    return drupal_get_form($this);
+    return \Drupal::formBuilder()->getForm($this);
   }
 
   /*
