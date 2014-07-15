@@ -44,10 +44,9 @@ class ConfigAutocompleteController implements ContainerInjectionInterface {
   public function autocomplete(Request $request) {
     $typed_category = $request->query->get('q');
     $matches = array();
-    foreach (\Drupal::service('config.factory')->listAll() as $config) {
-      if (stripos($config, $typed_category) === 0) {
-        $matches[] = array('value' => $config, 'label' => String::checkPlain($config));
-      }
+    $prefixMatches = array_slice(\Drupal::service('config.factory')->listAll($request->query->get('q')), 0, 10);
+    foreach ($prefixMatches as $config) {
+      $matches[] = array('value' => $config, 'label' => String::checkPlain($config));
     }
     return new JsonResponse($matches);
   }
