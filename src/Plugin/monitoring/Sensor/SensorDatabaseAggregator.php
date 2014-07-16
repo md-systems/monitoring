@@ -10,6 +10,7 @@ namespace Drupal\monitoring\Plugin\monitoring\Sensor;
 use Drupal\Core\Database\Query\SelectInterface;
 use Drupal\monitoring\Result\SensorResultInterface;
 use Drupal\monitoring\Sensor\Sensors\SensorDatabaseAggregatorBase;
+use Drupal\Core\Entity\DependencyTrait;
 
 /**
  * Simple database aggregator able to query a single db table.
@@ -23,6 +24,8 @@ use Drupal\monitoring\Sensor\Sensors\SensorDatabaseAggregatorBase;
  *
  */
 class SensorDatabaseAggregator extends SensorDatabaseAggregatorBase {
+  
+  use DependencyTrait;
 
   /**
    * The fetched object from the query result.
@@ -105,6 +108,19 @@ class SensorDatabaseAggregator extends SensorDatabaseAggregatorBase {
     }
 
     $result->setValue($records_count);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function calculateDependencies() {
+    parent::calculateDependencies();
+
+    $schema = drupal_get_schema($this->info->getSetting('table'));
+    if ($schema && $this->module != $schema['module']) {
+      $this->addDependency('module', $schema['module']);
+    }
+    return $this->dependencies;
   }
 
   /**
