@@ -117,7 +117,7 @@ class SensorDatabaseAggregator extends SensorDatabaseAggregatorBase {
     parent::calculateDependencies();
 
     $schema = drupal_get_schema($this->info->getSetting('table'));
-    if ($schema && $this->module != $schema['module']) {
+    if ($schema) {
       $this->addDependency('module', $schema['module']);
     }
     return $this->dependencies;
