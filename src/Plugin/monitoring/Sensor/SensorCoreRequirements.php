@@ -9,6 +9,7 @@ namespace Drupal\monitoring\Plugin\monitoring\Sensor;
 use Drupal\Component\Utility\String;
 use Drupal\monitoring\Result\SensorResultInterface;
 use Drupal\monitoring\Sensor\Sensor;
+use Drupal\Core\Entity\DependencyTrait;
 
 /**
  * Monitors a specific module hook_requirements.
@@ -23,6 +24,8 @@ use Drupal\monitoring\Sensor\Sensor;
  * @todo Shorten sensor message and add improved verbose output.
  */
 class SensorCoreRequirements extends Sensor {
+
+  use DependencyTrait;
 
   /**
    * Requirements from hook_requirements.
@@ -138,5 +141,14 @@ class SensorCoreRequirements extends Sensor {
     else {
       $result->addStatusMessage('Requirements check OK');
     }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function calculateDependencies() {
+    $module = $this->info->getSetting('module');
+    $this->addDependency('module', $module);
+    return $this->dependencies;
   }
 }
