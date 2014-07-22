@@ -296,7 +296,7 @@ class SensorRunner {
    *   Instantiated sensor result object.
    */
   protected function getResultObject(SensorInfo $sensor_info) {
-    $result_class = $sensor_info->getResultClass();
+    $result_class = '\Drupal\monitoring\Result\SensorResult';
 
     if (!$this->forceRun && isset($this->sensorResultCache[$sensor_info->getName()])) {
       $result = new $result_class($sensor_info, $this->sensorResultCache[$sensor_info->getName()]);

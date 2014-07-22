@@ -16,16 +16,14 @@ use Drupal\Core\Entity\DependencyTrait;
 /**
  * Entity database aggregator.
  *
+ * It utilises the entity query aggregate functionality.
+ *
  * @Sensor(
  *   id = "entity_aggregator",
  *   label = @Translation("Entity Aggregator"),
  *   description = @Translation("Utilises the entity query aggregate functionality."),
  *   addable = TRUE
  * )
- *
- * It utilises the entity query aggregate functionality.
- *
- * The table specified in the sensor info must be the base table of the entity.
  */
 class SensorEntityAggregator extends SensorDatabaseAggregatorBase {
 

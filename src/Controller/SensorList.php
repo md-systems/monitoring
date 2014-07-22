@@ -114,10 +114,8 @@ class SensorList extends ControllerBase {
         if ($sensor_info->getCachingTime() && $this->currentUser()->hasPermission('monitoring force run')) {
           $links['force_execution'] = array('title' => t('Force execution'), 'href' => 'monitoring/sensors/force/' . $sensor_name);
         }
-        if ($sensor_info->isConfigurable() && $this->currentUser()->hasPermission('administer monitoring')) {
-          $links['edit'] = array('title' => t('Edit'), 'href' => 'admin/config/system/monitoring/sensors/' . $sensor_name,
-            'query' => array('destination' => 'admin/reports/monitoring'));
-        }
+	$links['edit'] = array('title' => t('Edit'), 'href' => 'admin/config/system/monitoring/sensors/' . $sensor_name,
+          'query' => array('destination' => 'admin/reports/monitoring'));
 
         \Drupal::moduleHandler()->alter('monitoring_sensor_links', $links, $sensor_info);
 

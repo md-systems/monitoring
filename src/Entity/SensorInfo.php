@@ -182,16 +182,6 @@ class SensorInfo extends ConfigEntityBase {
   }
 
   /**
-   * Gets sensor result class.
-   *
-   * @return string
-   *   Result class.
-   */
-  public function getResultClass() {
-    return '\Drupal\monitoring\Result\SensorResult';
-  }
-
-  /**
    * Gets sensor categories.
    *
    * @return string
@@ -434,7 +424,5 @@ class SensorInfo extends ConfigEntityBase {
     parent::postSave($storage, $update);
     \Drupal::service('monitoring.sensor_runner')->resetCache(array($this->id));
   }
-
-
 
 }
