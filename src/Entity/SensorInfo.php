@@ -125,7 +125,7 @@ class SensorInfo extends ConfigEntityBase {
   public $status = TRUE;
 
   /**
-   * The sensor id.
+   * The sensor ID.
    *
    * @var string
    */
