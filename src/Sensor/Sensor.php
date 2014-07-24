@@ -101,4 +101,15 @@ abstract class Sensor implements SensorInterface {
   public function calculateDependencies() {
     return array();
   }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
+    return new static(
+      $configuration,
+      $plugin_id,
+      $plugin_definition
+    );
+  }
 }
