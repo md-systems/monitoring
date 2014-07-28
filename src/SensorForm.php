@@ -209,6 +209,10 @@ class SensorForm extends EntityForm {
   public function save(array $form, array &$form_state) {
     /** @var Sensor $sensor */
     $sensor_info = $this->entity;
+    if (isset($sensor_info->settings['conditions']) && isset($sensor_info->settings['conditions']['table'])) {
+      $this->entity->settings['conditions'] = $this->entity->settings['conditions']['table'];
+      unset($this->entity->settings['conditions']['table']);
+    }
     $sensor_info->save();
     $form_state['redirect_route']['route_name'] = 'monitoring.sensors_overview_settings';
     drupal_set_message($this->t('Sensor settings saved.'));

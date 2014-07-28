@@ -29,6 +29,8 @@ class SensorEntityAggregator extends SensorDatabaseAggregatorBase {
 
   use DependencyTrait;
 
+  public $conditions;
+
   /**
    * Local variable to store the field that is used as aggregate.
    *
@@ -105,8 +107,10 @@ class SensorEntityAggregator extends SensorDatabaseAggregatorBase {
    */
   public function settingsForm($form, &$form_state) {
     $form = parent::settingsForm($form, $form_state);
-    $field = '';
-    $field_value = '';
+    $this->conditions = array();
+    if (isset($form_state['values']['conditions'])) {
+      $conditions = $form_state['values']['conditions'];
+    }
     $settings = $this->info->getSettings();
 
     if (isset($this->info->settings['entity_type'])) {
@@ -117,8 +121,9 @@ class SensorEntityAggregator extends SensorDatabaseAggregatorBase {
         '#title' => t('Entity Type'),
         '#attributes' => array('readonly' => 'readonly'),
       );
-      $field = $settings['conditions'][0]['field'];
-      $field_value = $settings['conditions'][0]['value'];
+      if (isset($settings['conditions'])) {
+        $this->conditions = $settings['conditions'];
+      }
     }
     else {
       $form['entity_type'] = array(
@@ -129,18 +134,82 @@ class SensorEntityAggregator extends SensorDatabaseAggregatorBase {
       );
     }
 
-    $form['conditions'][0]['field'] = array(
-      '#type' => 'textfield',
-      '#title' => t('Condition\'s Field'),
-      '#maxlength' => 255,
-      '#default_value' => $field,
+    $this->conditions += array(array('field' => '', 'value' => ''));
+
+    $form['conditions'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Conditions'),
+      '#prefix' => '<div id="add-conditions">',
+      '#suffix' => '</div>',
     );
-    $form['conditions'][0]['value'] = array(
-      '#type' => 'textfield',
-      '#title' => t('Condition\'s Value'),
-      '#maxlength' => 255,
-      '#default_value' => $field_value,
+
+    $form['conditions']['conditions_add_button'] = array(
+      '#type' => 'submit',
+      '#value' => t('Add Condition'),
+      '#ajax' => array(
+        'wrapper' => 'add-conditions',
+        'callback' => array($this, 'addConditions'),
+        'method' => 'replace',
+      ),
+      '#submit' => array(
+        array($this, 'addConditionSubmit'),
+      ),
     );
+
+    $form['conditions']['table'] = array(
+      '#type' => 'table',
+      '#header' => array(
+        'no' => t('Condition No.'),
+        'field' => t('Field'),
+        'value' => t('Value'),
+      ),
+      '#prefix' => '<div id="add-conditions">',
+      '#suffix' => '</div>',
+      '#empty' => t(
+        'Add Conditions to this sensor.'
+      ),
+      '#tabledrag' => array(
+        array(
+          'action' => 'order',
+          'relationship' => 'sibling',
+          'group' => 'sensors-table-weight',
+        ),
+      ),
+    );
+
+    foreach ($this->conditions as $no => $condition) {
+      $form['conditions']['table'][$no] = array(
+        'no' => array(
+          '#markup' => count($this->conditions),
+        ),
+        'field' => array(
+          '#type' => 'textfield',
+          '#default_value' => $condition['field'],
+          '#required' => TRUE,
+        ),
+        'value' => array(
+          '#type' => 'textfield',
+          '#default_value' => $condition['value'],
+          '#required' => TRUE,
+        )
+      );
+    }
     return $form;
   }
+
+  /**
+   * Returns the rebuild form;
+   */
+  public function addConditions(array $form, array &$form_state) {
+    return $form['settings']['conditions'];
+  }
+
+  /**
+   * Adds new condition field and value to the form.
+   */
+  public function addConditionSubmit(array $form, array &$form_state) {
+    $form_state['rebuild'] = TRUE;
+    $this->conditions += array(array('field' => '', 'value' => ''));
+  }
+
 }
