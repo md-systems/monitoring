@@ -50,4 +50,14 @@ class MultigraphDeleteForm extends EntityConfirmFormBase {
     ));
     $form_state['redirect_route'] = $this->getCancelRoute();
   }
+
+  /**
+   * Returns the route to go to if the user cancels the action.
+   *
+   * @return \Drupal\Core\Url
+   *   A URL object.
+   */
+  public function getCancelUrl() {
+    return $this->entity->urlInfo();
+  }
 }

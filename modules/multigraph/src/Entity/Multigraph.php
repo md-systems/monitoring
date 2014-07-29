@@ -33,6 +33,7 @@ use Drupal\monitoring\Entity\SensorInfo;
  *     "label" = "label"
  *   },
  *   links = {
+ *     "canonical" = "monitoring.multigraphs_overview",
  *     "delete-form" = "monitoring.multigraph_delete",
  *     "edit-form" = "monitoring.multigraph_edit"
  *   }
