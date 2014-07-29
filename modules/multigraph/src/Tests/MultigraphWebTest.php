@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Contains Drupal\monitoring_multigraph\Tests\MultigraphSimpleTest
+ * Contains Drupal\monitoring_multigraph\Tests\MultigraphWebTest
  */
 
 namespace Drupal\monitoring_multigraph\Tests;
@@ -12,9 +12,6 @@ use Drupal\simpletest\WebTestBase;
  * Tests the Multigraph forms (add/edit/delete).
  *
  * @group monitoring
- * @group monitoring_multigraph
- * @requires module monitoring
- * @requires module monitoring_multigraph
  */
 class MultigraphWebTest extends WebTestBase {
 

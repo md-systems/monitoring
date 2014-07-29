@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Contains \Drupal\monitoring_multigraph\Tests\MonitoringServicesTest.
+ * Contains \Drupal\monitoring_multigraph\Tests\MultigraphServicesTest.
  */
 
 namespace Drupal\monitoring_multigraph\Tests;
@@ -15,11 +15,8 @@ use Drupal\Core\Session\AccountInterface;
  * Tests for REST services provided by Monitoring Multigraph.
  *
  * @group monitoring
- * @group monitoring_multigraph
- * @requires module monitoring
- * @requires module monitoring_multigraph
  */
-class MonitoringMultigraphServicesTest extends RESTTestBase {
+class MultigraphServicesTest extends RESTTestBase {
 
   /**
    * Modules to enable.
