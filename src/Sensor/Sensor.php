@@ -7,6 +7,7 @@
 namespace Drupal\monitoring\Sensor;
 
 use Drupal\monitoring\Entity\SensorInfo;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Abstract SensorInterface implementation with common behaviour and will be extended by
@@ -30,7 +31,7 @@ abstract class Sensor implements SensorInterface {
    * @var string
    */
   protected $pluginId;
-  
+
   /**
    * The plugin implementation definition.
    *
@@ -105,9 +106,9 @@ abstract class Sensor implements SensorInterface {
   /**
    * {@inheritdoc}
    */
-  public function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
+  public static function create(ContainerInterface $container, SensorInfo $info, $plugin_id, $plugin_definition) {
     return new static(
-      $configuration,
+      $info,
       $plugin_id,
       $plugin_definition
     );

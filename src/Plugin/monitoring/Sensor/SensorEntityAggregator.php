@@ -12,6 +12,10 @@ use Drupal\monitoring\Result\SensorResultInterface;
 use Drupal;
 use Drupal\monitoring\Sensor\Sensors\SensorDatabaseAggregatorBase;
 use Drupal\Core\Entity\DependencyTrait;
+use Drupal\Core\Entity\EntityManagerInterface;
+use Drupal\Core\Entity\Query\QueryFactory;
+use Drupal\monitoring\Entity\SensorInfo;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Entity database aggregator.
@@ -29,8 +33,6 @@ class SensorEntityAggregator extends SensorDatabaseAggregatorBase {
 
   use DependencyTrait;
 
-  public $conditions;
-
   /**
    * Local variable to store the field that is used as aggregate.
    *
@@ -40,15 +42,29 @@ class SensorEntityAggregator extends SensorDatabaseAggregatorBase {
   protected $aggregateField;
 
   /**
+   * Local variable to store \Drupal::entityManger().
+   *
+   * @var \Drupal\Core\Entity\EntityManagerInterface
+   */
+  protected $entityManager;
+
+  /**
+   * Local variable to store \Drupal::entityQueryAggregate.
+   *
+   * @var \Drupal\Core\Entity\Query\QueryFactory
+   */
+  protected $entityQueryAggregate;
+
+  /**
    * Builds the entity aggregate query.
    *
    * @return Drupal\Core\Entity\Query\QueryInterface
    *   The entity query object.
    */
   protected function getEntityQueryAggregate() {
-    $entity_info = \Drupal::entityManager()->getDefinition($this->getEntityType(), TRUE);
+    $entity_info = $this->entityManager->getDefinition($this->getEntityType(), TRUE);
 
-    $query = \Drupal::entityQueryAggregate($this->getEntityType());
+    $query = $this->entityQueryAggregate($this->getEntityType());
     $this->aggregateField = $entity_info->getKey('id');
     $query->aggregate($this->aggregateField, 'COUNT');
 
@@ -63,6 +79,28 @@ class SensorEntityAggregator extends SensorDatabaseAggregatorBase {
     return $query;
   }
 
+  /**
+   * Constructs an SensorEntityAggregator object.
+   */
+  public function __construct (SensorInfo $info, $plugin_id, $plugin_definition, EntityManagerInterface $entityManager, QueryFactory $entity_query) {
+    parent::__construct($info, $plugin_id, $plugin_definition);
+    $this->entityManager = $entityManager;
+    $this->entityQueryAggregate = $entity_query;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container, SensorInfo $info, $plugin_id, $plugin_definition) {
+    return new static(
+      $info,
+      $plugin_id,
+      $plugin_definition,
+      $container->get('entity.manager'),
+      $container->get('entity.query')
+    );
+  }
+
   protected function getEntityType() {
     return $this->info->getSetting('entity_type');
   }
@@ -73,7 +111,7 @@ class SensorEntityAggregator extends SensorDatabaseAggregatorBase {
   public function runSensor(SensorResultInterface $result) {
     $query_result = $this->getEntityQueryAggregate()->execute();
     $entity_type = $this->getEntityType();
-    $entity_info = \Drupal::entityManager()->getDefinition($entity_type);
+    $entity_info = $this->entityManager->getDefinition($entity_type);
 
     if (isset($query_result[0][$entity_info->getKey('id') . '_count'])) {
       $records_count = $query_result[0][$entity_info->getKey('id') . '_count'];
@@ -97,7 +135,7 @@ class SensorEntityAggregator extends SensorDatabaseAggregatorBase {
    */
   public function calculateDependencies() {
     $entity_type_id = $this->getEntityType();
-    $entity_type = \Drupal::entityManager()->getDefinition($entity_type_id);
+    $entity_type = $this->entityManager->getDefinition($entity_type_id);
     $this->addDependency('module', $entity_type->getProvider());
     return $this->dependencies;
   }
@@ -107,34 +145,33 @@ class SensorEntityAggregator extends SensorDatabaseAggregatorBase {
    */
   public function settingsForm($form, &$form_state) {
     $form = parent::settingsForm($form, $form_state);
-    $this->conditions = array();
-    if (isset($form_state['values']['conditions'])) {
-      $conditions = $form_state['values']['conditions'];
-    }
+    $conditions = array(array('field' => '', 'value' => ''));
     $settings = $this->info->getSettings();
 
     if (isset($this->info->settings['entity_type'])) {
       $form['old_entity_type'] = array(
         '#type' => 'textfield',
-        '#default_value' => \Drupal::entityManager()->getDefinition($this->getEntityType())->getClass(),
+        '#default_value' => $this->entityManager->getDefinition($this->getEntityType())->getClass(),
 	'#maxlength' => 255,
         '#title' => t('Entity Type'),
         '#attributes' => array('readonly' => 'readonly'),
       );
       if (isset($settings['conditions'])) {
-        $this->conditions = $settings['conditions'];
+        $conditions = $settings['conditions'];
       }
     }
     else {
       $form['entity_type'] = array(
         '#type' => 'select',
-        '#options' => \Drupal::entityManager()->getEntityTypeLabels(),
+        '#options' => $this->entityManager->getEntityTypeLabels(),
         '#title' => t('Entity Type'),
         '#required' => TRUE,
       );
     }
 
-    $this->conditions += array(array('field' => '', 'value' => ''));
+    if (isset($form_state['values']['settings']['conditions']['table'])) {
+      $conditions = $form_state['values']['settings']['conditions']['table'];
+    }
 
     $form['conditions'] = array(
       '#type' => 'fieldset',
@@ -177,10 +214,10 @@ class SensorEntityAggregator extends SensorDatabaseAggregatorBase {
       ),
     );
 
-    foreach ($this->conditions as $no => $condition) {
+    foreach ($conditions as $no => $condition) {
       $form['conditions']['table'][$no] = array(
         'no' => array(
-          '#markup' => count($this->conditions),
+          '#markup' => count($conditions),
         ),
         'field' => array(
           '#type' => 'textfield',
@@ -209,7 +246,7 @@ class SensorEntityAggregator extends SensorDatabaseAggregatorBase {
    */
   public function addConditionSubmit(array $form, array &$form_state) {
     $form_state['rebuild'] = TRUE;
-    $this->conditions += array(array('field' => '', 'value' => ''));
+    $form_state['values']['settings']['conditions'] += array(array('field' => '', 'value' => ''));
   }
 
 }

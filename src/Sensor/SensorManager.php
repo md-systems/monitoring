@@ -74,7 +74,7 @@ class SensorManager extends DefaultPluginManager {
     // Sensor class from the sensor definition.
     $class = $definition['class'];
     // Creating instance of the sensor. Refer Sensor.php for arguments.
-    return new $class($sensor_info, $plugin_id, $definition);
+    return $class::create(\Drupal::getContainer(), $sensor_info, $plugin_id, $definition);
   }
 
   /**
