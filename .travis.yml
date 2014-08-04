@@ -78,7 +78,7 @@ script:
   - cd $TRAVIS_BUILD_DIR/../drupal
   - ls -la $TRAVIS_BUILD_DIR/../drupal/sites/default
   # Run the tests
-  - php core/scripts/run-tests.sh --verbose --color --concurrency 4 --php `which php` --url http://localhost "Monitoring" | tee /tmp/test.txt
+  - php core/scripts/run-tests.sh --verbose --color --concurrency 4 --php `which php` --url http://localhost "monitoring" | tee /tmp/test.txt
   - TEST_EXIT=${PIPESTATUS[0]}
   - echo $TEST_EXIT
   # Check if we had fails in the run-tests.sh script
@@ -98,6 +98,5 @@ script:
   #- /home/travis/.composer/vendor/bin/phpcs --standard=/home/travis/.composer/vendor/drupal/coder/coder_sniffer/Drupal --extensions=php,inc,test,module,install --ignore=css/ $TRAVIS_BUILD_DIR/../drupal/modules/search_api
   - php -i | grep 'php.ini'
   - sudo cat /var/log/apache2/error.log
-  - sudo cat /var/log/syslog | grep 'php'
   # Exit the build
   - if [ $TEST_EXIT -eq 0 ] && [ $TEST_OUTPUT -eq 0 ] && [ $TEST_PHPUNIT -eq 0 ]; then exit 0; else exit 1; fi
