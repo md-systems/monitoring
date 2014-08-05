@@ -84,7 +84,7 @@ class MonitoringUITest extends MonitoringTestBase {
     $this->assertText('Sensor Settings');
     $this->drupalPostForm(NULL, array(
       'settings[time_interval_value]' => 86400,
-      'settings[entity_type]' => 'field_config',
+      'settings[entity_type]' => 'field_storage_config',
       'settings[conditions][0][field]' => 'type',
       'settings[conditions][0][value]' => 'message',
     ), t('Save'));

@@ -636,7 +636,7 @@ class MonitoringCoreTest extends MonitoringTestBase {
     // Test support for configurable fields, create a taxonomy reference field.
     $vocabulary = $this->createVocabulary();
 
-    entity_create('field_config', array(
+    entity_create('field_storage_config', array(
       'name' => 'term_reference',
       'cardinality' => FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED,
       'entity_type' => 'node',
@@ -670,7 +670,7 @@ class MonitoringCoreTest extends MonitoringTestBase {
       ),
     ))->save();
 
-    entity_create('field_config', array(
+    entity_create('field_storage_config', array(
       'name' => 'term_reference2',
       'cardinality' => FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED,
       'entity_type' => 'node',
