@@ -11,6 +11,7 @@ use Drupal\Component\Utility\String;
 use Drupal\monitoring\Result\SensorResultInterface;
 use Drupal;
 use Drupal\monitoring\Sensor\Sensors\SensorDatabaseAggregatorBase;
+use Drupal\Core\DependencyInjection\DependencySerializationTrait;
 use Drupal\Core\Entity\DependencyTrait;
 use Drupal\Core\Entity\EntityManagerInterface;
 use Drupal\Core\Entity\Query\QueryFactory;
@@ -31,6 +32,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  */
 class SensorEntityAggregator extends SensorDatabaseAggregatorBase {
 
+  use DependencySerializationTrait;
   use DependencyTrait;
 
   /**
