@@ -14,6 +14,7 @@ use Drupal\monitoring\SensorRunner;
 use Drupal\views\Views;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Drupal\Core\Form\FormStateInterface;
 
 /**
  * Sensor detail form controller.
@@ -60,7 +61,7 @@ class SensorDetailForm extends EntityForm {
   /**
    * {@inheritdoc}
    */
-  public function buildForm(array $form, array &$form_state, $sensor_name = '') {
+  public function buildForm(array $form, FormStateInterface $form_state, $sensor_name = '') {
     $form_state['sensor_name'] = $sensor_name;
     $form = parent::buildForm($form, $form_state);
     return $form;
@@ -69,7 +70,7 @@ class SensorDetailForm extends EntityForm {
   /**
    * {@inheritdoc}
    */
-  public function form(array $form, array &$form_state) {
+  public function form(array $form, FormStateInterface $form_state) {
     $form = parent::form($form, $form_state);
     $sensor_name = $form_state['sensor_name'];
     try {
@@ -128,7 +129,7 @@ class SensorDetailForm extends EntityForm {
       $form['sensor_result']['cached'] = array(
         '#type' => 'item',
         '#title' => $this->t('Cache information'),
-        '#markup' => $this->t('Executed @interval ago, valid for @valid', array('@interval' => \Drupal::service('date')->formatInterval(REQUEST_TIME - $result->getTimestamp()), '@valid' => \Drupal::service('date')->formatInterval($sensor_info->getCachingTime()))),
+        '#markup' => $this->t('Executed @interval ago, valid for @valid', array('@interval' => \Drupal::service('date.formatter')->formatInterval(REQUEST_TIME - $result->getTimestamp()), '@valid' => \Drupal::service('date.formatter')->formatInterval($sensor_info->getCachingTime()))),
       );
 
       $form['sensor_result']['force_run'] = array(
@@ -141,7 +142,7 @@ class SensorDetailForm extends EntityForm {
       $form['sensor_result']['cached'] = array(
         '#type' => 'item',
         '#title' => $this->t('Cache information'),
-        '#markup' => $this->t('Executed now, valid for @valid', array('@valid' => \Drupal::service('date')->formatInterval($sensor_info->getCachingTime()))),
+        '#markup' => $this->t('Executed now, valid for @valid', array('@valid' => \Drupal::service('date.formatter')->formatInterval($sensor_info->getCachingTime()))),
       );
 
       $form['sensor_result']['force_run'] = array(
@@ -211,13 +212,13 @@ class SensorDetailForm extends EntityForm {
   /**
    * {@inheritdoc}
    */
-  public function validate(array $form, array &$form_state) {
+  public function validate(array $form, FormStateInterface $form_state) {
   }
 
   /**
    * {@inheritdoc}
    */
-  public function submitForm(array &$form, array &$form_state) {
+  public function submitForm(array &$form, FormStateInterface $form_state) {
     $this->sensorRunner->resetCache(array($form_state['sensor_name']));
     drupal_set_message(t('Sensor force run executed.'));
   }

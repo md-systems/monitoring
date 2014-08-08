@@ -95,6 +95,7 @@ abstract class SensorDatabaseAggregatorBase extends SensorThresholds implements 
       1209600,
       2419200
     );
-    return array_map('format_interval', array_combine($time_intervals, $time_intervals)) + array(0 => t('No restriction'));
+    $date_formatter = \Drupal::service('date.formatter');
+    return array_map(array($date_formatter, 'formatInterval'), array_combine($time_intervals, $time_intervals)) + array(0 => t('No restriction'));
   }
 }

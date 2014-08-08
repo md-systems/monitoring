@@ -516,10 +516,10 @@ function monitoring_value_types() {
  * @return string
  *   Formatted time interval.
  *
- * @see \Drupal::service('date')->formatInterval()
+ * @see \Drupal::service('date.formatter')->formatInterval()
  */
 function monitoring_value_label_callback_interval(SensorResultInterface $result) {
-  return \Drupal::service('date')->formatInterval($result->getValue());
+  return \Drupal::service('date.formatter')->formatInterval($result->getValue());
 }
 
 /**

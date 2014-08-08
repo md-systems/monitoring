@@ -176,7 +176,7 @@ function monitoring_drush_info_single($sensor_name) {
     '@label' => ($sensor_info->getValueLabel() ? $sensor_info->getValueLabel() : dt('N/A')),
     '@numeric' => ($sensor_info->isNumeric() ? dt('Yes') : dt('No')),
   )));
-  $rows[] = array(dt('Caching time'), \Drupal::service('date')->formatInterval($sensor_info->getCachingTime()));
+  $rows[] = array(dt('Caching time'), \Drupal::service('date.formatter')->formatInterval($sensor_info->getCachingTime()));
   $rows[] = array(dt('Enabled'), $sensor_info->isEnabled() ? dt('Yes') : dt('No'));
   $rows[] = array(dt('Has thresholds'), $sensor_info->isDefiningThresholds() ? dt('Yes') : dt('No'));
   $rows[] = array(dt('Is configurable'), $sensor_info->isConfigurable() ? dt('Yes') : dt('No'));
@@ -296,7 +296,7 @@ function monitoring_drush_result_output_table_single(SensorResultInterface $resu
   $rows[] = array(dt('Status'), $result->getStatusLabel());
   $rows[] = array(dt('Message'), $result->getMessage());
   $rows[] = array(dt('Execution time'), $result->getExecutionTime() . 'ms');
-  $rows[] = array(dt('Result age'), \Drupal::service('date')->formatInterval(time() - $result->getTimestamp()));
+  $rows[] = array(dt('Result age'), \Drupal::service('date.formatter')->formatInterval(time() - $result->getTimestamp()));
 
   // Add the verbose output if requested.
   if ($result->getVerboseOutput()) {
@@ -325,7 +325,7 @@ function monitoring_drush_result_output_table_multiple(array $results, $show_exe
       String::format("@label\n(@name)", array('@label' => truncate_utf8($result->getSensorInfo()->getLabel(), 40, TRUE, TRUE), '@name' => $result->getSensorName())),
       $result->getStatusLabel(),
       truncate_utf8($result->getMessage(), 40, TRUE, TRUE),
-      \Drupal::service('date')->formatInterval(time() - $result->getTimestamp()),
+      \Drupal::service('date.formatter')->formatInterval(time() - $result->getTimestamp()),
     );
 
     if ($show_exec_time) {

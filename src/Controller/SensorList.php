@@ -96,7 +96,7 @@ class SensorList extends ControllerBase {
           'class' => array('status'),
         );
 
-        $row['data']['timestamp'] = \Drupal::service('date')->formatInterval(REQUEST_TIME - $sensor_result->getTimestamp());
+        $row['data']['timestamp'] = \Drupal::service('date.formatter')->formatInterval(REQUEST_TIME - $sensor_result->getTimestamp());
         $row['data']['execution_time'] = array(
           'data' => $sensor_result->getExecutionTime() . 'ms',
           'class' => array('execution-time'),
@@ -157,7 +157,7 @@ class SensorList extends ControllerBase {
     if (!empty($oldest_sensor_info)) {
       $output['summary']['#oldest_sensor_label'] = $oldest_sensor_info->getLabel();
       $output['summary']['#oldest_sensor_category'] = $oldest_sensor_info->getCategory();
-      $output['summary']['#oldest_sensor_called_before'] = \Drupal::service('date')->formatInterval($oldest_sensor_age);
+      $output['summary']['#oldest_sensor_called_before'] = \Drupal::service('date.formatter')->formatInterval($oldest_sensor_age);
     }
 
     $header = array(

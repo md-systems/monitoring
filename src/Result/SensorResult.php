@@ -208,7 +208,7 @@ class SensorResult implements SensorResultInterface {
         '!formatted_value' => $this->getFormattedValue($this->getValue()),
         '@time' => $this->getTimestamp(),
         '!expected' => $msg_expected,
-        '!time_interval' => \Drupal::service('date')->formatInterval($this->getSensorInfo()->getTimeIntervalValue()),
+        '!time_interval' => \Drupal::service('date.formatter')->formatInterval($this->getSensorInfo()->getTimeIntervalValue()),
       );
 
       // Build an array of message parts.
