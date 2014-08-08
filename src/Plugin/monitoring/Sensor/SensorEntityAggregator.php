@@ -239,16 +239,16 @@ class SensorEntityAggregator extends SensorDatabaseAggregatorBase {
   /**
    * Returns the rebuild form;
    */
-  public function addConditions(array $form, array &$form_state) {
+  public function addConditions(array $form, &$form_state) {
     return $form['settings']['conditions'];
   }
 
   /**
    * Adds new condition field and value to the form.
    */
-  public function addConditionSubmit(array $form, array &$form_state) {
+  public function addConditionSubmit(array $form, &$form_state) {
     $form_state['rebuild'] = TRUE;
-    $form_state['values']['settings']['conditions'] += array(array('field' => '', 'value' => ''));
+    $form_state['values']['settings']['conditions']['table'] += array(array('field' => '', 'value' => ''));
   }
 
 }
