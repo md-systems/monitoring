@@ -93,6 +93,11 @@ class MonitoringUITest extends MonitoringTestBase {
     $this->drupalGet('admin/config/system/monitoring/sensors/ui_test_sensor');
     $this->assertFieldByName('caching_time', 100);
     $this->assertFieldByName('settings[conditions][0][value]', 'message');
+
+    $this->drupalGet('admin/config/system/monitoring/sensors/ui_test_sensor/delete');
+    $this->assertText('This action cannot be undone.');
+    $this->drupalPostForm(NULL, array(), t('Delete'));
+    $this->assertText('Sensor UI created Sensor has been deleted.');
   }
 
   /**
