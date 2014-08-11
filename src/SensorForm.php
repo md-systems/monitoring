@@ -16,6 +16,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Url;
 
 /**
  * Sensor settings form controller.
@@ -215,7 +216,7 @@ class SensorForm extends EntityForm {
       unset($this->entity->settings['conditions']['table']);
     }
     $sensor_info->save();
-    $form_state['redirect_route']['route_name'] = 'monitoring.sensors_overview_settings';
+    $form_state->setRedirectUrl(new Url('monitoring.sensors_overview_settings'));
     drupal_set_message($this->t('Sensor settings saved.'));
   }
 
