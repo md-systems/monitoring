@@ -140,8 +140,8 @@ abstract class SensorThresholds extends SensorConfigurable implements SensorThre
    * @param string $message
    *   The validation message.
    */
-  protected function setFormError($threshold_key, &$form_state, $message) {
-    \Drupal::formBuilder()->setErrorByName($this->info->getName() . '][thresholds][' . $threshold_key, $form_state, $message);
+  protected function setFormError($threshold_key, $form_state, $message) {
+    $form_state->setErrorByName($this->info->getName() . '][thresholds][' . $threshold_key, $message);
   }
 
   /**
