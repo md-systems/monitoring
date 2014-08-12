@@ -171,7 +171,7 @@ class SensorEntityAggregator extends SensorDatabaseAggregatorBase {
       );
     }
 
-    if (isset($form_state['values']['settings']['conditions']['table'])) {
+    /*    if (isset($form_state['values']['settings']['conditions']['table'])) {
       $conditions = $form_state['values']['settings']['conditions']['table'];
     }
 
@@ -215,19 +215,18 @@ class SensorEntityAggregator extends SensorDatabaseAggregatorBase {
         ),
       ),
     );
-
+    */
     foreach ($conditions as $no => $condition) {
-      $form['conditions']['table'][$no] = array(
-        'no' => array(
-          '#markup' => count($conditions),
-        ),
+      $form['conditions'][$no] = array(
         'field' => array(
           '#type' => 'textfield',
+	  '#title' => t('Condition\'s Field'),
           '#default_value' => $condition['field'],
           '#required' => TRUE,
         ),
         'value' => array(
           '#type' => 'textfield',
+	  '#title' => t('Condition\'s Value'),
           '#default_value' => $condition['value'],
           '#required' => TRUE,
         )
