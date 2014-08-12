@@ -66,7 +66,7 @@ class SensorEntityAggregator extends SensorDatabaseAggregatorBase {
   protected function getEntityQueryAggregate() {
     $entity_info = $this->entityManager->getDefinition($this->getEntityType(), TRUE);
 
-    $query = $this->entityQueryAggregate->get($this->getEntityType());
+    $query = $this->entityQueryAggregate->getAggregate($this->getEntityType());
     $this->aggregateField = $entity_info->getKey('id');
     $query->aggregate($this->aggregateField, 'COUNT');
 
