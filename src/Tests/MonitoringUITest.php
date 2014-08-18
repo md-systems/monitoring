@@ -178,13 +178,11 @@ class MonitoringUITest extends MonitoringTestBase {
     $i = 0;
     foreach (monitoring_sensor_info_by_categories() as $category => $category_sensor_info) {
       $tr = $rows->tr[$i];
-//      $this->assertEqual($category, $tr->td->h3);
-      $this->assertTrue(strpos($tr->td, $category)!=FALSE);
+      $this->assertEqual($category, $tr->td->h3);
       foreach ($category_sensor_info as $sensor_info) {
         $i++;
         $tr = $rows->tr[$i];
-//        $this->assertEqual($tr->td[0]->span, $sensor_info->getLabel());
-      $this->assertTrue(strpos($tr->td, $sensor_info->getLabel())!=FALSE);
+        $this->assertEqual($tr->td[0]->span, $sensor_info->getLabel());
       }
 
       $i++;

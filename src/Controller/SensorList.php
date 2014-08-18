@@ -7,6 +7,7 @@ use Drupal\monitoring\Result\SensorResultInterface;
 use Drupal\monitoring\Sensor\SensorManager;
 use Drupal\monitoring\SensorRunner;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Drupal\Component\Utility\SafeMarkup;
 
 class SensorList extends ControllerBase {
 
@@ -70,7 +71,7 @@ class SensorList extends ControllerBase {
       $rows[] = array(
         'data' => array(
           'label' => array(
-            'data' => '<h3>' . $category . '</h3>',
+            'data' => SafeMarkup::set('<h3>' . $category . '</h3>'),
             'colspan' => 7
           ),
         ),
@@ -89,7 +90,7 @@ class SensorList extends ControllerBase {
           $oldest_sensor_age = $called_before;
         }
 
-        $row['data']['label'] = '<span title="' . $sensor_info->getDescription() . '">' . $sensor_info->getLabel() . '</span>';
+        $row['data']['label'] = SafeMarkup::set('<span title="' . $sensor_info->getDescription() . '">' . $sensor_info->getLabel() . '</span>');
 
         $row['data']['sensor_status'] = array(
           'data' => $sensor_result->getStatus(),
