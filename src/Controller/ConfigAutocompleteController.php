@@ -16,21 +16,7 @@ use Symfony\Component\HttpFoundation\Request;
 /**
  * Returns autocomplete responses for config.
  */
-class ConfigAutocompleteController implements ContainerInjectionInterface {
-
-  /**
-   * {@inheritdoc}
-   */
-  public static function create(ContainerInterface $container) {
-    return new static();
-  }
-
-  /**
-   * Constructs a new ConfigAutocompleteController.
-   *
-   */
-  public function __construct() {
-  }
+class ConfigAutocompleteController {
 
   /**
    * Retrieves suggestions for config autocompletion.
@@ -42,7 +28,6 @@ class ConfigAutocompleteController implements ContainerInjectionInterface {
    *   A JSON response containing autocomplete suggestions.
    */
   public function autocomplete(Request $request) {
-    $typed_category = $request->query->get('q');
     $matches = array();
     $prefixMatches = array_slice(\Drupal::service('config.factory')->listAll($request->query->get('q')), 0, 10);
     foreach ($prefixMatches as $config) {
