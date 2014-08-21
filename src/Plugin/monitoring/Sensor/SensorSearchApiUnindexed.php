@@ -8,6 +8,7 @@ namespace Drupal\monitoring\Plugin\monitoring\Sensor;
 
 use Drupal\monitoring\Result\SensorResultInterface;
 use Drupal\monitoring\Sensor\SensorThresholds;
+use Drupal\search_api\Entity\Index;
 
 /**
  * Monitors unindexed items for a search api index.
@@ -32,13 +33,13 @@ class SensorSearchApiUnindexed extends SensorThresholds {
    * {@inheritdoc}
    */
   public function runSensor(SensorResultInterface $result) {
-    $indexes = search_api_index_load_multiple(array($this->info->getSetting('index_id')));
-    $index = reset($indexes);
+    $index = Index::load($this->info->getSetting('index_id'));
 
-    $status = search_api_index_status($index);
+    /* @var \Drupal\search_api\Tracker\TrackerInterface $tracker */
+    $tracker = $index->getTracker();
 
     // Set amount of unindexed items.
-    $result->setValue($status['total'] - $status['indexed']);
+    $result->setValue($tracker->getRemainingItemsCount());
   }
 
 }
