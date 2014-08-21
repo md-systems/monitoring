@@ -2,11 +2,11 @@ id: user_active
 label: 'Active users'
 description: ''
 category: 'User activity'
-sensor_id: database_aggregator
+sensor_id: entity_aggregator
 value_label: 'Users'
 status: FALSE
 caching_time: 3600
 settings:
-  table: 'users'
+  entity_type: 'user'
   time_interval_value: '86400'
   time_interval_field: 'created'

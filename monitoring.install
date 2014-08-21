@@ -23,7 +23,7 @@ function monitoring_install() {
         'id' => 'node_new_' . $node_type->type,
         'label' => String::format('New @type nodes', array('@type' => $node_type->name)),
         'description' => String::format('New nodes of type @type', array('@type' => $node_type->name)),
-        'sensor_id' => 'database_aggregator',
+        'sensor_id' => 'entity_aggregator',
         'value_label' => String::format('@type nodes', array('@type' => $node_type->name)),
         'category' => 'Content',
         'status' => TRUE,
@@ -32,7 +32,7 @@ function monitoring_install() {
           'thresholds' => array(
             'type' => 'falls',
           ),
-          'table' => 'node_field_data',
+          'entity_type' => 'node',
           'conditions' => array(
             array('field' => 'type', 'value' => $node_type->type),
           ),

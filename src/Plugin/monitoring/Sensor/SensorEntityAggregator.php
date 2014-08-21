@@ -137,6 +137,9 @@ class SensorEntityAggregator extends SensorDatabaseAggregatorBase {
    */
   public function calculateDependencies() {
     $entity_type_id = $this->getEntityType();
+    if (!$entity_type_id) {
+      throw new \Exception(String::format('Sensor @id is missing the required entity_type setting.', array('@id' => $this->id())));
+    }
     $entity_type = $this->entityManager->getDefinition($entity_type_id);
     $this->addDependency('module', $entity_type->getProvider());
     return $this->dependencies;
