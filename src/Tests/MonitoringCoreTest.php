@@ -187,7 +187,7 @@ class MonitoringCoreTest extends MonitoringTestBase {
 
     // ======= SensorImageMissingStyle tests ======= //
 
-    $file = file_save_data($this->randomName());
+    $file = file_save_data($this->randomMachineName());
     /** @var FileUsageInterface $usage */
     $usage = \Drupal::service('file.usage');
     $usage->add($file, 'monitoring_test', 'test_object', 123456789);
@@ -297,7 +297,7 @@ class MonitoringCoreTest extends MonitoringTestBase {
     $this->assertEqual($result->getMessage(), String::format('@count @unit in @time_interval', array(
       '@count' => $result->getValue(),
       '@unit' => strtolower($result->getSensorInfo()->getValueLabel()),
-      '@time_interval' => \Drupal::service('date')->formatInterval($result->getSensorInfo()
+      '@time_interval' => \Drupal::service('date.formatter')->formatInterval($result->getSensorInfo()
         ->getTimeIntervalValue()),
     )));
 
@@ -524,9 +524,9 @@ class MonitoringCoreTest extends MonitoringTestBase {
       array('field' => 'type', 'value' => 'test_type'),
     );
     $sensor_info->save();
-    watchdog('test_type', $this->randomName());
-    watchdog('test_type', $this->randomName());
-    watchdog('other_test_type', $this->randomName());
+    watchdog('test_type', $this->randomMachineName());
+    watchdog('test_type', $this->randomMachineName());
+    watchdog('other_test_type', $this->randomMachineName());
     $result = $this->runSensor('watchdog_aggregate_test');
     $this->assertEqual($result->getValue(), 2);
 
@@ -535,9 +535,9 @@ class MonitoringCoreTest extends MonitoringTestBase {
       array('field' => 'message', 'value' => 'test_message'),
     );
     $sensor_info->save();
-    watchdog($this->randomName(), 'test_message');
-    watchdog($this->randomName(), 'another_test_message');
-    watchdog($this->randomName(), 'another_test_message');
+    watchdog($this->randomMachineName(), 'test_message');
+    watchdog($this->randomMachineName(), 'another_test_message');
+    watchdog($this->randomMachineName(), 'another_test_message');
     $result = $this->runSensor('watchdog_aggregate_test');
     $this->assertEqual($result->getValue(), 1);
 
@@ -546,10 +546,10 @@ class MonitoringCoreTest extends MonitoringTestBase {
       array('field' => 'severity', 'value' => WATCHDOG_CRITICAL),
     );
     $sensor_info->save();
-    watchdog($this->randomName(), $this->randomName(), array(), WATCHDOG_CRITICAL);
-    watchdog($this->randomName(), $this->randomName(), array(), WATCHDOG_CRITICAL);
-    watchdog($this->randomName(), $this->randomName(), array(), WATCHDOG_CRITICAL);
-    watchdog($this->randomName(), $this->randomName(), array(), WATCHDOG_CRITICAL);
+    watchdog($this->randomMachineName(), $this->randomMachineName(), array(), WATCHDOG_CRITICAL);
+    watchdog($this->randomMachineName(), $this->randomMachineName(), array(), WATCHDOG_CRITICAL);
+    watchdog($this->randomMachineName(), $this->randomMachineName(), array(), WATCHDOG_CRITICAL);
+    watchdog($this->randomMachineName(), $this->randomMachineName(), array(), WATCHDOG_CRITICAL);
     $result = $this->runSensor('watchdog_aggregate_test');
     $this->assertEqual($result->getValue(), 4);
 
@@ -636,7 +636,7 @@ class MonitoringCoreTest extends MonitoringTestBase {
     // Test support for configurable fields, create a taxonomy reference field.
     $vocabulary = $this->createVocabulary();
 
-    entity_create('field_config', array(
+    entity_create('field_storage_config', array(
       'name' => 'term_reference',
       'cardinality' => FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED,
       'entity_type' => 'node',
@@ -670,7 +670,7 @@ class MonitoringCoreTest extends MonitoringTestBase {
       ),
     ))->save();
 
-    entity_create('field_config', array(
+    entity_create('field_storage_config', array(
       'name' => 'term_reference2',
       'cardinality' => FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED,
       'entity_type' => 'node',
@@ -768,9 +768,9 @@ class MonitoringCoreTest extends MonitoringTestBase {
   function createVocabulary() {
     // Create a vocabulary.
     $vocabulary = entity_create('taxonomy_vocabulary');
-    $vocabulary->vid = drupal_strtolower($this->randomName());
-    $vocabulary->name = $this->randomName();
-    $vocabulary->description = $this->randomName();
+    $vocabulary->vid = drupal_strtolower($this->randomMachineName());
+    $vocabulary->name = $this->randomMachineName();
+    $vocabulary->description = $this->randomMachineName();
     $vocabulary->save();
     return $vocabulary;
   }
@@ -786,8 +786,8 @@ class MonitoringCoreTest extends MonitoringTestBase {
    */
   function createTerm($vocabulary) {
     $term = entity_create('taxonomy_term', array('vid' => $vocabulary->id()));
-    $term->name = $this->randomName();
-    $term->description = $this->randomName();
+    $term->name = $this->randomMachineName();
+    $term->description = $this->randomMachineName();
     $term->save();
     return $term;
   }

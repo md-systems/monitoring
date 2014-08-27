@@ -11,6 +11,7 @@ use Drupal\Core\Extension\Extension;
 use Drupal\Core\Template\Attribute;
 use Drupal\monitoring\Entity\SensorInfo;
 use Drupal\monitoring\Result\SensorResultInterface;
+use Drupal\node\NodeTypeInterface;
 
 /**
  * Returns an instance of the sensor manager.
@@ -366,7 +367,7 @@ function theme_monitoring_overview_summary($variables) {
       '@unknown' => $variables['status_overview'][SensorResultInterface::STATUS_UNKNOWN],
     ));
   $output .= '</div>';
-  if (user_access('monitoring force run')) {
+  if (\Drupal::currentUser()->hasPermission('monitoring force run')) {
     $output .= '<div class="monitoring-overview-summary-actions-right">' . l(t('Force execute all'), 'monitoring/sensors/force') . '</div>';
   }
   if (!empty($variables['oldest_sensor_label'])) {
@@ -516,10 +517,10 @@ function monitoring_value_types() {
  * @return string
  *   Formatted time interval.
  *
- * @see \Drupal::service('date')->formatInterval()
+ * @see \Drupal::service('date.formatter')->formatInterval()
  */
 function monitoring_value_label_callback_interval(SensorResultInterface $result) {
-  return \Drupal::service('date')->formatInterval($result->getValue());
+  return \Drupal::service('date.formatter')->formatInterval($result->getValue());
 }
 
 /**
@@ -573,13 +574,13 @@ function monitoring_sensor_thresholds_ajax($form, &$form_state) {
  *
  * Inserts new node sensor config entities on creation of new node types.
  */
-function monitoring_node_type_insert($info) {
+function monitoring_node_type_insert(NodeTypeInterface $type) {
   $sensor = SensorInfo::create(array(
-    'id' => 'node_new_' . $info->type,
-    'label' => String::format('New @type nodes', array('@type' => $info->name)),
-    'description' => String::format('New nodes of type @type', array('@type' => $info->name)),
-    'sensor_id' => 'database_aggregator',
-    'value_label' => String::format('@type nodes', array('@type' => $info->name)),
+    'id' => 'node_new_' . $type->id(),
+    'label' => String::format('New @type nodes', array('@type' => $type->label())),
+    'description' => String::format('New nodes of type @type', array('@type' => $type->label())),
+    'sensor_id' => 'entity_aggregator',
+    'value_label' => String::format('@type nodes', array('@type' => $type->label())),
     'category' => 'Content',
     'status' => FALSE,
     'caching_time' => 600,
@@ -587,9 +588,9 @@ function monitoring_node_type_insert($info) {
       'thresholds' => array(
         'type' => 'falls',
       ),
-      'table' => 'node_field_data',
+      'entity_type' => 'node',
       'conditions' => array(
-        array('field' => 'type', 'value' => $info->type),
+        array('field' => 'type', 'value' => $type->id()),
       ),
       'time_interval_field' => 'created',
       'time_interval_value' => 60 * 60 * 24,
@@ -603,8 +604,8 @@ function monitoring_node_type_insert($info) {
  *
  * Deletes node sensor config entities on deletion of node types.
  */
-function monitoring_node_type_delete($info) {
-  $config_id = 'node_new_' . $info->type;
+function monitoring_node_type_delete(NodeTypeInterface $info) {
+  $config_id = 'node_new_' . $info->id();
   $sensor = SensorInfo::load($config_id);
   $sensor->delete();
 }
@@ -612,17 +613,28 @@ function monitoring_node_type_delete($info) {
 /*
  * Implements hook_node_type_update().
  *
- * Updates node sensor config entities on updation of node types.
+ * Updates node sensor config entities on update of node types.
  */
-function monitoring_node_type_update($info) {
-  $config_id = 'node_new_' . $info->type;
+function monitoring_node_type_update(NodeTypeInterface $type) {
+  $config_id = 'node_new_' . $type->id();
   $sensor = SensorInfo::load($config_id);
-  $sensor->id = 'node_new_' . $info->type;
-  $sensor->label = String::format('New @type nodes', array('@type' => $info->name));
-  $sensor->description = String::format('New nodes of type @type', array('@type' => $info->name));
-  $sensor->value_label = String::format('@type nodes', array('@type' => $info->name));
-  $sensor->settings->conditions->value = $info->type;
-  $sensor->save();
+  if ($sensor) {
+    $sensor->id = 'node_new_' . $type->id();
+    $sensor->label = String::format(
+      'New @type nodes',
+      array('@type' => $type->label())
+    );
+    $sensor->description = String::format(
+      'New nodes of type @type',
+      array('@type' => $type->label())
+    );
+    $sensor->value_label = String::format(
+      '@type nodes',
+      array('@type' => $type->label())
+    );
+    $sensor->settings['conditions'][0]['value'] = $type->id();
+    $sensor->save();
+  }
 }
 
 /*

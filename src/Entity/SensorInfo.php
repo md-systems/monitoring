@@ -125,7 +125,7 @@ class SensorInfo extends ConfigEntityBase {
   public $status = TRUE;
 
   /**
-   * The sensor id.
+   * The sensor ID.
    *
    * @var string
    */
@@ -179,16 +179,6 @@ class SensorInfo extends ConfigEntityBase {
     $configuration = array('sensor_info' => $this);
     $sensor = monitoring_sensor_manager()->createInstance($this->sensor_id, $configuration);
     return $sensor;
-  }
-
-  /**
-   * Gets sensor result class.
-   *
-   * @return string
-   *   Result class.
-   */
-  public function getResultClass() {
-    return '\Drupal\monitoring\Result\SensorResult';
   }
 
   /**
@@ -434,7 +424,5 @@ class SensorInfo extends ConfigEntityBase {
     parent::postSave($storage, $update);
     \Drupal::service('monitoring.sensor_runner')->resetCache(array($this->id));
   }
-
-
 
 }

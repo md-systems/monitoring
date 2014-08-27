@@ -7,6 +7,7 @@ use Drupal\monitoring\Result\SensorResultInterface;
 use Drupal\monitoring\Sensor\SensorManager;
 use Drupal\monitoring\SensorRunner;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Drupal\Component\Utility\SafeMarkup;
 
 class SensorList extends ControllerBase {
 
@@ -70,7 +71,7 @@ class SensorList extends ControllerBase {
       $rows[] = array(
         'data' => array(
           'label' => array(
-            'data' => '<h3>' . $category . '</h3>',
+            'data' => SafeMarkup::set('<h3>' . $category . '</h3>'),
             'colspan' => 7
           ),
         ),
@@ -89,14 +90,14 @@ class SensorList extends ControllerBase {
           $oldest_sensor_age = $called_before;
         }
 
-        $row['data']['label'] = '<span title="' . $sensor_info->getDescription() . '">' . $sensor_info->getLabel() . '</span>';
+        $row['data']['label'] = SafeMarkup::set('<span title="' . $sensor_info->getDescription() . '">' . $sensor_info->getLabel() . '</span>');
 
         $row['data']['sensor_status'] = array(
           'data' => $sensor_result->getStatus(),
           'class' => array('status'),
         );
 
-        $row['data']['timestamp'] = \Drupal::service('date')->formatInterval(REQUEST_TIME - $sensor_result->getTimestamp());
+        $row['data']['timestamp'] = \Drupal::service('date.formatter')->formatInterval(REQUEST_TIME - $sensor_result->getTimestamp());
         $row['data']['execution_time'] = array(
           'data' => $sensor_result->getExecutionTime() . 'ms',
           'class' => array('execution-time'),
@@ -114,10 +115,8 @@ class SensorList extends ControllerBase {
         if ($sensor_info->getCachingTime() && $this->currentUser()->hasPermission('monitoring force run')) {
           $links['force_execution'] = array('title' => t('Force execution'), 'href' => 'monitoring/sensors/force/' . $sensor_name);
         }
-        if ($sensor_info->isConfigurable() && $this->currentUser()->hasPermission('administer monitoring')) {
-          $links['edit'] = array('title' => t('Edit'), 'href' => 'admin/config/system/monitoring/sensors/' . $sensor_name,
-            'query' => array('destination' => 'admin/reports/monitoring'));
-        }
+	$links['edit'] = array('title' => t('Edit'), 'href' => 'admin/config/system/monitoring/sensors/' . $sensor_name,
+          'query' => array('destination' => 'admin/reports/monitoring'));
 
         \Drupal::moduleHandler()->alter('monitoring_sensor_links', $links, $sensor_info);
 
@@ -159,7 +158,7 @@ class SensorList extends ControllerBase {
     if (!empty($oldest_sensor_info)) {
       $output['summary']['#oldest_sensor_label'] = $oldest_sensor_info->getLabel();
       $output['summary']['#oldest_sensor_category'] = $oldest_sensor_info->getCategory();
-      $output['summary']['#oldest_sensor_called_before'] = \Drupal::service('date')->formatInterval($oldest_sensor_age);
+      $output['summary']['#oldest_sensor_called_before'] = \Drupal::service('date.formatter')->formatInterval($oldest_sensor_age);
     }
 
     $header = array(

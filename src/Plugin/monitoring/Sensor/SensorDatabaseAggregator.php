@@ -10,6 +10,7 @@ namespace Drupal\monitoring\Plugin\monitoring\Sensor;
 use Drupal\Core\Database\Query\SelectInterface;
 use Drupal\monitoring\Result\SensorResultInterface;
 use Drupal\monitoring\Sensor\Sensors\SensorDatabaseAggregatorBase;
+use Drupal\Core\Entity\DependencyTrait;
 
 /**
  * Simple database aggregator able to query a single db table.
@@ -18,11 +19,13 @@ use Drupal\monitoring\Sensor\Sensors\SensorDatabaseAggregatorBase;
  *   id = "database_aggregator",
  *   label = @Translation("Simple Database Aggregator"),
  *   description = @Translation("Simple database aggregator able to query a single db table."),
- *   addable = FALSE
+ *   addable = TRUE
  * )
  *
  */
 class SensorDatabaseAggregator extends SensorDatabaseAggregatorBase {
+  
+  use DependencyTrait;
 
   /**
    * The fetched object from the query result.
@@ -107,4 +110,51 @@ class SensorDatabaseAggregator extends SensorDatabaseAggregatorBase {
     $result->setValue($records_count);
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  public function calculateDependencies() {
+    parent::calculateDependencies();
+
+    $schema = drupal_get_schema($this->info->getSetting('table'));
+    if ($schema) {
+      $this->addDependency('module', $schema['module']);
+    }
+    return $this->dependencies;
+  }
+
+  /**
+   * Adds UI for variables table and conditions.
+   */
+  public function settingsForm($form, &$form_state) {
+    $form = parent::settingsForm($form, $form_state);
+    $field = '';
+    $field_value = '';
+    $settings = $this->info->getSettings();
+    $form['table'] = array(
+      '#type' => 'textfield',
+      '#default_value' => $this->info->getSetting('table'),
+      '#maxlength' => 255,
+      '#title' => t('Table'),
+      '#required' => TRUE,
+    );
+    if (isset($this->info->settings['table'])) {
+      $field = $settings['conditions'][0]['field'];
+      $field_value = $settings['conditions'][0]['value'];
+    }
+
+    $form['conditions'][0]['field'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Condition\'s Field'),
+      '#maxlength' => 255,
+      '#default_value' => $field,
+    );
+    $form['conditions'][0]['value'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Condition\'s Value'),
+      '#maxlength' => 255,
+      '#default_value' => $field_value,
+    );
+    return $form;
+  }
 }

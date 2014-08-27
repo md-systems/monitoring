@@ -16,6 +16,7 @@ use Drupal\rest\ResourceResponse;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Route;
+use Psr\Log\LoggerInterface;
 
 /**
  * Provides a resource for monitoring sensors results.
@@ -41,8 +42,8 @@ class MonitoringSensorResultResource extends ResourceBase {
    */
   protected $sensorRunner;
 
-  public function __construct(array $configuration, $plugin_id, array $plugin_definition, array $serializer_formats, SensorManager $sensor_manager, SensorRunner $sensor_runner) {
-    parent::__construct($configuration, $plugin_id, $plugin_definition, $serializer_formats);
+  public function __construct(array $configuration, $plugin_id, array $plugin_definition, array $serializer_formats, SensorManager $sensor_manager, SensorRunner $sensor_runner, LoggerInterface $logger) {
+    parent::__construct($configuration, $plugin_id, $plugin_definition, $serializer_formats, $logger);
     $this->sensorManager = $sensor_manager;
     $this->sensorRunner = $sensor_runner;
   }
@@ -57,7 +58,8 @@ class MonitoringSensorResultResource extends ResourceBase {
       $plugin_definition,
       $container->getParameter('serializer.formats'),
       $container->get('monitoring.sensor_manager'),
-      $container->get('monitoring.sensor_runner')
+      $container->get('monitoring.sensor_runner'),
+      $container->get('logger.factory')->get('ajax')
     );
   }
 

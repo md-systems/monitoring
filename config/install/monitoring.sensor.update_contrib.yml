@@ -5,7 +5,7 @@ category: 'Update'
 sensor_id: update_status
 value_label: 'Outdated modules'
 numeric: FALSE
-status: FALSE
+status: true
 caching_time: '86400'
 settings:
   type: 'contrib'

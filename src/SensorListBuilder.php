@@ -12,6 +12,7 @@ use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Form\FormInterface;
 use Drupal\monitoring\Sensor\SensorManager;
 use Drupal\monitoring\Entity\SensorInfo;
+use Drupal\Core\Form\FormStateInterface;
 
 /**
  * Defines a class to build a listing of monitoring entities.
@@ -50,7 +51,7 @@ class SensorListBuilder extends ConfigEntityListBuilder implements FormInterface
   /**
    * Implements \Drupal\Core\Form\FormInterface::validateForm().
    */
-  public function validateForm(array &$form, array &$form_state) {
+  public function validateForm(array &$form, FormStateInterface $form_state) {
     // No validation.
   }
 
@@ -58,13 +59,13 @@ class SensorListBuilder extends ConfigEntityListBuilder implements FormInterface
    * {@inheritdoc}
    */
   public function render() {
-    return drupal_get_form($this);
+    return \Drupal::formBuilder()->getForm($this);
   }
 
   /*
    * {@inheritdoc}
    */
-  public function buildForm(array $form, array &$form_state) {
+  public function buildForm(array $form, FormStateInterface $form_state) {
     foreach ($this->load() as $entity) {
       $row = $this->buildRow($entity);
       $options[$entity->id()] = $row;
@@ -93,7 +94,7 @@ class SensorListBuilder extends ConfigEntityListBuilder implements FormInterface
   /*
    * {@inheritdoc}
    */
-  public function submitForm(array &$form, array &$form_state) {
+  public function submitForm(array &$form, FormStateInterface $form_state) {
     foreach ($form_state['values']['sensors'] as $sensor_id => $enabled) {
       $sensor = SensorInfo::load($sensor_id);
       if ($enabled) {

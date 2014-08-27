@@ -37,7 +37,7 @@ class SensorElysiaCron extends SensorThresholds {
     // In case we are querying for last_run, the value is the seconds ago.
     if ($this->info->getSetting('metric') == 'last_run') {
       $value = REQUEST_TIME - $value;
-      $result->addStatusMessage('@time ago', array('@time' => \Drupal::service('date')->formatInterval($value)));
+      $result->addStatusMessage('@time ago', array('@time' => \Drupal::service('date.formatter')->formatInterval($value)));
     }
     else {
       // metric last_execution_time

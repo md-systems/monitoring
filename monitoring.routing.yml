@@ -59,3 +59,10 @@ monitoring.sensor_add:
     _title: 'Add Sensor'
   requirements:
     _permission: 'administer monitoring'
+
+monitoring.config_autocomplete:
+  path: '/monitoring-config/autocomplete'
+  defaults:
+    _controller: '\Drupal\monitoring\Controller\ConfigAutocompleteController::autocomplete'
+  requirements:
+    _permission: 'administer monitoring'

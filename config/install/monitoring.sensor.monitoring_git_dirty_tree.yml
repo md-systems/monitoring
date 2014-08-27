@@ -7,4 +7,4 @@ status: FALSE
 settings:
   repo_path: NULL
   cmd: 'git status --porcelain'
-  
+

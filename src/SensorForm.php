@@ -15,6 +15,8 @@ use Drupal\monitoring\Sensor\SensorManager;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Url;
 
 /**
  * Sensor settings form controller.
@@ -24,7 +26,7 @@ class SensorForm extends EntityForm {
   /**
    * {@inheritdoc}
    */
-  public function form(array $form, array &$form_state) {
+  public function form(array $form, FormStateInterface $form_state) {
     $form = parent::form($form, $form_state);
     $form['#tree'] = TRUE;
     $sensor_info = $this->entity;
@@ -172,14 +174,14 @@ class SensorForm extends EntityForm {
   /**
    * Handles switching the configuration type selector.
    */
-  public function updateSelectedPluginType($form, &$form_state) {
+  public function updateSelectedPluginType($form, FormStateInterface $form_state) {
     return $form['settings'];
   }
 
   /**
    * Handles submit call when sensor type is selected.
    */
-  public function submitSelectPlugin(array $form, array &$form_state) {
+  public function submitSelectPlugin(array $form, FormStateInterface $form_state) {
     $this->entity = $this->buildEntity($form, $form_state);
     $form_state['rebuild'] = TRUE;
     // @todo: This is necessary because there are two different instances of the
@@ -190,7 +192,7 @@ class SensorForm extends EntityForm {
   /**
    * {@inheritdoc}
    */
-  public function validate(array $form, array &$form_state) {
+  public function validate(array $form, FormStateInterface $form_state) {
     parent::validate($form, $form_state);
     /** @var SensorConfigurableInterface $sensor */
     if ($this->entity->isNew()) {
@@ -206,19 +208,15 @@ class SensorForm extends EntityForm {
   /**
    * {@inheritdoc}
    */
-  public function save(array $form, array &$form_state) {
+  public function save(array $form, FormStateInterface $form_state) {
     /** @var Sensor $sensor */
     $sensor_info = $this->entity;
-    if ($sensor_info->sensor_id == 'entity_aggregator') {
-      $this->entity->settings['conditions'] = array(
-	array(
-          'field' => $sensor_info->settings['conditions'][1]['field'],
-	  'value' => $sensor_info->settings['conditions'][1]['value'],
-      ));
-      unset($sensor_info->settings['conditions'][1]);
-    }
+    /*    if (isset($sensor_info->settings['conditions']) && isset($sensor_info->settings['conditions']['table'])) {
+      $this->entity->settings['conditions'] = $this->entity->settings['conditions']['table'];
+      unset($this->entity->settings['conditions']['table']);
+      }*/
     $sensor_info->save();
-    $form_state['redirect_route']['route_name'] = 'monitoring.sensors_overview_settings';
+    $form_state->setRedirectUrl(new Url('monitoring.sensors_overview_settings'));
     drupal_set_message($this->t('Sensor settings saved.'));
   }
 

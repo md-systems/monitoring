@@ -16,7 +16,7 @@ use Drupal\monitoring\Sensor\Sensors\SensorValueComparisonBase;
  *   id = "config_value",
  *   label = @Translation("Config Value"),
  *   description = @Translation("Checks for a specific configuration value."),
- *   addable = FALSE
+ *   addable = TRUE
  * )
  *
  */
@@ -47,5 +47,29 @@ class SensorConfigValue extends SensorValueComparisonBase {
    */
   protected function getConfig($name) {
     return $this->getService('config.factory')->get($name);
+  }
+
+  /**
+   * Adds UI for variables config object and key.
+   */
+  public function settingsForm($form, &$form_state) {
+    $form = parent::settingsForm($form, $form_state);
+    $settings = $this->info->getSettings();
+    $form['config'] = array(
+      '#type' => 'textfield',
+      '#default_value' => $this->info->getSetting('config')? $this->info->getSetting('config') : '',
+      '#autocomplete_route_name' => 'monitoring.config_autocomplete',
+      '#maxlength' => 255,
+      '#title' => t('Config Object'),
+      '#required' => TRUE,
+    );
+    $form['key'] = array(
+      '#type' => 'textfield',
+      '#default_value' => $this->info->getSetting('key')? $this->info->getSetting('key') : '',
+      '#maxlength' => 255,
+      '#title' => t('Key'),
+      '#required' => TRUE,
+    );
+    return $form;
   }
 }

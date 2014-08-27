@@ -23,7 +23,7 @@ function monitoring_install() {
         'id' => 'node_new_' . $node_type->type,
         'label' => String::format('New @type nodes', array('@type' => $node_type->name)),
         'description' => String::format('New nodes of type @type', array('@type' => $node_type->name)),
-        'sensor_id' => 'database_aggregator',
+        'sensor_id' => 'entity_aggregator',
         'value_label' => String::format('@type nodes', array('@type' => $node_type->name)),
         'category' => 'Content',
         'status' => TRUE,
@@ -32,13 +32,14 @@ function monitoring_install() {
           'thresholds' => array(
             'type' => 'falls',
           ),
-          'table' => 'node_field_data',
+          'entity_type' => 'node',
           'conditions' => array(
             array('field' => 'type', 'value' => $node_type->type),
           ),
           'time_interval_field' => 'created',
           'time_interval_value' => 60 * 60 * 24,
         ),
+        'dependencies' => array('module' => 'node'),
       ));
       $sensor->save();
     }
@@ -59,6 +60,7 @@ function monitoring_install() {
         'settings' => array(
           'index_id' => $index->id(),
         ),
+        'dependencies' => array('module' => 'search_api'),
       ));
       $sensor->save();
     }
@@ -134,6 +136,7 @@ function monitoring_install() {
         'time_interval_field' => 'timestamp',
         'time_interval_value' => 60 * 60 * 24,
       ),
+      'dependencies' => array('module' => 'image'),
     ));
     $sensor->save();
   }
@@ -161,6 +164,7 @@ function monitoring_install() {
         'module' => $module,
         // List requirements keys which reports will be suppressed.
         'exclude keys' => array(),
+      'dependencies' => array('module' => $module),
       ),
     ));
     // Ignore the cron key for system requirements, as we have a separate

@@ -62,6 +62,45 @@ class MonitoringUITest extends MonitoringTestBase {
   }
 
   /**
+   * Tests creation of sensor through UI.
+   */
+  function testSensorCreation() {
+    $account = $this->drupalCreateUser(array('administer monitoring', 'monitoring reports'));
+    $this->drupalLogin($account);
+
+    $this->drupalGet('admin/config/system/monitoring/sensors/add');
+
+    $this->assertFieldByName('status', TRUE);
+
+    $this->drupalPostForm('admin/config/system/monitoring/sensors/add', array(
+      'label' => 'UI created Sensor',
+      'description' => 'Sensor created to test UI',
+      'id' => 'ui_test_sensor',
+      'value_label' => 'Test Value',
+      'caching_time' => 100,
+      'sensor_id' => 'entity_aggregator',
+    ), t('Select sensor'));
+
+    $this->assertText('Sensor Settings');
+    $this->drupalPostForm(NULL, array(
+      'settings[time_interval_value]' => 86400,
+      'settings[entity_type]' => 'field_storage_config',
+      'settings[conditions][0][field]' => 'type',
+      'settings[conditions][0][value]' => 'message',
+    ), t('Save'));
+    $this->assertText('Sensor settings saved.');
+
+    $this->drupalGet('admin/config/system/monitoring/sensors/ui_test_sensor');
+    $this->assertFieldByName('caching_time', 100);
+    $this->assertFieldByName('settings[conditions][0][value]', 'message');
+
+    $this->drupalGet('admin/config/system/monitoring/sensors/ui_test_sensor/delete');
+    $this->assertText('This action cannot be undone.');
+    $this->drupalPostForm(NULL, array(), t('Delete'));
+    $this->assertText('Sensor UI created Sensor has been deleted.');
+  }
+
+  /**
    * Tests the time interval settings UI of the database aggregator sensor.
    */
   function testAggregateSensorTimeIntervalConfig() {
@@ -72,7 +111,6 @@ class MonitoringUITest extends MonitoringTestBase {
     $this->drupalGet('admin/reports/monitoring');
     $this->assertText('0 druplicons in 1 day');
 
-    $form_key = 'db_aggregate_test';
     $sensor_info = $this->sensorManager->getSensorInfoByName('db_aggregate_test');
     $this->drupalGet('admin/config/system/monitoring/sensors/db_aggregate_test');
     // Test for the default value.
@@ -137,12 +175,10 @@ class MonitoringUITest extends MonitoringTestBase {
     // Test the overview table.
     $tbody = $this->xpath('//table[@id="monitoring-sensors-overview"]/tbody');
     $rows = $tbody[0];
-
     $i = 0;
     foreach (monitoring_sensor_info_by_categories() as $category => $category_sensor_info) {
       $tr = $rows->tr[$i];
       $this->assertEqual($category, $tr->td->h3);
-
       foreach ($category_sensor_info as $sensor_info) {
         $i++;
         $tr = $rows->tr[$i];

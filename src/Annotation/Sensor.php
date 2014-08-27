@@ -16,7 +16,7 @@ use Drupal\Component\Annotation\Plugin;
  * @Annotation
  */
 class Sensor extends Plugin {
-  
+
    /**
    * The plugin ID.
    *
