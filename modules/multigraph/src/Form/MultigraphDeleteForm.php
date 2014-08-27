@@ -8,6 +8,7 @@
 namespace Drupal\monitoring_multigraph\Form;
 
 use Drupal\Core\Entity\EntityConfirmFormBase;
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
 
 /**
@@ -19,7 +20,7 @@ class MultigraphDeleteForm extends EntityConfirmFormBase {
    * {@inheritdoc}
    */
   public function getQuestion() {
-    return t(
+    return $this->t(
       'Are you sure you want to delete the %name multigraph?',
       array('%name' => $this->entity->getLabel())
     );
@@ -36,19 +37,19 @@ class MultigraphDeleteForm extends EntityConfirmFormBase {
    * {@inheritdoc}
    */
   public function getConfirmText() {
-    return t('Delete');
+    return $this->t('Delete');
   }
 
   /**
    * {@inheritdoc}
    */
-  public function submit(array $form, array &$form_state) {
+  public function submit(array $form, FormStateInterface $form_state) {
     $this->entity->delete();
-    drupal_set_message(t(
+    drupal_set_message($this->t(
       'The %label multigraph has been deleted.',
       array('%label' => $this->entity->getLabel())
     ));
-    $form_state['redirect_route'] = $this->getCancelRoute();
+    $form_state->setRedirectUrl($this->getCancelRoute());
   }
 
   /**

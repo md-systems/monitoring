@@ -7,6 +7,7 @@
 namespace Drupal\monitoring_multigraph\Form;
 
 use Drupal\Core\Entity\EntityForm;
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\monitoring\Entity\SensorInfo;
 use Drupal\monitoring_multigraph\Entity\Multigraph;
 
@@ -24,7 +25,7 @@ class MultigraphForm extends EntityForm {
   /**
    * {@inheritdoc}
    */
-  public function form(array $form, array &$form_state) {
+  public function form(array $form, FormStateInterface $form_state) {
     $form = parent::form($form, $form_state);
     $form['#tree'] = TRUE;
     /** @var Multigraph $multigraph */
@@ -44,7 +45,7 @@ class MultigraphForm extends EntityForm {
 
     $form['label'] = array(
       '#type' => 'textfield',
-      '#title' => t('Label'),
+      '#title' => $this->t('Label'),
       '#maxlength' => 255,
       '#default_value' => $multigraph->getLabel(),
       '#required' => TRUE,
@@ -52,10 +53,10 @@ class MultigraphForm extends EntityForm {
 
     $form['id'] = array(
       '#type' => 'machine_name',
-      '#title' => t('ID'),
+      '#title' => $this->t('ID'),
       '#maxlength' => 255,
       '#default_value' => $multigraph->id(),
-      '#description' => t("ID of the multigraph"),
+      '#description' => $this->t("ID of the multigraph"),
       '#required' => TRUE,
       '#disabled' => !$multigraph->isNew(),
       '#machine_name' => array(
@@ -65,7 +66,7 @@ class MultigraphForm extends EntityForm {
 
     $form['description'] = array(
       '#type' => 'textfield',
-      '#title' => t('Description'),
+      '#title' => $this->t('Description'),
       '#maxlength' => 255,
       '#default_value' => $multigraph->getDescription(),
     );
@@ -73,7 +74,7 @@ class MultigraphForm extends EntityForm {
     // Fieldset for sensor list elements.
     $form['sensor_add'] = array(
       '#type' => 'fieldset',
-      '#title' => t('Sensors'),
+      '#title' => $this->t('Sensors'),
       '#prefix' => '<div id="selected-sensors">',
       '#suffix' => '</div>',
     );
@@ -87,39 +88,37 @@ class MultigraphForm extends EntityForm {
     // Select element for available sensors.
     $form['sensor_add']['sensor_add_select'] = array(
       '#type' => 'select',
-      '#title' => t('Available sensors'),
+      '#title' => $this->t('Available sensors'),
       '#options' => $sensors_options,
-      '#description' => t('Choose a sensor to add.'),
+      '#description' => $this->t('Choose a sensor to add.'),
       '#empty_value' => '',
     );
 
     $form['sensor_add']['sensor_add_button'] = array(
       '#type' => 'submit',
-      '#value' => t('Add'),
+      '#value' => $this->t('Add'),
       '#ajax' => array(
         'wrapper' => 'selected-sensors',
         'callback' => array($this, 'sensorsReplace'),
         'method' => 'replace',
       ),
-      '#submit' => array(
-        array($this, 'addSensorSubmit'),
-      ),
+      '#submit' => array('::addSensorSubmit'),
     );
 
     // Table for included sensors.
     $form['sensor_add']['sensors'] = array(
       '#type' => 'table',
       '#header' => array(
-        'category' => t('Category'),
-        'label' => t('Sensor label'),
-        'description' => t('Description'),
-        'message' => t('Sensor message'),
-        'weight' => t('Weight'),
-        'operations' => t('Operations'),
+        'category' => $this->t('Category'),
+        'label' => $this->t('Sensor label'),
+        'description' => $this->t('Description'),
+        'message' => $this->t('Sensor message'),
+        'weight' => $this->t('Weight'),
+        'operations' => $this->t('Operations'),
       ),
       '#prefix' => '<div id="selected-sensors">',
       '#suffix' => '</div>',
-      '#empty' => t(
+      '#empty' => $this->t(
         'Select and add sensors above to include them in this multigraph.'
       ),
       '#tabledrag' => array(
@@ -140,7 +139,7 @@ class MultigraphForm extends EntityForm {
         'label' => array(
           '#type' => 'textfield',
           '#default_value' => $sensor->getLabel(),
-          '#title' => t('Custom sensor label'),
+          '#title' => $this->t('Custom sensor label'),
           '#title_display' => 'invisible',
           '#required' => TRUE,
         ),
@@ -152,7 +151,7 @@ class MultigraphForm extends EntityForm {
         ),
         'weight' => array(
           '#type' => 'weight',
-          '#title' => t('Weight'),
+          '#title' => $this->t('Weight'),
           '#title_display' => 'invisible',
           '#default_value' => $weight,
           '#attributes' => array(
@@ -161,17 +160,15 @@ class MultigraphForm extends EntityForm {
         ),
         'operations' => array(
           '#type' => 'submit',
-          '#value' => t('Remove'),
-          '#description' => t('Exclude sensor from multigraph'),
+          '#value' => $this->t('Remove'),
+          '#description' => $this->t('Exclude sensor from multigraph'),
           '#name' => 'remove_' . $sensor->getName(),
           '#ajax' => array(
             'wrapper' => 'selected-sensors',
             'callback' => array($this, 'sensorsReplace'),
             'method' => 'replace',
           ),
-          '#submit' => array(
-            array($this, 'removeSensorSubmit'),
-          ),
+          '#submit' => array('::removeSensorSubmit'),
         ),
         '#attributes' => array(
           'class' => array('draggable'),
@@ -192,18 +189,21 @@ class MultigraphForm extends EntityForm {
    *
    * @param array $form
    *   The updated form structure array.
-   * @param array $form_state
-   *   The form state structure array.
+   * @param FormStateInterface $form_state
+   *   The form state structure.
    *
    * @return array
    *   The updated form component for the selected sensors.
    */
-  public function sensorsReplace(array $form, array &$form_state) {
+  public function sensorsReplace(array $form, FormStateInterface $form_state) {
     return $form['sensor_add'];
   }
 
-  public function submit(array $form, array &$form_state) {
-    // Disregard the sensor_add fieldset in the form structure.
+  /**
+   * {@inheritdoc}
+   */
+  public function submit(array $form, FormStateInterface $form_state) {
+    // Flatten the sensor_add fieldset in the form structure.
     $form_state['values'] += $form_state['values']['sensor_add'];
     unset($form['sensor_add']);
     parent::submit($form, $form_state);
@@ -214,11 +214,11 @@ class MultigraphForm extends EntityForm {
    *
    * @param array $form
    *   The form structure array
-   * @param array $form_state
-   *   The form state structure array.
+   * @param FormStateInterface $form_state
+   *   The form state structure.
    */
-  public function addSensorSubmit(array $form, array &$form_state) {
-    $form_state['rebuild'] = TRUE;
+  public function addSensorSubmit(array $form, FormStateInterface $form_state) {
+    $form_state->setRebuild();
 
     /** @var Multigraph $multigraph */
     $multigraph = $this->entity;
@@ -230,10 +230,6 @@ class MultigraphForm extends EntityForm {
       $multigraph->addSensor($sensor_name);
       drupal_set_message($this->t('Sensor "@sensor_label" added. You have unsaved changes.', array('@sensor_label' => $sensor_label)), 'warning');
     }
-
-    // @todo: This is necessary because there are two different instances of the
-    // form object. Core should handle this.
-    $form_state['build_info']['callback_object'] = $form_state['controller'];
   }
 
   /**
@@ -241,11 +237,11 @@ class MultigraphForm extends EntityForm {
    *
    * @param array $form
    *   The form structure array
-   * @param array $form_state
-   *   The form state structure array.
+   * @param FormStateInterface $form_state
+   *   The form state structure.
    */
-  public function removeSensorSubmit(array $form, array &$form_state) {
-    $form_state['rebuild'] = TRUE;
+  public function removeSensorSubmit(array $form, FormStateInterface $form_state) {
+    $form_state->setRebuild();
 
     /** @var Multigraph $multigraph */
     $multigraph = $this->entity;
@@ -256,16 +252,12 @@ class MultigraphForm extends EntityForm {
     $sensor_label = \Drupal::entityManager()->getStorage('monitoring_sensor')->load($sensor_name)->getLabel();
     $multigraph->removeSensor($sensor_name);
     drupal_set_message($this->t('Sensor "@sensor_label" removed.  You have unsaved changes.', array('@sensor_label' => $sensor_label)), 'warning');
-
-    // @todo: This is necessary because there are two different instances of the
-    // form object. Core should handle this.
-    $form_state['build_info']['callback_object'] = $form_state['controller'];
   }
 
   /**
    * {@inheritdoc}
    */
-  public function save(array $form, array &$form_state) {
+  public function save(array $form, FormStateInterface $form_state) {
     /** @var Multigraph $multigraph */
     $multigraph = $this->entity;
 
@@ -277,7 +269,7 @@ class MultigraphForm extends EntityForm {
     }
 
     $multigraph->save();
-    $form_state['redirect_route']['route_name'] = 'monitoring.multigraphs_overview';
+    $form_state->setRedirect('monitoring.multigraphs_overview');
     drupal_set_message($this->t('Multigraph settings saved.'));
   }
 }

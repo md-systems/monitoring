@@ -18,7 +18,7 @@ use Drupal\monitoring\Entity\SensorInfo;
  * @ConfigEntityType(
  *   id = "monitoring_multigraph",
  *   label = @Translation("Multigraph"),
- *   controllers = {
+ *   handlers = {
  *     "list_builder" = "\Drupal\monitoring_multigraph\MultigraphListBuilder",
  *     "form" = {
  *       "add" = "\Drupal\monitoring_multigraph\Form\MultigraphForm",

@@ -22,9 +22,9 @@ class MultigraphListBuilder extends ConfigEntityListBuilder {
    * {@inheritdoc}
    */
   public function buildHeader() {
-    $header['label'] = t('Label');
-    $header['description'] = t('Description');
-    $header['sensors'] = t('Sensors');
+    $header['label'] = $this->t('Label');
+    $header['description'] = $this->t('Description');
+    $header['sensors'] = $this->t('Sensors');
     return $header + parent::buildHeader();
   }
 
