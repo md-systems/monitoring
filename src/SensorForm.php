@@ -85,9 +85,9 @@ class SensorForm extends EntityForm {
     if ($sensor_info->isNew()) {
       $plugin_types = array();
       foreach (monitoring_sensor_manager()->getDefinitions() as $plugin_id => $definition) {
-	if ($definition['addable'] == TRUE) {
-	  $plugin_types[$plugin_id] = $definition['label']->render();
-	}
+        if ($definition['addable'] == TRUE) {
+          $plugin_types[$plugin_id] = (string) $definition['label'];
+        }
       }
       uasort($plugin_types, 'strnatcasecmp');
       $form['sensor_id'] = array(
@@ -95,11 +95,11 @@ class SensorForm extends EntityForm {
         '#options' => $plugin_types,
         '#title' => $this->t('Sensor Plugin'),
         '#limit_validation_errors' => array(array('sensor_id')),
-        '#submit' => array(array($this, 'submitSelectPlugin')),
+        '#submit' => array('::submitSelectPlugin'),
         '#required' => TRUE,
         '#executes_submit_callback' => TRUE,
         '#ajax' => array(
-          'callback' => array($this, 'updateSelectedPluginType'),
+          'callback' => '::updateSelectedPluginType',
           'wrapper' => 'monitoring-sensor-plugin',
           'method' => 'replace',
         ),
@@ -109,7 +109,7 @@ class SensorForm extends EntityForm {
         '#type' => 'submit',
         '#value' => $this->t('Select sensor'),
         '#limit_validation_errors' => array(array('sensor_id')),
-        '#submit' => array(array($this, 'submitSelectPlugin')),
+        '#submit' => array('::submitSelectPlugin'),
         '#attributes' => array('class' => array('js-hide')),
       );
 
@@ -184,9 +184,6 @@ class SensorForm extends EntityForm {
   public function submitSelectPlugin(array $form, FormStateInterface $form_state) {
     $this->entity = $this->buildEntity($form, $form_state);
     $form_state['rebuild'] = TRUE;
-    // @todo: This is necessary because there are two different instances of the
-    //   form object. Core should handle this.
-    $form_state['build_info']['callback_object'] = $form_state['controller'];
   }
 
   /**
