@@ -17,7 +17,7 @@ use Drupal\Core\Entity\EntityStorageInterface;
  * @ConfigEntityType(
  *   id = "monitoring_sensor",
  *   label = @Translation("Monitoring Sensor"),
- *   controllers = {
+ *   handlers = {
  *     "list_builder" = "Drupal\monitoring\SensorListBuilder",
  *     "form" = {
  *       "add" = "Drupal\monitoring\SensorForm",
