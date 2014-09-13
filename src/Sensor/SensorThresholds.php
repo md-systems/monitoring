@@ -31,8 +31,8 @@ abstract class SensorThresholds extends SensorConfigurable implements SensorThre
       '#suffix' => '</div>',
     );
 
-    if (isset($form_state['values'][$this->getSensorName()]['thresholds']['type'])) {
-      $type = $form_state['values'][$this->getSensorName()]['thresholds']['type'];
+    if ($form_state->hasValue(array($this->getSensorName(), 'thresholds', 'type'))) {
+      $type = $form_state->gasValue(array($this->getSensorName(), 'thresholds', 'type'));
     }
     else {
       $type = $this->info->getThresholdsType();
@@ -150,8 +150,7 @@ abstract class SensorThresholds extends SensorConfigurable implements SensorThre
    * {@inheritdoc}
    */
   public function settingsFormValidate($form, &$form_state) {
-    $form_key = $this->info->getName();
-    $values = $form_state['values']['settings']['thresholds'];
+    $values = $form_state->getValue(array('settings', 'thresholds'));
     $type = $values['type'];
 
     switch ($type) {

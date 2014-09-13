@@ -95,7 +95,7 @@ class SensorListBuilder extends ConfigEntityListBuilder implements FormInterface
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
-    foreach ($form_state['values']['sensors'] as $sensor_id => $enabled) {
+    foreach ($form_state->getValue('sensors') as $sensor_id => $enabled) {
       $sensor = SensorInfo::load($sensor_id);
       if ($enabled) {
         $sensor->status = TRUE;

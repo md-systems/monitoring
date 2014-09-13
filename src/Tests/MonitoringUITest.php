@@ -230,8 +230,8 @@ class MonitoringUITest extends MonitoringTestBase {
 
     $rows = $this->xpath('//div[contains(@class, "view-monitoring-sensor-results")]//tbody/tr');
     $this->assertEqual(count($rows), 1);
-    $this->assertEqual(trim((string)$rows[0]->td[1]), 'WARNING');
-    $this->assertEqual(trim((string)$rows[0]->td[2]), '1 druplicons in 1 day, falls below 2');
+    $this->assertEqual(trim((string) $rows[0]->td[1]), 'WARNING');
+    $this->assertEqual(trim((string) $rows[0]->td[2]), '1 druplicons in 1 day, falls below 2');
 
     // Create another node and run again.
     $this->drupalCreateNode(array('promote' => '1'));
@@ -241,8 +241,8 @@ class MonitoringUITest extends MonitoringTestBase {
     $rows = $this->xpath('//div[contains(@class, "view-monitoring-sensor-results")]//tbody/tr');
     $this->assertEqual(count($rows), 2);
     // The latest log result should be displayed first.
-    $this->assertEqual(trim((string)$rows[0]->td[1]), 'OK');
-    $this->assertEqual(trim((string)$rows[1]->td[1]), 'WARNING');
+    $this->assertEqual(trim((string) $rows[0]->td[1]), 'OK');
+    $this->assertEqual(trim((string) $rows[1]->td[1]), 'WARNING');
 
     // Refresh the page, this not run the sensor again.
     $this->drupalGet('admin/reports/monitoring/sensors/db_aggregate_test');

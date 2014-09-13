@@ -1,20 +1,15 @@
 <?php
 /**
  * @file
- *   Contains \Drupal\monitoring\SensorForm.
+ *   Contains \Drupal\monitoring\Form\SensorForm.
  */
 
-namespace Drupal\monitoring;
+namespace Drupal\monitoring\Form;
 
 use Drupal\Core\Entity\EntityForm;
-use Drupal\monitoring\Sensor\NonExistingSensorException;
 use Drupal\monitoring\Sensor\Sensor;
 use Drupal\monitoring\Entity\SensorInfo;
 use Drupal\monitoring\Sensor\SensorConfigurableInterface;
-use Drupal\monitoring\Sensor\SensorManager;
-use Symfony\Component\DependencyInjection\ContainerInterface;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
 
@@ -115,7 +110,7 @@ class SensorForm extends EntityForm {
 
     }
     else {
-      $form_state['sensor_object'] = $sensor_info->getPlugin();
+      $form_state->set('sensor_object', $sensor_info->getPlugin());
       // Set the sensor object into $form_state to make it available for validate
       // and submit callbacks.
       $form['old_sensor_id'] = array(
@@ -183,7 +178,7 @@ class SensorForm extends EntityForm {
    */
   public function submitSelectPlugin(array $form, FormStateInterface $form_state) {
     $this->entity = $this->buildEntity($form, $form_state);
-    $form_state['rebuild'] = TRUE;
+    $form_state->setRebuild();
   }
 
   /**
@@ -193,11 +188,11 @@ class SensorForm extends EntityForm {
     parent::validate($form, $form_state);
     /** @var SensorConfigurableInterface $sensor */
     if ($this->entity->isNew()) {
-      $plugin = $form_state['values']['sensor_id'];
+      $plugin = $form_state->getValue('sensor_id');
       $sensor = monitoring_sensor_manager()->createInstance($plugin, array('sensor_info' => $this->entity));
     }
     else {
-      $sensor = $form_state['sensor_object'];
+      $sensor = $form_state->get('sensor_object');
     }
     $sensor->settingsFormValidate($form, $form_state);
   }

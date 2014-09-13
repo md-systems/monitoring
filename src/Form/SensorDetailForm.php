@@ -6,7 +6,9 @@
 
 namespace Drupal\monitoring\Form;
 
+use Drupal\Component\Utility\SafeMarkup;
 use Drupal\Core\Entity\EntityForm;
+use Drupal\monitoring\Entity\SensorInfo;
 use Drupal\monitoring\Sensor\DisabledSensorException;
 use Drupal\monitoring\Sensor\NonExistingSensorException;
 use Drupal\monitoring\Sensor\SensorManager;
@@ -61,20 +63,10 @@ class SensorDetailForm extends EntityForm {
   /**
    * {@inheritdoc}
    */
-  public function buildForm(array $form, FormStateInterface $form_state, $sensor_name = '') {
-    $form_state['sensor_name'] = $sensor_name;
-    $form = parent::buildForm($form, $form_state);
-    return $form;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   public function form(array $form, FormStateInterface $form_state) {
     $form = parent::form($form, $form_state);
-    $sensor_name = $form_state['sensor_name'];
+    $sensor_info = $this->entity;
     try {
-      $sensor_info = $this->sensorManager->getSensorInfoByName($sensor_name);
       $results = $this->sensorRunner->runSensors(array($sensor_info), FALSE, TRUE);
       $result = array_shift($results);
     }
@@ -188,7 +180,7 @@ class SensorDetailForm extends EntityForm {
     $form['settings'] = array(
       '#type' => 'details',
       '#title' => $this->t('Settings'),
-      '#description' => '<pre>' . var_export($sensor_info->getSettings(), TRUE) . '</pre>',
+      '#description' => SafeMarkup::set('<pre>' . var_export($sensor_info->getSettings(), TRUE) . '</pre>'),
       '#open' => FALSE,
     );
 
@@ -219,17 +211,14 @@ class SensorDetailForm extends EntityForm {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
-    $this->sensorRunner->resetCache(array($form_state['sensor_name']));
+    $this->sensorRunner->resetCache(array($this->entity->id()));
     drupal_set_message(t('Sensor force run executed.'));
   }
 
   /**
    * Settings form page title callback.
    */
-  public function formTitle($sensor_name) {
-    if ($sensor_info = $this->sensorManager->getSensorInfoByName($sensor_name)) {
-      return $this->t('@label (@category)', array('@category' => $sensor_info->getCategory(), '@label' => $sensor_info->getLabel()));
-    }
-    return '';
+  public function formTitle(SensorInfo $monitoring_sensor) {
+    return $this->t('@label (@category)', array('@category' => $monitoring_sensor->getCategory(), '@label' => $monitoring_sensor->getLabel()));
   }
 }

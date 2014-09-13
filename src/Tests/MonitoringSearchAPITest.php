@@ -16,7 +16,7 @@ class MonitoringSearchAPITest extends MonitoringTestBase {
    *
    * @var array
    */
-  public static $modules = array('search_api', 'search_api_db');
+  public static $modules = array('search_api', 'search_api_db', 'node');
 
   /**
    * {@inheritdoc}

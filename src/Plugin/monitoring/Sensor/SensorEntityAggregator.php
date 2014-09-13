@@ -8,8 +8,8 @@ namespace Drupal\monitoring\Plugin\monitoring\Sensor;
 
 
 use Drupal\Component\Utility\String;
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\monitoring\Result\SensorResultInterface;
-use Drupal;
 use Drupal\monitoring\Sensor\Sensors\SensorDatabaseAggregatorBase;
 use Drupal\Core\DependencyInjection\DependencySerializationTrait;
 use Drupal\Core\Entity\DependencyTrait;
@@ -241,16 +241,18 @@ class SensorEntityAggregator extends SensorDatabaseAggregatorBase {
   /**
    * Returns the rebuild form;
    */
-  public function addConditions(array $form, &$form_state) {
+  public function addConditions(array $form, FormStateInterface $form_state) {
     return $form['settings']['conditions'];
   }
 
   /**
    * Adds new condition field and value to the form.
    */
-  public function addConditionSubmit(array $form, &$form_state) {
-    $form_state['rebuild'] = TRUE;
-    $form_state['values']['settings']['conditions']['table'] += array(array('field' => '', 'value' => ''));
+  public function addConditionSubmit(array $form, FormStateInterface $form_state) {
+    $form_state->setRebuild();
+    if (!$form_state->hasValue(array('settings', 'conditions', 'table'))) {
+      $form_state->setValue(array('settings', 'conditions', 'table'), array(array('field' => '', 'value' => '')));
+    }
   }
 
 }
