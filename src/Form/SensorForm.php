@@ -1,20 +1,15 @@
 <?php
 /**
  * @file
- *   Contains \Drupal\monitoring\SensorForm.
+ *   Contains \Drupal\monitoring\Form\SensorForm.
  */
 
-namespace Drupal\monitoring;
+namespace Drupal\monitoring\Form;
 
 use Drupal\Core\Entity\EntityForm;
-use Drupal\monitoring\Sensor\NonExistingSensorException;
 use Drupal\monitoring\Sensor\Sensor;
 use Drupal\monitoring\Entity\SensorInfo;
 use Drupal\monitoring\Sensor\SensorConfigurableInterface;
-use Drupal\monitoring\Sensor\SensorManager;
-use Symfony\Component\DependencyInjection\ContainerInterface;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
 
@@ -85,9 +80,9 @@ class SensorForm extends EntityForm {
     if ($sensor_info->isNew()) {
       $plugin_types = array();
       foreach (monitoring_sensor_manager()->getDefinitions() as $plugin_id => $definition) {
-	if ($definition['addable'] == TRUE) {
-	  $plugin_types[$plugin_id] = $definition['label']->render();
-	}
+        if ($definition['addable'] == TRUE) {
+          $plugin_types[$plugin_id] = (string) $definition['label'];
+        }
       }
       uasort($plugin_types, 'strnatcasecmp');
       $form['sensor_id'] = array(
@@ -95,11 +90,11 @@ class SensorForm extends EntityForm {
         '#options' => $plugin_types,
         '#title' => $this->t('Sensor Plugin'),
         '#limit_validation_errors' => array(array('sensor_id')),
-        '#submit' => array(array($this, 'submitSelectPlugin')),
+        '#submit' => array('::submitSelectPlugin'),
         '#required' => TRUE,
         '#executes_submit_callback' => TRUE,
         '#ajax' => array(
-          'callback' => array($this, 'updateSelectedPluginType'),
+          'callback' => '::updateSelectedPluginType',
           'wrapper' => 'monitoring-sensor-plugin',
           'method' => 'replace',
         ),
@@ -109,13 +104,13 @@ class SensorForm extends EntityForm {
         '#type' => 'submit',
         '#value' => $this->t('Select sensor'),
         '#limit_validation_errors' => array(array('sensor_id')),
-        '#submit' => array(array($this, 'submitSelectPlugin')),
+        '#submit' => array('::submitSelectPlugin'),
         '#attributes' => array('class' => array('js-hide')),
       );
 
     }
     else {
-      $form_state['sensor_object'] = $sensor_info->getPlugin();
+      $form_state->set('sensor_object', $sensor_info->getPlugin());
       // Set the sensor object into $form_state to make it available for validate
       // and submit callbacks.
       $form['old_sensor_id'] = array(
@@ -183,10 +178,7 @@ class SensorForm extends EntityForm {
    */
   public function submitSelectPlugin(array $form, FormStateInterface $form_state) {
     $this->entity = $this->buildEntity($form, $form_state);
-    $form_state['rebuild'] = TRUE;
-    // @todo: This is necessary because there are two different instances of the
-    //   form object. Core should handle this.
-    $form_state['build_info']['callback_object'] = $form_state['controller'];
+    $form_state->setRebuild();
   }
 
   /**
@@ -196,11 +188,11 @@ class SensorForm extends EntityForm {
     parent::validate($form, $form_state);
     /** @var SensorConfigurableInterface $sensor */
     if ($this->entity->isNew()) {
-      $plugin = $form_state['values']['sensor_id'];
+      $plugin = $form_state->getValue('sensor_id');
       $sensor = monitoring_sensor_manager()->createInstance($plugin, array('sensor_info' => $this->entity));
     }
     else {
-      $sensor = $form_state['sensor_object'];
+      $sensor = $form_state->get('sensor_object');
     }
     $sensor->settingsFormValidate($form, $form_state);
   }

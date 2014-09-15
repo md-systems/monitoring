@@ -19,3 +19,6 @@ settings:
     critical: '100'
   time_interval_field: 'timestamp'
   time_interval_value: '86400'
+dependencies:
+  module:
+    - dblog

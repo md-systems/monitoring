@@ -18,7 +18,7 @@ abstract class MonitoringUnitTestBase extends DrupalUnitTestBase {
    *
    * @var array
    */
-  public static $modules = array('monitoring', 'monitoring_test', 'field', 'system');
+  public static $modules = array('monitoring', 'monitoring_test', 'field', 'system', 'user');
 
   /**
    * {@inheritdoc}

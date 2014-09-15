@@ -15,7 +15,7 @@ monitoring.sensor_list:
     _permission: 'monitoring reports'
 
 monitoring.detail_form:
-  path: '/admin/reports/monitoring/sensors/{sensor_name}'
+  path: '/admin/reports/monitoring/sensors/{monitoring_sensor}'
   defaults:
     _entity_form: 'monitoring_sensor.details'
     _title_callback: '\Drupal\monitoring\Form\SensorDetailForm::formTitle'
@@ -48,7 +48,7 @@ monitoring.sensor_edit:
   path: '/admin/config/system/monitoring/sensors/{monitoring_sensor}'
   defaults:
     _entity_form: 'monitoring_sensor.edit'
-    _title_callback: '\Drupal\monitoring\SensorForm::formTitle'
+    _title_callback: '\Drupal\monitoring\Form\SensorForm::formTitle'
   requirements:
     _permission: 'administer monitoring'
 

@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Monitoring sensor interface.
+ * Contains \Drupal\monitoring\Sensor\SensorInterface.
  */
 
 namespace Drupal\monitoring\Sensor;

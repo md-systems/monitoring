@@ -17,12 +17,12 @@ use Drupal\Core\Entity\EntityStorageInterface;
  * @ConfigEntityType(
  *   id = "monitoring_sensor",
  *   label = @Translation("Monitoring Sensor"),
- *   controllers = {
+ *   handlers = {
  *     "list_builder" = "Drupal\monitoring\SensorListBuilder",
  *     "form" = {
- *       "add" = "Drupal\monitoring\SensorForm",
- *       "delete" = "Drupal\monitoring\SensorDeleteForm",
- *       "edit" = "Drupal\monitoring\SensorForm",
+ *       "add" = "Drupal\monitoring\Form\SensorForm",
+ *       "delete" = "Drupal\monitoring\Form\SensorDeleteForm",
+ *       "edit" = "Drupal\monitoring\Form\SensorForm",
  *       "details" = "Drupal\monitoring\Form\SensorDetailForm"
  *     }
  *   },
