@@ -1,5 +1,5 @@
 monitoring.multigraphs_overview:
-  path: '/admin/config/system/monitoring/multigraphs'
+  path: /admin/config/system/monitoring/multigraphs
   defaults:
     _entity_list: 'monitoring_multigraph'
     _title: 'Multigraph Overview'
@@ -7,7 +7,7 @@ monitoring.multigraphs_overview:
     _permission: 'administer monitoring'
 
 monitoring.multigraph_add:
-  path: '/admin/config/system/monitoring/multigraphs/add'
+  path: /admin/config/system/monitoring/multigraphs/add
   defaults:
     _entity_form: 'monitoring_multigraph.add'
     _title: 'Add Multigraph'
@@ -15,7 +15,7 @@ monitoring.multigraph_add:
     _permission: 'administer monitoring'
 
 monitoring.multigraph_edit:
-  path: '/admin/config/system/monitoring/multigraphs/{monitoring_multigraph}'
+  path: /admin/config/system/monitoring/multigraphs/{monitoring_multigraph}
   defaults:
     _entity_form: 'monitoring_multigraph.edit'
     _title: 'Edit Multigraph'
@@ -23,7 +23,7 @@ monitoring.multigraph_edit:
     _permission: 'administer monitoring'
 
 monitoring.multigraph_delete:
-  path: '/admin/config/system/monitoring/multigraphs/{monitoring_multigraph}/delete'
+  path: /admin/config/system/monitoring/multigraphs/{monitoring_multigraph}/delete
   defaults:
     _entity_form: 'monitoring_multigraph.delete'
     _title: 'Delete Multigraph'

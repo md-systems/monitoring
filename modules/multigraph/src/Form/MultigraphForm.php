@@ -202,11 +202,11 @@ class MultigraphForm extends EntityForm {
   /**
    * {@inheritdoc}
    */
-  public function submit(array $form, FormStateInterface $form_state) {
+  public function submitForm(array &$form, FormStateInterface $form_state) {
     // Flatten the sensor_add fieldset in the form structure.
-    $form_state['values'] += $form_state['values']['sensor_add'];
+    $form_state->setValue('sensors', $form_state->getValue(array('sensor_add', 'sensors')));
     unset($form['sensor_add']);
-    parent::submit($form, $form_state);
+    parent::submitForm($form, $form_state);
   }
 
   /**
@@ -224,8 +224,8 @@ class MultigraphForm extends EntityForm {
     $multigraph = $this->entity;
 
     // Add any selected sensor to entity.
-    if (isset($form_state['values']['sensor_add']['sensor_add_select'])) {
-      $sensor_name = $form_state['values']['sensor_add']['sensor_add_select'];
+    if ($form_state->getValue(array('sensor_add', 'sensor_add_select'))) {
+      $sensor_name = $form_state->getValue(array('sensor_add', 'sensor_add_select'));
       $sensor_label = \Drupal::entityManager()->getStorage('monitoring_sensor')->load($sensor_name)->getLabel();
       $multigraph->addSensor($sensor_name);
       drupal_set_message($this->t('Sensor "@sensor_label" added. You have unsaved changes.', array('@sensor_label' => $sensor_label)), 'warning');
@@ -247,7 +247,7 @@ class MultigraphForm extends EntityForm {
     $multigraph = $this->entity;
 
     // Remove sensor as indicated by triggering_element.
-    $button_name = $form_state['triggering_element']['#name'];
+    $button_name = $form_state->getTriggeringElement()['#name'];
     $sensor_name = substr($button_name, strlen('remove_'));
     $sensor_label = \Drupal::entityManager()->getStorage('monitoring_sensor')->load($sensor_name)->getLabel();
     $multigraph->removeSensor($sensor_name);
