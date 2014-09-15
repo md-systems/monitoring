@@ -30,6 +30,9 @@ abstract class MonitoringTestBase extends WebTestBase {
    */
   function setUp() {
     parent::setUp();
+    if (!\Drupal::moduleHandler()->moduleExists('monitoring')) {
+      throw new \Exception("Failed to install modules, aborting test");
+    }
     $this->sensorManager = monitoring_sensor_manager();
     require_once drupal_get_path('module', 'monitoring') . '/monitoring.setup.inc';
   }

@@ -9,3 +9,6 @@ status: true
 caching_time: '86400'
 settings:
   type: 'contrib'
+dependencies:
+  module:
+    - update

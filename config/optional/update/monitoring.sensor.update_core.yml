@@ -9,3 +9,6 @@ numeric: FALSE
 caching_time: '86400'
 settings:
   type: 'core'
+dependencies:
+  module:
+    - update
