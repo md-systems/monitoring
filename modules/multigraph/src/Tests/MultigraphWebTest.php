@@ -16,21 +16,6 @@ use Drupal\simpletest\WebTestBase;
 class MultigraphWebTest extends WebTestBase {
 
   /**
-   * @var string
-   */
-  protected $label = 'Multigraph 123';
-
-  /**
-   * @var string
-   */
-  protected $id = 'multigraph_123';
-
-  /**
-   * @var string
-   */
-  protected $description = 'Lorem Ipsum Dolor Sit Ameth..';
-
-  /**
    * User object.
    *
    * @var \Drupal\user\Entity\User|false
@@ -92,9 +77,9 @@ class MultigraphWebTest extends WebTestBase {
   public function doTestMultigraphAdd() {
     // Add a few sensors.
     $values = array(
-      'label' => $this->label,
-      'id' => $this->id,
-      'description' => $this->description,
+      'label' => $this->randomString(),
+      'id' => 'multigraph_123',
+      'description' => $this->randomString(),
       'sensor_add[sensor_add_select]' => 'dblog_404',
     );
     $this->drupalPostForm('admin/config/system/monitoring/multigraphs/add', $values, t('Add'));

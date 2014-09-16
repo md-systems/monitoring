@@ -7,9 +7,7 @@
 namespace Drupal\monitoring_multigraph\Tests;
 
 use Drupal\Component\Serialization\Json;
-use Drupal\monitoring_multigraph\Entity\Multigraph;
 use Drupal\rest\Tests\RESTTestBase;
-use Drupal\Core\Session\AccountInterface;
 
 /**
  * Tests for REST services provided by Monitoring Multigraph.
@@ -34,7 +32,7 @@ class MultigraphServicesTest extends RESTTestBase {
   /**
    * User account to make REST requests.
    *
-   * @var AccountInterface
+   * @var \Drupal\Core\Session\AccountInterface
    */
   protected $servicesAccount;
 
@@ -72,18 +70,18 @@ class MultigraphServicesTest extends RESTTestBase {
     $response_data = $this->doRequest('monitoring-multigraph');
     $this->assertResponse(200);
 
-    /** @var Multigraph[] $multigraphs */
+    /** @var \Drupal\monitoring_multigraph\Entity\Multigraph[] $multigraphs */
     $multigraphs = \Drupal::entityManager()
       ->getStorage('monitoring_multigraph')
       ->loadMultiple();
 
     // Test the list of multigraphs.
     foreach ($multigraphs as $name => $multigraph) {
-      $this->assertEqual($response_data[$name]['id'], $multigraph->getName());
-      $this->assertEqual($response_data[$name]['label'], $multigraph->getLabel());
+      $this->assertEqual($response_data[$name]['id'], $multigraph->id());
+      $this->assertEqual($response_data[$name]['label'], $multigraph->label());
       $this->assertEqual($response_data[$name]['description'], $multigraph->getDescription());
       $this->assertEqual($response_data[$name]['sensors'], $multigraph->sensors);
-      $this->assertEqual($response_data[$name]['uri'], url('monitoring-multigraph/' . $multigraph->getName(), array('absolute' => TRUE)));
+      $this->assertEqual($response_data[$name]['uri'], url('monitoring-multigraph/' . $multigraph->id(), array('absolute' => TRUE)));
     }
 
     // Test response for non-existing multigraph.
@@ -96,11 +94,11 @@ class MultigraphServicesTest extends RESTTestBase {
     $response_data = $this->doRequest('monitoring-multigraph/' . $name);
     $this->assertResponse(200);
     $multigraph = $multigraphs[$name];
-    $this->assertEqual($response_data['id'], $multigraph->getName());
-    $this->assertEqual($response_data['label'], $multigraph->getLabel());
+    $this->assertEqual($response_data['id'], $multigraph->id());
+    $this->assertEqual($response_data['label'], $multigraph->label());
     $this->assertEqual($response_data['description'], $multigraph->getDescription());
     $this->assertEqual($response_data['sensors'], $multigraph->sensors);
-    $this->assertEqual($response_data['uri'], url('monitoring-multigraph/' . $multigraph->getName(), array('absolute' => TRUE)));
+    $this->assertEqual($response_data['uri'], url('monitoring-multigraph/' . $multigraph->id(), array('absolute' => TRUE)));
   }
 
   /**

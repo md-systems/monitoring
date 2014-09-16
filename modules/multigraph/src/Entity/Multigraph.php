@@ -26,16 +26,15 @@ use Drupal\monitoring\Entity\SensorInfo;
  *       "delete" = "\Drupal\monitoring_multigraph\Form\MultigraphDeleteForm"
  *     }
  *   },
- *   admin_permission = "administer sensors",
+ *   admin_permission = "administer monitoring",
  *   config_prefix = "multigraph",
  *   entity_keys = {
  *     "id" = "id",
  *     "label" = "label"
  *   },
  *   links = {
- *     "canonical" = "monitoring.multigraphs_overview",
- *     "delete-form" = "monitoring.multigraph_delete",
- *     "edit-form" = "monitoring.multigraph_edit"
+ *     "delete-form" = "entity.monitoring_multigraph.delete_form",
+ *     "edit-form" = "entity.monitoring_multigraph.edit_form"
  *   }
  * )
  */
@@ -46,21 +45,21 @@ class Multigraph extends ConfigEntityBase {
    *
    * @var string
    */
-  public $id;
+  protected $id;
 
   /**
    * The multigraph label.
    *
    * @var string
    */
-  public $label;
+  protected $label;
 
   /**
    * The multigraph description.
    *
    * @var string
    */
-  public $description = '';
+  protected $description = '';
 
   /**
    * The included sensors.
@@ -70,29 +69,11 @@ class Multigraph extends ConfigEntityBase {
    *   - weight: the sensor weight for this multigraph
    *   - label: custom sensor label for the multigraph
    *
+   * @todo make protected and fix weight sorting so getSensors() can just return
+   *
    * @var string[]
    */
   public $sensors = array();
-
-  /**
-   * Gets the multigraph name.
-   *
-   * @return string
-   *   The name of the Multigraph
-   */
-  public function getName() {
-    return $this->id;
-  }
-
-  /**
-   * Gets the multigraph label.
-   *
-   * @return string
-   *   Multigraph label.
-   */
-  public function getLabel() {
-    return $this->label;
-  }
 
   /**
    * Gets the multigraph description.
@@ -120,7 +101,7 @@ class Multigraph extends ConfigEntityBase {
   public function getDefinition() {
     return array(
       'id' => $this->id(),
-      'label' => $this->getLabel(),
+      'label' => $this->label(),
       'description' => $this->getDescription(),
       'sensors' => $this->sensors,
     );
@@ -139,7 +120,7 @@ class Multigraph extends ConfigEntityBase {
     }
     $sensors = array();
     foreach ($this->sensors as $name => $entry) {
-      /** @var SensorInfo $sensor */
+      /** @var \Drupal\monitoring\Entity\SensorInfo $sensor */
       $sensor = \Drupal::entityManager()
         ->getStorage('monitoring_sensor')
         ->load($name);
@@ -192,13 +173,4 @@ class Multigraph extends ConfigEntityBase {
     unset($this->sensors[$name]);
   }
 
-  /**
-   * Gets multigraph result class.
-   *
-   * @return string
-   *   Result class.
-   */
-  public function getResultClass() {
-    return '\Drupal\monitoring\Result\SensorResult';
-  }
 }

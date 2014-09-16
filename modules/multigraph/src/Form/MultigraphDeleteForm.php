@@ -22,15 +22,8 @@ class MultigraphDeleteForm extends EntityConfirmFormBase {
   public function getQuestion() {
     return $this->t(
       'Are you sure you want to delete the %name multigraph?',
-      array('%name' => $this->entity->getLabel())
+      array('%name' => $this->entity->label())
     );
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getCancelRoute() {
-    return new Url('monitoring.multigraphs_overview');
   }
 
   /**
@@ -47,9 +40,9 @@ class MultigraphDeleteForm extends EntityConfirmFormBase {
     $this->entity->delete();
     drupal_set_message($this->t(
       'The %label multigraph has been deleted.',
-      array('%label' => $this->entity->getLabel())
+      array('%label' => $this->entity->label())
     ));
-    $form_state->setRedirectUrl($this->getCancelRoute());
+    $form_state->setRedirectUrl($this->getCancelUrl());
   }
 
   /**
@@ -59,6 +52,6 @@ class MultigraphDeleteForm extends EntityConfirmFormBase {
    *   A URL object.
    */
   public function getCancelUrl() {
-    return $this->entity->urlInfo();
+    return new Url('entity.monitoring_multigraph.list');
   }
 }

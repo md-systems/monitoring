@@ -65,7 +65,7 @@ class MonitoringMultigraphResource extends ResourceBase {
    */
   public function get($multigraph_name = NULL) {
     if ($multigraph_name) {
-      /** @var Multigraph $multigraph */
+      /** @var \Drupal\monitoring_multigraph\Entity\Multigraph $multigraph */
       $multigraph = \Drupal::entityManager()
         ->getStorage('monitoring_multigraph')
         ->load($multigraph_name);
@@ -82,7 +82,7 @@ class MonitoringMultigraphResource extends ResourceBase {
       ->getStorage('monitoring_multigraph')
       ->loadMultiple();
     foreach ($multigraphs as $name => $multigraph) {
-      /** @var Multigraph $multigraph */
+      /** @var \Drupal\monitoring_multigraph\Entity\Multigraph $multigraph */
       $list[$name] = $multigraph->getDefinition();
       $list[$name]['uri'] = \Drupal::request()->getUriForPath('/monitoring-multigraph/' . $name);
     }

@@ -1,6 +1,6 @@
 monitoring.multigraph_add:
-  route_name: monitoring.multigraph_add
+  route_name: entity.monitoring_multigraph.add_form
   title: 'Add Multigraph'
   weight: 1
   appears_on:
-    - monitoring.multigraphs_overview
+    - entity.monitoring_multigraph.list

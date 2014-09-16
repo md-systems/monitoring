@@ -8,8 +8,6 @@ namespace Drupal\monitoring_multigraph\Form;
 
 use Drupal\Core\Entity\EntityForm;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\monitoring\Entity\SensorInfo;
-use Drupal\monitoring_multigraph\Entity\Multigraph;
 
 /**
  * Multigraph settings form controller.
@@ -17,18 +15,12 @@ use Drupal\monitoring_multigraph\Entity\Multigraph;
 class MultigraphForm extends EntityForm {
 
   /**
-   * Construct the form by finding and storing all available sensors.
-   */
-  public function __construct() {
-  }
-
-  /**
    * {@inheritdoc}
    */
   public function form(array $form, FormStateInterface $form_state) {
     $form = parent::form($form, $form_state);
     $form['#tree'] = TRUE;
-    /** @var Multigraph $multigraph */
+    /** @var \Drupal\monitoring_multigraph\Entity\Multigraph $multigraph */
     $multigraph = $this->entity;
 
     // Find sensors that can be included.
@@ -38,7 +30,7 @@ class MultigraphForm extends EntityForm {
       ->execute();
     $sensor_ids = array_diff($sensor_ids, $multigraph->getSensorNames());
     ksort($sensor_ids);
-    /** @var SensorInfo[] $sensors */
+    /** @var \Drupal\monitoring\Entity\SensorInfo[] $sensors */
     $sensors = \Drupal::entityManager()
       ->getStorage('monitoring_sensor')
       ->loadMultiple($sensor_ids);
@@ -46,15 +38,15 @@ class MultigraphForm extends EntityForm {
     $form['label'] = array(
       '#type' => 'textfield',
       '#title' => $this->t('Label'),
-      '#maxlength' => 255,
-      '#default_value' => $multigraph->getLabel(),
+      '#maxlength' => 60,
+      '#default_value' => $multigraph->label(),
       '#required' => TRUE,
     );
 
     $form['id'] = array(
       '#type' => 'machine_name',
       '#title' => $this->t('ID'),
-      '#maxlength' => 255,
+      '#maxlength' => 32,
       '#default_value' => $multigraph->id(),
       '#description' => $this->t("ID of the multigraph"),
       '#required' => TRUE,
@@ -75,8 +67,7 @@ class MultigraphForm extends EntityForm {
     $form['sensor_add'] = array(
       '#type' => 'fieldset',
       '#title' => $this->t('Sensors'),
-      '#prefix' => '<div id="selected-sensors">',
-      '#suffix' => '</div>',
+      '#tree' => TRUE,
     );
 
     // Create an array suitable for the sensor_add_select element.
@@ -205,7 +196,6 @@ class MultigraphForm extends EntityForm {
   public function submitForm(array &$form, FormStateInterface $form_state) {
     // Flatten the sensor_add fieldset in the form structure.
     $form_state->setValue('sensors', $form_state->getValue(array('sensor_add', 'sensors')));
-    unset($form['sensor_add']);
     parent::submitForm($form, $form_state);
   }
 
@@ -220,7 +210,7 @@ class MultigraphForm extends EntityForm {
   public function addSensorSubmit(array $form, FormStateInterface $form_state) {
     $form_state->setRebuild();
 
-    /** @var Multigraph $multigraph */
+    /** @var \Drupal\monitoring_multigraph\Entity\Multigraph $multigraph */
     $multigraph = $this->entity;
 
     // Add any selected sensor to entity.
@@ -243,7 +233,7 @@ class MultigraphForm extends EntityForm {
   public function removeSensorSubmit(array $form, FormStateInterface $form_state) {
     $form_state->setRebuild();
 
-    /** @var Multigraph $multigraph */
+    /** @var \Drupal\monitoring_multigraph\Entity\Multigraph $multigraph */
     $multigraph = $this->entity;
 
     // Remove sensor as indicated by triggering_element.
@@ -258,7 +248,7 @@ class MultigraphForm extends EntityForm {
    * {@inheritdoc}
    */
   public function save(array $form, FormStateInterface $form_state) {
-    /** @var Multigraph $multigraph */
+    /** @var \Drupal\monitoring_multigraph\Entity\Multigraph $multigraph */
     $multigraph = $this->entity;
 
     // Clean entity properties, whose structure was imposed by form array.
@@ -269,7 +259,7 @@ class MultigraphForm extends EntityForm {
     }
 
     $multigraph->save();
-    $form_state->setRedirect('monitoring.multigraphs_overview');
+    $form_state->setRedirect('entity.monitoring_multigraph.list');
     drupal_set_message($this->t('Multigraph settings saved.'));
   }
 }
