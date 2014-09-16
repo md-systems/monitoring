@@ -70,7 +70,7 @@ class MultigraphServicesTest extends RESTTestBase {
     $response_data = $this->doRequest('monitoring-multigraph');
     $this->assertResponse(200);
 
-    /** @var \Drupal\monitoring_multigraph\Entity\Multigraph[] $multigraphs */
+    /** @var \Drupal\monitoring_multigraph\MultigraphInterface[] $multigraphs */
     $multigraphs = \Drupal::entityManager()
       ->getStorage('monitoring_multigraph')
       ->loadMultiple();
@@ -80,7 +80,7 @@ class MultigraphServicesTest extends RESTTestBase {
       $this->assertEqual($response_data[$name]['id'], $multigraph->id());
       $this->assertEqual($response_data[$name]['label'], $multigraph->label());
       $this->assertEqual($response_data[$name]['description'], $multigraph->getDescription());
-      $this->assertEqual($response_data[$name]['sensors'], $multigraph->sensors);
+      $this->assertEqual($response_data[$name]['sensors'], $multigraph->getSensorsRaw());
       $this->assertEqual($response_data[$name]['uri'], url('monitoring-multigraph/' . $multigraph->id(), array('absolute' => TRUE)));
     }
 
@@ -97,7 +97,7 @@ class MultigraphServicesTest extends RESTTestBase {
     $this->assertEqual($response_data['id'], $multigraph->id());
     $this->assertEqual($response_data['label'], $multigraph->label());
     $this->assertEqual($response_data['description'], $multigraph->getDescription());
-    $this->assertEqual($response_data['sensors'], $multigraph->sensors);
+    $this->assertEqual($response_data['sensors'], $multigraph->getSensorsRaw());
     $this->assertEqual($response_data['uri'], url('monitoring-multigraph/' . $multigraph->id(), array('absolute' => TRUE)));
   }
 

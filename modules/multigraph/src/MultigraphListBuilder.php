@@ -38,7 +38,7 @@ class MultigraphListBuilder extends ConfigEntityListBuilder {
     // Format sensors list.
     $row['sensors'] = array();
     foreach ($entity->getSensors() as $sensor) {
-      $row['sensors'][] = $sensor->getLabel();
+      $row['sensors'][] = $sensor->label();
     }
     $row['sensors'] = implode(', ', $row['sensors']);
 

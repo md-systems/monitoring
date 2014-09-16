@@ -7,7 +7,9 @@
 namespace Drupal\monitoring_multigraph\Entity;
 
 use Drupal\Core\Config\Entity\ConfigEntityBase;
-use Drupal\monitoring\Entity\SensorInfo;
+use Drupal\Core\Entity\Entity;
+use Drupal\Core\Entity\EntityStorageInterface;
+use Drupal\monitoring_multigraph\MultigraphInterface;
 
 /**
  * Represents an aggregation of related sensors, called a multigraph.
@@ -38,7 +40,7 @@ use Drupal\monitoring\Entity\SensorInfo;
  *   }
  * )
  */
-class Multigraph extends ConfigEntityBase {
+class Multigraph extends ConfigEntityBase implements MultigraphInterface {
 
   /**
    * The config id.
@@ -69,34 +71,27 @@ class Multigraph extends ConfigEntityBase {
    *   - weight: the sensor weight for this multigraph
    *   - label: custom sensor label for the multigraph
    *
-   * @todo make protected and fix weight sorting so getSensors() can just return
-   *
    * @var string[]
    */
-  public $sensors = array();
+  protected $sensors = array();
 
   /**
-   * Gets the multigraph description.
+   * The entities of the included sensors, sorted by weight and with labels
+   * overridden.
    *
-   * @return string
-   *   Sensor description.
+   * @var \Drupal\monitoring\Entity\SensorInfo[]
+   */
+  protected $sensorEntities = array();
+
+  /**
+   * {@inheritdoc}
    */
   public function getDescription() {
     return $this->description;
   }
 
   /**
-   * Compiles entity properties into an associative array.
-   *
-   * @return array
-   *   An associative array containing the following multigraph info:
-   *     - id: The machine name
-   *     - label
-   *     - description
-   *     - sensors: An associative array of included sensors, where keys are
-   *       sensor machine names and values are associative arrays, containing:
-   *         - weight
-   *         - label: A custom label of the sensor for this multigraph
+   * {@inheritdoc}
    */
   public function getDefinition() {
     return array(
@@ -108,49 +103,28 @@ class Multigraph extends ConfigEntityBase {
   }
 
   /**
-   * Gets the included sensors.
-   *
-   * @return SensorInfo[]
-   *   The included sensors as an indexed array, where keys are weights and
-   *   values are sensors with custom labels.
+   * {@inheritdoc}
+   */
+  public function getSensorsRaw() {
+    return $this->sensors;
+  }
+
+  /**
+   * {@inheritdoc}
    */
   public function getSensors() {
-    if (!$this->sensors) {
-      return array();
+    if (!empty($this->sensorEntities)) {
+      return $this->sensorEntities;
     }
-    $sensors = array();
-    foreach ($this->sensors as $name => $entry) {
-      /** @var \Drupal\monitoring\Entity\SensorInfo $sensor */
-      $sensor = \Drupal::entityManager()
-        ->getStorage('monitoring_sensor')
-        ->load($name);
-      if ($entry['label']) {
-        $sensor->label = $entry['label'];
-      }
-      $sensors[$entry['weight']] = $sensor;
-    }
-    ksort($sensors);
 
-    return $sensors;
+    foreach ($this->sensors as $name => $info) {
+      $this->addSensorEntity($name, $info['label']);
+    }
+    return $this->sensorEntities;
   }
 
   /**
-   * Gets the machine names of the sensors included in this multigraph.
-   *
-   * @return string[]
-   *   An indexed array containing the id's of the included sensors.
-   */
-  public function getSensorNames() {
-    return $this->sensors ? array_keys($this->sensors) : array();
-  }
-
-  /**
-   * Includes a sensor.
-   *
-   * @param string $name
-   *   The machine name of the sensor that should be included by the multigraph.
-   * @param string $label
-   *   (optional) Custom label for the sensor within the multigraph.
+   * {@inheritdoc}
    */
   public function addSensor($name, $label = NULL) {
     $this->sensors[$name] = array(
@@ -161,16 +135,48 @@ class Multigraph extends ConfigEntityBase {
         $this->sensors
       )) : 0,
     );
+
+    $this->addSensorEntity($name, $label);
   }
 
   /**
-   * Excludes a sensor that has previously been included.
-   *
-   * @param string $name
-   *   Machine name of included sensor.
+   * {@inheritdoc}
+   */
+  public function preSave(EntityStorageInterface $storage) {
+    // Sort sensors by weight before saving.
+    uasort($this->sensors, function($a, $b) {
+      return $a['weight'] > $b['weight'];
+    });
+    parent::preSave($storage);
+  }
+
+  /**
+   * {@inheritdoc}
    */
   public function removeSensor($name) {
     unset($this->sensors[$name]);
+    foreach ($this->sensorEntities as $key => $entity) {
+      if ($entity->id() == $name) {
+        unset($this->sensorEntities[$key]);
+        break;
+      }
+    }
+  }
+
+  /**
+   * Loads the entity of a sensor and adds it to the end of the internal array.
+   *
+   * @param string $name
+   *   Sensor machine name.
+   * @param string $label
+   *   (optional) Custom sensor label for this Multigraph.
+   */
+  protected function addSensorEntity($name, $label = NULL) {
+    $sensor = \Drupal::entityManager()->getStorage('monitoring_sensor')->load($name);
+    if (!empty($label)) {
+      $sensor->label = $label;
+    }
+    $this->sensorEntities[] = $sensor;
   }
 
 }
