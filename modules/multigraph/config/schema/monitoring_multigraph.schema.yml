@@ -7,17 +7,19 @@ monitoring_multigraph.*:
       label: 'Machine-readable name'
     label:
       type: label
-      label: 'Multigraph Label'
+      label: 'Multigraph label'
     description:
       type: text
       label: 'Description'
     sensors:
-      type: mapping
+      type: sequence
       label: 'Sensors'
       sequence:
         - type: mapping
           mapping:
             weight:
               type: integer
+              label: 'Weight'
             label:
-              type: string
+              type: label
+              label: 'Custom label'
