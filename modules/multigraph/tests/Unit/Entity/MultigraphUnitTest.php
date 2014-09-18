@@ -39,12 +39,12 @@ class MultigraphUnitTest extends UnitTestCase {
    * @covers ::calculateDependencies
    */
   public function testCalculateDependencies() {
-    // Mock a couple of sensors with dependencies.
+    // Mock a couple of sensors.
     $sensor1_id = $this->getRandomGenerator()->word(16);
-    $sensor1 = $this->getMockSensor(array('module' => array('foo', 'bar')));
+    $sensor1 = $this->getMockSensor($sensor1_id);
 
     $sensor2_id = $this->getRandomGenerator()->word(16);
-    $sensor2 = $this->getMockSensor(array('module' => array('foo', 'baz')));
+    $sensor2 = $this->getMockSensor($sensor2_id);
 
     // Create a Multigraph containing the sensors.
     $multigraph = new Multigraph(array(
@@ -70,25 +70,23 @@ class MultigraphUnitTest extends UnitTestCase {
 
     // Assert dependencies are calculated correctly for the Multigraph.
     $dependencies = $multigraph->calculateDependencies();
-    $this->assertContains('foo', $dependencies['module']);
-    $this->assertContains('bar', $dependencies['module']);
-    $this->assertContains('baz', $dependencies['module']);
+    $this->assertEquals(array('entity' => array("sensor.$sensor1_id", "sensor.$sensor2_id")), $dependencies);
   }
 
   /**
    * Returns a mock SensorInfo entity.
    *
-   * @param array $dependencies
-   *   An array that calls to calculateDependencies() should return.
+   * @param array $id
+   *   An ID to set on the sensor.
    *
    * @return \Drupal\monitoring\Entity\SensorInfo|\PHPUnit_Framework_MockObject_MockObject
    *   The mock sensor object.
    */
-  protected function getMockSensor($dependencies) {
+  protected function getMockSensor($id) {
     $sensor1 = $this->getMock('\Drupal\monitoring\Entity\SensorInfo', array(), array(array(), 'monitoring_sensor'));
     $sensor1->expects($this->any())
-      ->method('calculateDependencies')
-      ->willReturn($dependencies);
+      ->method('getConfigDependencyName')
+      ->willReturn("sensor.$id");
     return $sensor1;
   }
 

@@ -10,6 +10,7 @@ use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Config\Entity\ConfigEntityBase;
 use Drupal\Core\Entity\Entity;
 use Drupal\Core\Entity\EntityStorageInterface;
+use Drupal\monitoring\Entity\SensorInfo;
 use Drupal\monitoring_multigraph\MultigraphInterface;
 
 /**
@@ -184,11 +185,9 @@ class Multigraph extends ConfigEntityBase implements MultigraphInterface {
    * {@inheritdoc}
    */
   public function calculateDependencies() {
-    $this->dependencies = array();
-    foreach ($this->getSensors() as $sensor) {
-      $this->dependencies = NestedArray::mergeDeep($this->dependencies, $sensor->calculateDependencies());
-    }
-    return $this->dependencies;
+    return array('entity' => array_map(function(SensorInfo $sensor) {
+      return $sensor->getConfigDependencyName();
+    }, $this->getSensors()));
   }
 
 }
