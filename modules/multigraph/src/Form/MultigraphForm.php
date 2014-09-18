@@ -68,7 +68,6 @@ class MultigraphForm extends EntityForm {
     $form['sensor_add'] = array(
       '#type' => 'fieldset',
       '#title' => $this->t('Sensors'),
-      '#tree' => TRUE,
       '#prefix' => '<div id="selected-sensors">',
       '#suffix' => '</div>',
     );
@@ -195,14 +194,11 @@ class MultigraphForm extends EntityForm {
   /**
    * {@inheritdoc}
    */
-  public function submitForm(array &$form, FormStateInterface $form_state) {
-    // Flatten the sensor_add fieldset and remove 'operations'.
-    $sensors = $form_state->getValue(array('sensor_add', 'sensors'));
-    foreach ($sensors as &$info) {
-      unset($info['operations']);
-    }
-    $form_state->setValue('sensors', $sensors);
-    parent::submitForm($form, $form_state);
+  protected function copyFormValuesToEntity(EntityInterface $entity, array $form, FormStateInterface $form_state) {
+    // Get rid of structural form elements before copying.
+    $form_state->setValue('sensors', $form_state->getValue(array('sensor_add', 'sensors')) ?: array());
+    $form_state->unsetValue('sensor_add');
+    parent::copyFormValuesToEntity($entity, $form, $form_state);
   }
 
   /**
