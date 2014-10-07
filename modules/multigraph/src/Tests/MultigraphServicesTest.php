@@ -7,6 +7,7 @@
 namespace Drupal\monitoring_multigraph\Tests;
 
 use Drupal\Component\Serialization\Json;
+use Drupal\Core\Url;
 use Drupal\rest\Tests\RESTTestBase;
 
 /**
@@ -81,7 +82,7 @@ class MultigraphServicesTest extends RESTTestBase {
       $this->assertEqual($response_data[$name]['label'], $multigraph->label());
       $this->assertEqual($response_data[$name]['description'], $multigraph->getDescription());
       $this->assertEqual($response_data[$name]['sensors'], $multigraph->getSensorsRaw());
-      $this->assertEqual($response_data[$name]['uri'], url('monitoring-multigraph/' . $multigraph->id(), array('absolute' => TRUE)));
+      $this->assertEqual($response_data[$name]['uri'], Url::fromUri('base://monitoring-multigraph/' . $multigraph->id(), array('absolute' => TRUE))->toString());
     }
 
     // Test response for non-existing multigraph.
@@ -98,7 +99,7 @@ class MultigraphServicesTest extends RESTTestBase {
     $this->assertEqual($response_data['label'], $multigraph->label());
     $this->assertEqual($response_data['description'], $multigraph->getDescription());
     $this->assertEqual($response_data['sensors'], $multigraph->getSensorsRaw());
-    $this->assertEqual($response_data['uri'], url('monitoring-multigraph/' . $multigraph->id(), array('absolute' => TRUE)));
+    $this->assertEqual($response_data['uri'], Url::fromUri('base://monitoring-multigraph/' . $multigraph->id(), array('absolute' => TRUE))->toString());
   }
 
   /**
@@ -113,7 +114,7 @@ class MultigraphServicesTest extends RESTTestBase {
    *   Decoded json object.
    */
   protected function doRequest($action, $query = array()) {
-    $url = url($action, array('absolute' => TRUE, 'query' => $query));
+    $url = Url::fromUri("base://$action", array('absolute' => TRUE, 'query' => $query))->toString();
     $result = $this->httpRequest($url, 'GET', NULL, $this->defaultMimeType);
     return Json::decode($result);
   }
